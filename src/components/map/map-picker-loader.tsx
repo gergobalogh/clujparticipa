@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 const MapPicker = dynamic(() => import("./map-picker"), {
   ssr: false,
   loading: () => (
-    <div className="h-[300px] w-full rounded-md border border-slate-200 bg-slate-50 animate-pulse" />
+    <div className="h-[300px] w-full rounded-sm border border-ink/8 bg-paper-muted animate-pulse" />
   ),
 });
 

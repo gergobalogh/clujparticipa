@@ -66,48 +66,48 @@ export function DataDeletionContent() {
     : null;
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
-      <h1 className="text-2xl font-semibold text-slate-950 sm:text-3xl">
+    <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+      <h1 className="font-serif text-2xl font-bold text-ink sm:text-3xl">
         {t("title")}
       </h1>
-      <p className="mt-4 text-sm leading-6 text-slate-600">{t("intro")}</p>
+      <p className="mt-4 text-sm leading-6 text-ink-muted">{t("intro")}</p>
 
       <div className="mt-8 space-y-8">
         <section>
-          <h2 className="text-base font-semibold text-slate-950">
+          <h2 className="text-base font-semibold text-ink">
             {t("facebookHeading")}
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="mt-2 text-sm leading-6 text-ink-muted">
             {t("facebookText")}
           </p>
         </section>
 
         <section>
-          <h2 className="text-base font-semibold text-slate-950">
+          <h2 className="text-base font-semibold text-ink">
             {t("emailHeading")}
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="mt-2 text-sm leading-6 text-ink-muted">
             {t("emailText", { email: t("contactEmail") })}
           </p>
         </section>
 
         <section>
-          <h2 className="text-base font-semibold text-slate-950">
+          <h2 className="text-base font-semibold text-ink">
             {t("whatIsDeletedHeading")}
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="mt-2 text-sm leading-6 text-ink-muted">
             {t("whatIsDeletedText")}
           </p>
-          <p className="mt-2 text-sm italic leading-6 text-slate-500">
+          <p className="mt-2 text-sm italic leading-6 text-ink-muted">
             {t("retentionNote")}
           </p>
         </section>
 
         <section>
-          <h2 className="text-base font-semibold text-slate-950">
+          <h2 className="text-base font-semibold text-ink">
             {t("confirmationHeading")}
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="mt-2 text-sm leading-6 text-ink-muted">
             {t("confirmationText")}
           </p>
 
@@ -123,7 +123,7 @@ export function DataDeletionContent() {
             <button
               type="submit"
               disabled={loading || !code.trim()}
-              className="inline-flex items-center rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-800 disabled:opacity-50"
+              className="inline-flex items-center rounded-sm bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:bg-ink/90 disabled:opacity-50"
             >
               {loading ? "..." : t("checkStatus")}
             </button>
@@ -133,10 +133,10 @@ export function DataDeletionContent() {
             <p
               className={`mt-4 text-sm ${
                 result?.status === "completed"
-                  ? "font-medium text-green-700"
+                  ? "font-medium text-civic-teal"
                   : result === null
-                    ? "text-amber-600"
-                    : "text-slate-600"
+                    ? "text-civic-orange"
+                    : "text-ink-muted"
               }`}
             >
               {statusMessage}

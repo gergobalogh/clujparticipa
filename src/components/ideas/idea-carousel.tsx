@@ -44,11 +44,11 @@ export function IdeaCarousel({ images }: IdeaCarouselProps) {
 
   return (
     <div className="relative">
-      <div ref={emblaRef} className="overflow-hidden rounded-lg">
+      <div ref={emblaRef} className="overflow-hidden rounded-sm">
         <div className="flex">
           {images.map((img, i) => (
             <div key={i} className="relative min-w-0 flex-[0_0_100%]">
-              <div className="relative aspect-[16/9] w-full bg-slate-100">
+              <div className="relative aspect-[16/9] w-full bg-paper-muted">
                 <Image
                   src={img.url}
                   alt={img.alt || `Image ${i + 1}`}
@@ -68,7 +68,7 @@ export function IdeaCarousel({ images }: IdeaCarouselProps) {
           <button
             type="button"
             onClick={scrollPrev}
-            className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-800 shadow backdrop-blur-sm transition hover:bg-white"
+            className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-paper/80 text-ink shadow backdrop-blur-sm transition hover:bg-paper"
             aria-label={t("prev")}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -78,7 +78,7 @@ export function IdeaCarousel({ images }: IdeaCarouselProps) {
           <button
             type="button"
             onClick={scrollNext}
-            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-800 shadow backdrop-blur-sm transition hover:bg-white"
+            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-paper/80 text-ink shadow backdrop-blur-sm transition hover:bg-paper"
             aria-label={t("next")}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

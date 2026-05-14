@@ -35,12 +35,12 @@ const statusToBadgeVariant: Record<string, BadgeVariant> = {
 
 const statusColors: Record<string, string> = {
   SUBMITTED: "#64748b",
-  UNDER_REVIEW: "#ca8a04",
-  ELIGIBLE: "#2563eb",
+  UNDER_REVIEW: "#c2410c",
+  ELIGIBLE: "#1e5f9e",
   IN_VOTING: "#7c3aed",
-  SELECTED: "#059669",
-  IN_PROGRESS: "#2563eb",
-  COMPLETED: "#16a34a",
+  SELECTED: "#0f766e",
+  IN_PROGRESS: "#1e5f9e",
+  COMPLETED: "#0f766e",
   REJECTED: "#dc2626",
 };
 
@@ -57,10 +57,12 @@ function markerIcon(status: string) {
 
 type MapViewProps = {
   ideas: IdeaMapData[];
+  compact?: boolean;
 };
 
-export default function MapView({ ideas }: MapViewProps) {
+export default function MapView({ ideas, compact = false }: MapViewProps) {
   const t = useTranslations("Map");
+  const ts = useTranslations("Statuses");
   const locale = useLocale() as AppLocale;
 
   return (
@@ -68,7 +70,7 @@ export default function MapView({ ideas }: MapViewProps) {
       center={CLUJ_CENTER}
       zoom={DEFAULT_ZOOM}
       scrollWheelZoom
-      className="h-[500px] w-full rounded-md border border-slate-200"
+      className={`w-full rounded-sm border border-ink/8 ${compact ? "h-[280px] sm:h-[360px]" : "h-[500px] sm:h-[calc(100vh-200px)] min-h-[400px] max-h-[700px]"}`}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -83,19 +85,19 @@ export default function MapView({ ideas }: MapViewProps) {
         >
           <Popup>
             <div className="min-w-[180px] space-y-1.5">
-              <strong className="block text-sm">{idea.title}</strong>
+              <strong className="block text-sm font-serif text-ink">{idea.title}</strong>
               <div className="flex items-center gap-1.5">
                 <Badge variant={statusToBadgeVariant[idea.status] ?? "default"}>
-                  {idea.status.replace(/_/g, " ").toLowerCase()}
+                  {ts(idea.status as Parameters<typeof ts>[0])}
                 </Badge>
               </div>
-              <span className="block text-xs text-slate-500">
+              <span className="block text-xs text-ink-muted">
                 {idea.supportCount} support
               </span>
               <Link
                 href={`/ideas/${idea.id}`}
                 locale={locale}
-                className="block text-xs text-blue-700 underline"
+                className="block text-xs text-civic-blue underline focus-visible:outline-2 focus-visible:ring-2"
               >
                 {t("viewDetail")}
               </Link>

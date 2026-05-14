@@ -108,10 +108,10 @@ export default function NewIdeaPage() {
   if (createdId) {
     return (
       <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
-        <p className="text-lg font-medium text-green-700">{t("success")}</p>
+        <p className="text-lg font-medium text-civic-teal">{t("success")}</p>
         <Link
           href={`/ideas/${createdId}`}
-          className="mt-4 inline-flex items-center rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-800"
+          className="mt-4 inline-flex items-center rounded-sm bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:bg-ink/90"
         >
           {t("viewIdea")}
         </Link>
@@ -120,15 +120,15 @@ export default function NewIdeaPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
-      <h1 className="text-2xl font-semibold text-slate-950 sm:text-3xl">
+    <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+      <h1 className="font-serif text-2xl font-bold text-ink sm:text-3xl">
         {t("title")}
       </h1>
-      <p className="mt-2 text-slate-600">{t("description")}</p>
+      <p className="mt-2 text-sm text-ink-muted">{t("description")}</p>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-6">
         <div>
-          <label htmlFor="idea-title" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="idea-title" className="block text-sm font-medium text-ink">
             {t("titleLabel")} <span className="text-red-600">*</span>
           </label>
           <input
@@ -140,12 +140,12 @@ export default function NewIdeaPage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t("titlePlaceholder")}
-            className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-sm border border-ink/15 bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink-muted focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
           />
         </div>
 
         <div>
-          <label htmlFor="idea-desc" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="idea-desc" className="block text-sm font-medium text-ink">
             {t("descriptionLabel")} <span className="text-red-600">*</span>
           </label>
           <textarea
@@ -157,7 +157,7 @@ export default function NewIdeaPage() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t("descriptionPlaceholder")}
-            className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-sm border border-ink/15 bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink-muted focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
           />
         </div>
 
@@ -168,14 +168,14 @@ export default function NewIdeaPage() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="idea-category" className="block text-sm font-medium text-slate-700">
+            <label htmlFor="idea-category" className="block text-sm font-medium text-ink">
               {t("categoryLabel")} <span className="text-red-600">*</span>
             </label>
             <select
               id="idea-category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-sm border border-ink/15 bg-paper px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
             >
               <option value="">{t("categoryPlaceholder")}</option>
               {CATEGORIES.map((c) => (
@@ -187,14 +187,14 @@ export default function NewIdeaPage() {
           </div>
 
           <div>
-            <label htmlFor="idea-district" className="block text-sm font-medium text-slate-700">
+            <label htmlFor="idea-district" className="block text-sm font-medium text-ink">
               {t("districtLabel")} <span className="text-red-600">*</span>
             </label>
             <select
               id="idea-district"
               value={district}
               onChange={(e) => setDistrict(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-sm border border-ink/15 bg-paper px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
             >
               <option value="">{t("districtPlaceholder")}</option>
               {DISTRICTS.map((d) => (
@@ -207,10 +207,10 @@ export default function NewIdeaPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-ink">
             {t("locationLabel")} <span className="text-red-600">*</span>
           </label>
-          <p className="mt-1 text-xs text-slate-500">{t("locationHint")}</p>
+          <p className="mt-1 text-xs text-ink-muted">{t("locationHint")}</p>
           <div className="mt-2">
             <MapPickerLoader
               latitude={latitude}
@@ -223,7 +223,7 @@ export default function NewIdeaPage() {
             />
           </div>
           {latitude != null && longitude != null && (
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-ink-muted">
               {latitude.toFixed(5)}, {longitude.toFixed(5)}
             </p>
           )}
@@ -235,9 +235,9 @@ export default function NewIdeaPage() {
               type="checkbox"
               checked={notifyOnStatusChange}
               onChange={(e) => setNotifyOnStatusChange(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-500"
+              className="h-4 w-4 rounded-sm border-ink/20 text-ink focus:ring-ink"
             />
-            <span className="text-sm text-slate-700">{t("notifyLabel")}</span>
+            <span className="text-sm text-ink-muted">{t("notifyLabel")}</span>
           </label>
         )}
 
@@ -248,7 +248,7 @@ export default function NewIdeaPage() {
         <button
           type="submit"
           disabled={submitting || uploadingImages}
-          className="inline-flex items-center rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-800 disabled:opacity-50"
+          className="inline-flex items-center rounded-sm bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:bg-ink/90 disabled:opacity-50"
         >
           {submitting || uploadingImages ? t("submitting") : t("submit")}
         </button>

@@ -189,17 +189,17 @@ export const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(
 
     return (
       <div>
-        <label className="block text-sm font-medium text-slate-700">
+        <label className="block text-sm font-medium text-ink">
           {t("label")}
         </label>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-ink-muted">
           {t("hint", { max: String(IMAGE_MAX_COUNT), maxSize: "5" })}
         </p>
 
         <div
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
-          className="mt-2 flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-slate-300 bg-slate-50 p-4 transition hover:border-blue-400 hover:bg-blue-50"
+          className="mt-2 flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-sm border-2 border-dashed border-ink/15 bg-paper p-4 transition hover:border-ink/30 hover:bg-paper-muted/50"
           onClick={() => inputRef.current?.click()}
           role="button"
           tabIndex={0}
@@ -208,10 +208,10 @@ export const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(
           }}
           aria-label={t("dropzoneLabel")}
         >
-          <svg className="mb-1 h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="mb-1 h-6 w-6 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
-          <span className="text-sm text-slate-600">{t("dropOrClick")}</span>
+          <span className="text-sm text-ink-muted">{t("dropOrClick")}</span>
         </div>
 
         <input
@@ -233,10 +233,10 @@ export const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(
                 onDragStart={() => handleDragStart(i)}
                 onDragOver={(e) => handleDragOver(e, i)}
                 onDragEnd={handleDragEnd}
-                className={`group relative aspect-[4/3] overflow-hidden rounded-md border transition ${
+                className={`group relative aspect-[4/3] overflow-hidden rounded-sm border transition ${
                   dropTargetIndex === i && dragIndex !== null && dragIndex !== i
-                    ? "border-blue-500 ring-2 ring-blue-300"
-                    : "border-slate-200"
+                    ? "border-ink ring-2 ring-ink/30"
+                    : "border-ink/8"
                 } ${dragIndex === i ? "opacity-50" : ""} cursor-grab active:cursor-grabbing`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -245,7 +245,7 @@ export const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(
                   alt={p.file.name}
                   className="h-full w-full object-cover"
                 />
-                <span className="absolute left-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-slate-800/70 text-[10px] font-medium text-white">
+                <span className="absolute left-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-ink/70 text-[10px] font-medium text-paper">
                   {i + 1}
                 </span>
                 <button
@@ -273,7 +273,7 @@ export const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(
         )}
 
         {uploading && (
-          <p className="mt-2 text-sm text-blue-700">{t("uploading")}</p>
+          <p className="mt-2 text-sm text-ink-muted">{t("uploading")}</p>
         )}
       </div>
     );

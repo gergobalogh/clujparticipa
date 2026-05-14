@@ -15,7 +15,8 @@
     "bugReport": "Report a bug",
     "dataDeletion": "Data deletion",
     "terms": "Terms of Service",
-    "nonBinding": "Support votes are non-binding and collected for prototype testing only."
+    "nonBinding": "Support votes are non-binding and collected for prototype testing only.",
+    "languageLabel": "Choose language"
   },
   "Privacy": {
     "title": "Privacy and prototype notice",
@@ -48,8 +49,8 @@
   },
   "Home": {
     "eyebrow": "ClujParticipa",
-    "title": "Civic participation prototype for Cluj-Napoca",
-    "description": "A focused MVP for submitting neighborhood ideas, discovering them on a map, adding support, commenting, and following public status updates.",
+    "title": "ClujParticipa",
+    "description": "Civic participation prototype for Cluj-Napoca. Submit neighborhood ideas, discover them on the map, add support, comment, and follow public status updates.",
     "submitIdea": "Submit an idea",
     "browseIdeas": "Browse ideas",
     "openMap": "Open map",
@@ -58,7 +59,10 @@
     "totalVotes": "Support votes",
     "totalComments": "Comments",
     "recentIdeas": "Recent ideas",
-    "viewAll": "View all ideas"
+    "viewAll": "View all ideas",
+    "civicStatus": "Civic status",
+    "votingPhase": "Voting phase",
+    "activeDistricts": "Active districts"
   },
   "Ideas": {
     "title": "Ideas",
@@ -315,7 +319,7 @@
     "allVotesHeading": "All votes",
     "noResults": "No ideas in the voting process yet.",
     "votingPeriod": "Voting period",
-    "winner": "Winner"
+    "winner": "Selected"
   },
   "Unsubscribe": {
     "successTitle": "Unsubscribed successfully",

@@ -24,10 +24,10 @@ export function LanguageSwitcher() {
           <Link
             aria-current={isActive ? "page" : undefined}
             className={[
-              "flex h-9 min-w-10 items-center justify-center rounded-md border px-3 text-sm font-medium transition",
+              "flex h-9 min-w-10 items-center justify-center rounded-sm border px-3 text-sm font-medium transition",
               isActive
-                ? "border-slate-950 bg-slate-950 text-white"
-                : "border-slate-300 bg-white text-slate-700 hover:border-slate-500",
+                ? "border-ink bg-ink text-paper"
+                : "border-ink/15 bg-paper text-ink-muted hover:border-ink/30",
             ].join(" ")}
             href={pathname}
             key={locale}

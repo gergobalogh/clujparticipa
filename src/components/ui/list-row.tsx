@@ -7,7 +7,7 @@ export function ListRow({ children, className = "" }: ListRowProps) {
   return (
     <div
       className={[
-        "flex items-start gap-4 border-b border-slate-200 px-4 py-3 sm:px-0",
+        "flex items-start gap-4 border-b border-ink/8 px-4 py-3 sm:px-0",
         className,
       ].join(" ")}
     >
@@ -23,7 +23,7 @@ type ListRowTitleProps = {
 
 export function ListRowTitle({ children, className = "" }: ListRowTitleProps) {
   return (
-    <span className={["text-sm font-medium text-slate-950", className].join(" ")}>
+    <span className={["text-sm font-medium text-ink", className].join(" ")}>
       {children}
     </span>
   );
@@ -36,7 +36,7 @@ type ListRowMetaProps = {
 
 export function ListRowMeta({ children, className = "" }: ListRowMetaProps) {
   return (
-    <span className={["text-xs text-slate-500", className].join(" ")}>
+    <span className={["text-xs text-ink-muted", className].join(" ")}>
       {children}
     </span>
   );

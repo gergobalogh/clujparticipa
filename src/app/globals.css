@@ -3,4 +3,17 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-source-serif);
+
+  /* Editorial color tokens */
+  --color-paper: #FDFCFB;
+  --color-paper-muted: #F5F3F0;
+  --color-ink: #1C1C1C;
+  --color-ink-muted: rgba(28, 28, 28, 0.55);
+  --color-civic-teal: #0F766E;
+  --color-civic-teal-light: #CCFBF1;
+  --color-civic-blue: #1E5F9E;
+  --color-civic-blue-light: #DBEAFE;
+  --color-civic-orange: #C2410C;
+  --color-civic-orange-light: #FFF7ED;
 }

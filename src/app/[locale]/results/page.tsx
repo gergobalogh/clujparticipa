@@ -33,15 +33,15 @@ export default async function ResultsPage() {
   const hasContent = selectedIdeas.length > 0 || votingIdeas.length > 0 || votingConfig;
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-12">
-      <h1 className="text-2xl font-semibold text-slate-950 sm:text-3xl">
+    <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+      <h1 className="font-serif text-2xl font-bold text-ink sm:text-3xl">
         {t("title")}
       </h1>
-      <p className="mt-2 text-slate-600">{t("description")}</p>
+      <p className="mt-2 text-sm text-ink-muted">{t("description")}</p>
 
       {votingConfig && (
-        <div className="mt-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-3">
-          <p className="text-sm text-blue-800">
+        <div className="mt-4 rounded-sm border border-ink/10 bg-paper-muted px-4 py-3">
+          <p className="text-sm text-ink">
             {t("votingPeriod")}: {new Date(votingConfig.startsAt).toLocaleDateString()} – {new Date(votingConfig.endsAt).toLocaleDateString()}
             {votingConfig.label && ` · ${votingConfig.label}`}
           </p>
@@ -49,25 +49,25 @@ export default async function ResultsPage() {
       )}
 
       {!hasContent && (
-        <p className="mt-6 text-sm text-slate-500">{t("noResults")}</p>
+        <p className="mt-6 text-sm text-ink-muted">{t("noResults")}</p>
       )}
 
       {selectedIdeas.length > 0 && (
         <section className="mt-8">
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-ink-muted">
             {t("selectedHeading")}
           </h2>
-          <ul className="mt-4 space-y-3">
+          <ul className="mt-4 space-y-0">
             {selectedIdeas.map((idea) => (
-              <li key={idea.id} className="rounded-md border border-green-200 bg-green-50 px-4 py-3">
+              <li key={idea.id} className="border-b border-ink/8 px-0 py-3 last:border-b-0">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <span className="mr-2 inline-flex items-center rounded-full bg-green-600 px-2 py-0.5 text-xs font-medium text-white">
+                    <span className="mr-2 inline-flex items-center rounded-sm bg-civic-teal-light px-1.5 py-0.5 text-xs font-semibold text-civic-teal uppercase tracking-wide">
                       {t("winner")}
                     </span>
                     <Link
                       href={`/ideas/${idea.id}`}
-                      className="text-sm font-medium text-slate-900 hover:text-blue-700"
+                      className="font-serif text-sm font-semibold text-ink hover:text-civic-blue transition"
                     >
                       {idea.title}
                     </Link>
@@ -76,9 +76,11 @@ export default async function ResultsPage() {
                     {ts("SELECTED")}
                   </Badge>
                 </div>
-                <div className="mt-1 flex gap-3 text-xs text-slate-500">
-                  <span>{tc(idea.category as Parameters<typeof tc>[0])}</span>
-                  <span>{td(idea.district as Parameters<typeof td>[0])}</span>
+                <div className="mt-1 flex gap-3 text-xs text-ink-muted">
+                  <span className="uppercase tracking-wide font-semibold">{tc(idea.category as Parameters<typeof tc>[0])}</span>
+                  <span className="text-ink/20">·</span>
+                  <span className="uppercase tracking-wide font-semibold">{td(idea.district as Parameters<typeof td>[0])}</span>
+                  <span className="text-ink/20">·</span>
                   <span>{idea._count.votes} {ts("SELECTED").toLowerCase()}</span>
                 </div>
               </li>
@@ -89,20 +91,20 @@ export default async function ResultsPage() {
 
       {votingIdeas.length > 0 && (
         <section className="mt-8">
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-ink-muted">
             {t("allVotesHeading")}
           </h2>
-          <ol className="mt-4 space-y-2">
+          <ol className="mt-4 space-y-0">
             {votingIdeas.map((idea, idx) => (
-              <li key={idea.id} className="flex items-center gap-3 rounded-md border border-slate-200 px-4 py-3">
-                <span className="text-sm font-medium text-slate-400 w-6">{idx + 1}.</span>
+              <li key={idea.id} className="flex items-center gap-3 border-b border-ink/8 px-0 py-3 last:border-b-0">
+                <span className="text-sm font-medium text-ink-muted w-6">{idx + 1}.</span>
                 <Link
                   href={`/ideas/${idea.id}`}
-                  className="flex-1 text-sm font-medium text-slate-900 hover:text-blue-700"
+                  className="flex-1 font-serif text-sm font-semibold text-ink hover:text-civic-blue transition"
                 >
                   {idea.title}
                 </Link>
-                <span className="text-sm text-slate-600">{idea._count.votes}</span>
+                <span className="text-sm text-ink-muted">{idea._count.votes}</span>
               </li>
             ))}
           </ol>

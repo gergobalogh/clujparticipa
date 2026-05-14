@@ -43,7 +43,7 @@ export function VotingCountdown({ endsAt }: VotingCountdownProps) {
   parts.push(`${minutes} ${t("votingMinutes")}`);
 
   return (
-    <p className="text-sm text-slate-600">
+    <p className="text-sm text-ink-muted">
       {t("votingClosesIn")} {parts.join(" ")}
     </p>
   );

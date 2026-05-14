@@ -58,11 +58,11 @@ export default function BugReportPage() {
 
   if (success) {
     return (
-      <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
-        <p className="text-lg font-medium text-green-700">{t("success")}</p>
+      <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+        <p className="text-lg font-medium text-civic-teal">{t("success")}</p>
         <Link
           href="/"
-          className="mt-4 inline-flex items-center rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-800"
+          className="mt-4 inline-flex items-center rounded-sm bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:bg-ink/90"
         >
           {t("backHome")}
         </Link>
@@ -71,11 +71,11 @@ export default function BugReportPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
-      <h1 className="text-2xl font-semibold text-slate-950 sm:text-3xl">
+    <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+      <h1 className="font-serif text-2xl font-bold text-ink sm:text-3xl">
         {t("title")}
       </h1>
-      <p className="mt-2 text-slate-600">{t("description")}</p>
+      <p className="mt-2 text-sm text-ink-muted">{t("description")}</p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         <Textarea
@@ -112,7 +112,7 @@ export default function BugReportPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="inline-flex items-center rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-800 disabled:opacity-50"
+          className="inline-flex items-center rounded-sm bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:bg-ink/90 disabled:opacity-50"
         >
           {submitting ? t("submitting") : t("submit")}
         </button>

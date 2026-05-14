@@ -17,29 +17,29 @@ export default function TermsPage() {
   ];
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
-      <h1 className="text-2xl font-semibold text-slate-950 sm:text-3xl">
+    <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+      <h1 className="font-serif text-2xl font-bold text-ink sm:text-3xl">
         {t("title")}
       </h1>
       <div className="mt-8 space-y-8">
         {sections.map((s) => (
           <section key={s.heading}>
-            <h2 className="text-base font-semibold text-slate-950">
+            <h2 className="text-base font-semibold text-ink">
               {s.heading}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{s.text}</p>
+            <p className="mt-2 text-sm leading-6 text-ink-muted">{s.text}</p>
           </section>
         ))}
         <section>
-          <h2 className="text-base font-semibold text-slate-950">
+          <h2 className="text-base font-semibold text-ink">
             {t("privacyHeading")}
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="mt-2 text-sm leading-6 text-ink-muted">
             {t("privacyText")}
           </p>
           <Link
             href="/privacy"
-            className="mt-2 inline-block text-sm text-blue-700 underline hover:text-blue-900"
+            className="mt-2 inline-block text-sm text-civic-blue underline hover:text-ink transition"
           >
             {t("privacyHeading")} &rarr;
           </Link>

@@ -15,7 +15,8 @@
     "bugReport": "Hibabejelentés",
     "dataDeletion": "Adattörlés",
     "terms": "Felhasználási feltételek",
-    "nonBinding": "A támogató szavazatok nem kötelezőek, és kizárólag a prototípus teszteléséhez gyűjtöttek."
+    "nonBinding": "A támogató szavazatok nem kötelezőek, és kizárólag a prototípus teszteléséhez gyűjtöttek.",
+    "languageLabel": "Nyelv kiválasztása"
   },
   "Privacy": {
     "title": "Adatvédelem és prototípus megjegyzés",
@@ -48,8 +49,8 @@
   },
   "Home": {
     "eyebrow": "ClujParticipa",
-    "title": "Részvételi prototípus Kolozsvár számára",
-    "description": "Egy fókuszált MVP környéki ötletek beküldésére, térképes böngészésre, támogatásra, hozzászólásokra és nyilvános státuszkövetésre.",
+    "title": "ClujParticipa",
+    "description": "Részvételi prototípus Kolozsvár számára. Küldjön be környéki ötleteket, fedezze fel őket a térképen, támogassa, szóljon hozzá és kövesse a nyilvános státuszfrissítéseket.",
     "submitIdea": "Ötlet beküldése",
     "browseIdeas": "Ötletek böngészése",
     "openMap": "Térkép megnyitása",
@@ -58,7 +59,10 @@
     "totalVotes": "Támogató szavazatok",
     "totalComments": "Hozzászólások",
     "recentIdeas": "Legújabb ötletek",
-    "viewAll": "Összes ötlet megtekintése"
+    "viewAll": "Összes ötlet megtekintése",
+    "civicStatus": "Polgári státusz",
+    "votingPhase": "Szavazási fázis",
+    "activeDistricts": "Aktív körzetek"
   },
   "Ideas": {
     "title": "Ötletek",
@@ -315,7 +319,7 @@
     "allVotesHeading": "Összes szavazat",
     "noResults": "Még nincsenek ötletek a szavazási folyamatban.",
     "votingPeriod": "Szavazási időszak",
-    "winner": "Győztes"
+    "winner": "Kiválasztott"
   },
   "Unsubscribe": {
     "successTitle": "Sikeres leiratkozás",

@@ -3,7 +3,8 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
-import { IdeaCard } from "@/components/ideas/idea-card";
+import { IdeaListRow } from "@/components/ideas/idea-list-row";
+import { HomeMapPreview } from "@/components/map/home-map-preview";
 
 interface RecentIdea {
   id: string;
@@ -30,11 +31,19 @@ interface Stats {
   statusCounts: Record<string, number>;
 }
 
+interface VotingConfigData {
+  startsAt: string;
+  endsAt: string;
+  label: string | null;
+  isOpen: boolean;
+}
+
 export default function LocaleHomePage() {
   const t = useTranslations("Home");
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [statsError, setStatsError] = useState(false);
+  const [votingConfig, setVotingConfig] = useState<VotingConfigData | null>(null);
 
   useEffect(() => {
     fetch("/api/stats")
@@ -44,135 +53,150 @@ export default function LocaleHomePage() {
       })
       .then(setStats)
       .catch(() => setStatsError(true));
+
+    fetch("/api/voting-config")
+      .then((r) => (r.ok ? r.json() : { config: null }))
+      .then((data) => setVotingConfig(data.config ?? null))
+      .catch(() => {});
   }, []);
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
-      <section className="flex flex-col gap-8 lg:flex-row lg:items-center lg:gap-12">
-        <div className="flex-1 space-y-4">
-          <p className="text-sm font-medium uppercase tracking-wide text-blue-700">
-            {t("eyebrow")}
-          </p>
-          <h1 className="max-w-3xl text-3xl font-semibold text-slate-950 sm:text-4xl">
-            {t("title")}
-          </h1>
-          <p className="max-w-2xl text-lg leading-8 text-slate-600">
-            {t("description")}
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/ideas/new"
-              className="inline-flex items-center rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-blue-700"
-            >
-              {t("submitIdea")}
-            </Link>
-            <Link
-              href="/ideas"
-              className="inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-slate-400"
-            >
-              {t("browseIdeas")}
-            </Link>
-            <Link
-              href="/map"
-              className="inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-slate-400"
-            >
-              {t("openMap")}
-            </Link>
-          </div>
-        </div>
-        <div className="hidden lg:block lg:w-[340px] xl:w-[400px]">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-blue-100">
-            <svg className="absolute inset-0 h-full w-full text-blue-200" viewBox="0 0 400 300" fill="none">
-              <rect width="400" height="300" fill="currentColor" opacity="0.15" />
-              <circle cx="200" cy="120" r="60" stroke="currentColor" strokeWidth="2" opacity="0.4" />
-              <path d="M80 250 L140 180 L200 220 L260 160 L320 210 L320 250 Z" fill="currentColor" opacity="0.2" />
-              <circle cx="100" cy="80" r="4" fill="currentColor" opacity="0.3" />
-              <circle cx="300" cy="60" r="3" fill="currentColor" opacity="0.25" />
-              <circle cx="250" cy="100" r="5" fill="currentColor" opacity="0.2" />
-            </svg>
-          </div>
+    <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
+      {/* Header with brand + action */}
+      <section className="mb-6">
+        <h1 className="font-serif text-3xl font-bold text-ink sm:text-4xl tracking-tight">
+          {t("title")}
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm text-ink-muted leading-relaxed">
+          {t("description")}
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link
+            href="/ideas/new"
+            className="inline-flex items-center rounded-sm bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:bg-ink/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-ink"
+          >
+            {t("submitIdea")}
+          </Link>
+          <Link
+            href="/ideas"
+            className="inline-flex items-center rounded-sm border border-ink/15 bg-paper px-4 py-2 text-sm font-medium text-ink transition hover:bg-paper-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-ink/40"
+          >
+            {t("browseIdeas")}
+          </Link>
+          <Link
+            href="/map"
+            className="inline-flex items-center rounded-sm border border-ink/15 bg-paper px-4 py-2 text-sm font-medium text-ink transition hover:bg-paper-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-ink/40"
+          >
+            {t("openMap")}
+          </Link>
         </div>
       </section>
 
-      {!stats && !statsError && (
-        <section className="mt-12" aria-busy="true">
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="animate-pulse rounded-md border border-slate-200 px-4 py-3">
-                <div className="h-7 w-12 rounded bg-slate-200" />
-                <div className="mt-1 h-4 w-24 rounded bg-slate-100" />
-              </div>
-            ))}
+      {/* Civic status strip (Task 6) */}
+      {stats && (
+        <section className="mb-6 flex flex-wrap gap-3" aria-label={t("civicStatus")}>
+          <div className="flex items-center gap-2 rounded-sm border border-ink/8 bg-paper px-3 py-2">
+            <span className="h-2 w-2 rounded-full bg-civic-teal" aria-hidden="true" />
+            <span className="text-xs font-semibold text-ink">{stats.totalIdeas}</span>
+            <span className="text-xs text-ink-muted">{t("totalIdeas")}</span>
           </div>
+          <div className="flex items-center gap-2 rounded-sm border border-ink/8 bg-paper px-3 py-2">
+            <span className="text-xs font-semibold text-ink">{stats.totalVotes}</span>
+            <span className="text-xs text-ink-muted">{t("totalVotes")}</span>
+          </div>
+          <div className="flex items-center gap-2 rounded-sm border border-ink/8 bg-paper px-3 py-2">
+            <span className="text-xs font-semibold text-ink">{stats.totalComments}</span>
+            <span className="text-xs text-ink-muted">{t("totalComments")}</span>
+          </div>
+          {votingConfig && (
+            <div className="flex items-center gap-2 rounded-sm border border-ink/8 bg-paper px-3 py-2">
+              <span className={`h-2 w-2 rounded-full ${votingConfig.isOpen ? "bg-civic-teal" : "bg-ink-muted"}`} aria-hidden="true" />
+              <span className="text-xs text-ink-muted">{t("votingPhase")}:</span>
+              <span className="text-xs font-semibold text-ink">{votingConfig.isOpen ? "Open" : "Closed"}</span>
+            </div>
+          )}
+        </section>
+      )}
+
+      {!stats && !statsError && (
+        <section className="mb-6 flex flex-wrap gap-3" aria-busy="true">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse rounded-sm border border-ink/8 bg-paper px-3 py-2">
+              <div className="h-5 w-20 rounded bg-paper-muted" />
+            </div>
+          ))}
         </section>
       )}
 
       {statsError && (
-        <p role="alert" className="mt-8 text-sm text-slate-500">
+        <p role="alert" className="mb-6 text-sm text-ink-muted">
           {t("statsTitle")} — unavailable
         </p>
       )}
 
-      {stats && (
-        <section className="mt-12">
-          <h2 className="text-lg font-semibold text-slate-900">
-            {t("statsTitle")}
-          </h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-md border border-slate-200 px-4 py-3">
-              <p className="text-2xl font-semibold text-slate-950">
-                {stats.totalIdeas}
-              </p>
-              <p className="text-sm text-slate-500">{t("totalIdeas")}</p>
-            </div>
-            <div className="rounded-md border border-slate-200 px-4 py-3">
-              <p className="text-2xl font-semibold text-slate-950">
-                {stats.totalVotes}
-              </p>
-              <p className="text-sm text-slate-500">{t("totalVotes")}</p>
-            </div>
-            <div className="rounded-md border border-slate-200 px-4 py-3">
-              <p className="text-2xl font-semibold text-slate-950">
-                {stats.totalComments}
-              </p>
-              <p className="text-sm text-slate-500">{t("totalComments")}</p>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {stats?.recentIdeas.length ? (
-        <section className="mt-12">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">
+      {/* Main content: ideas feed + map preview */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_400px]">
+        {/* Recent ideas feed */}
+        <section>
+          <div className="flex items-center justify-between border-b border-ink/10 pb-2">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-ink">
               {t("recentIdeas")}
             </h2>
-            <Link
-              href="/ideas"
-              className="text-sm font-medium text-blue-700 hover:text-blue-800"
-            >
-              {t("viewAll")} &rarr;
+            {stats && stats.recentIdeas.length > 0 && (
+              <Link
+                href="/ideas"
+                className="text-xs font-medium text-civic-blue hover:text-ink transition"
+              >
+                {t("viewAll")} &rarr;
+              </Link>
+            )}
+          </div>
+
+          {stats && stats.recentIdeas.length > 0 ? (
+            <div className="mt-0">
+              {stats.recentIdeas.map((idea) => (
+                <IdeaListRow
+                  key={idea.id}
+                  id={idea.id}
+                  title={idea.title}
+                  category={idea.category}
+                  district={idea.district}
+                  status={idea.status}
+                  supportCount={idea.supportCount}
+                  commentCount={idea.commentCount}
+                  firstImage={idea.firstImage}
+                />
+              ))}
+            </div>
+          ) : stats ? (
+            <p className="mt-4 text-sm text-ink-muted">No ideas yet.</p>
+          ) : (
+            <div className="mt-4 space-y-3" aria-busy="true">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse border-b border-ink/5 py-3">
+                  <div className="h-3 w-24 rounded bg-paper-muted" />
+                  <div className="mt-2 h-5 w-3/4 rounded bg-paper-muted" />
+                  <div className="mt-2 h-3 w-32 rounded bg-paper-muted" />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Map preview */}
+        <section className="hidden lg:block">
+          <div className="border-b border-ink/10 pb-2">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-ink">
+              {t("openMap")}
+            </h2>
+          </div>
+          <div className="mt-2">
+            <Link href="/map" className="block group">
+              <HomeMapPreview />
             </Link>
           </div>
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {stats.recentIdeas.map((idea) => (
-              <IdeaCard
-                key={idea.id}
-                id={idea.id}
-                title={idea.title}
-                description=""
-                category={idea.category}
-                district={idea.district}
-                status={idea.status}
-                supportCount={idea.supportCount}
-                commentCount={idea.commentCount}
-                firstImage={idea.firstImage}
-                compact
-              />
-            ))}
-          </div>
         </section>
-      ) : null}
+      </div>
     </main>
   );
 }

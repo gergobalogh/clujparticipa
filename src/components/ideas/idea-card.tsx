@@ -27,14 +27,14 @@ interface IdeaCardProps {
 }
 
 const categoryColors: Record<string, string> = {
-  INFRASTRUCTURE: "bg-orange-100 text-orange-700",
-  EDUCATION: "bg-blue-100 text-blue-700",
-  ENVIRONMENT: "bg-green-100 text-green-700",
-  CULTURE: "bg-purple-100 text-purple-700",
-  SAFETY: "bg-red-100 text-red-700",
-  TRANSPORT: "bg-cyan-100 text-cyan-700",
-  HEALTH: "bg-pink-100 text-pink-700",
-  OTHER: "bg-slate-100 text-slate-700",
+  INFRASTRUCTURE: "bg-civic-orange-light text-civic-orange",
+  EDUCATION: "bg-civic-blue-light text-civic-blue",
+  ENVIRONMENT: "bg-civic-teal-light text-civic-teal",
+  CULTURE: "bg-purple-50 text-purple-700",
+  SAFETY: "bg-red-50 text-red-700",
+  TRANSPORT: "bg-cyan-50 text-cyan-700",
+  HEALTH: "bg-pink-50 text-pink-700",
+  OTHER: "bg-paper-muted text-ink-muted",
 };
 
 export function IdeaCard({
@@ -62,10 +62,10 @@ export function IdeaCard({
     return (
       <a
         href={href}
-        className="group flex gap-3 rounded-lg border border-slate-200 bg-white p-3 transition hover:border-blue-300 hover:shadow-sm"
+        className="group flex gap-3 rounded-sm border border-ink/8 bg-paper p-3 transition hover:border-ink/20 hover:bg-paper-muted/50"
       >
         {firstImage ? (
-          <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-md">
+          <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-sm">
             <Image
               src={firstImage.url}
               alt={firstImage.alt || title}
@@ -75,15 +75,15 @@ export function IdeaCard({
             />
           </div>
         ) : (
-          <div className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-md text-xs font-medium ${catColor}`}>
+          <div className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-sm text-xs font-medium ${catColor}`}>
             {tc(category as Parameters<typeof tc>[0]).slice(0, 2)}
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-medium text-slate-900 group-hover:text-blue-700">
+          <h3 className="truncate text-sm font-medium text-ink group-hover:text-civic-blue">
             {title}
           </h3>
-          <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+          <div className="mt-1 flex items-center gap-2 text-xs text-ink-muted">
             <Badge variant={statusToBadgeVariant(status)}>
               {ts(status as Parameters<typeof ts>[0])}
             </Badge>
@@ -100,9 +100,9 @@ export function IdeaCard({
   return (
     <a
       href={href}
-      className="group flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:border-blue-300 hover:shadow-sm"
+      className="group flex flex-col overflow-hidden rounded-sm border border-ink/8 bg-paper transition hover:border-ink/20"
     >
-      <div className="relative aspect-[16/9] w-full bg-slate-100">
+      <div className="relative aspect-[16/9] w-full bg-paper-muted">
         {firstImage ? (
           <Image
             src={firstImage.url}
@@ -120,7 +120,7 @@ export function IdeaCard({
 
       <div className="flex flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-medium text-slate-900 group-hover:text-blue-700">
+          <h3 className="font-serif font-semibold text-ink group-hover:text-civic-blue transition">
             {title}
           </h3>
           <div className="flex gap-1">
@@ -133,7 +133,7 @@ export function IdeaCard({
           </div>
         </div>
 
-        <p className="mt-1.5 line-clamp-2 text-sm text-slate-600">
+        <p className="mt-1.5 line-clamp-2 text-sm text-ink-muted">
           {description}
         </p>
 
@@ -143,12 +143,12 @@ export function IdeaCard({
           </p>
         )}
 
-        <div className="mt-auto flex flex-wrap items-center gap-2 pt-3 text-xs text-slate-500">
-          <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium ${catColor}`}>
+        <div className="mt-auto flex flex-wrap items-center gap-2 pt-3 text-xs text-ink-muted">
+          <span className={`inline-flex items-center rounded-sm px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${catColor}`}>
             {tc(category as Parameters<typeof tc>[0])}
           </span>
           <span>{td(district as Parameters<typeof td>[0])}</span>
-          <span className="text-slate-300">·</span>
+          <span className="text-ink/20">·</span>
           <span>{ti("supportCount", { count: supportCount })}</span>
           <span>{ti("commentCount", { count: commentCount })}</span>
         </div>

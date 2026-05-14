@@ -15,7 +15,8 @@
     "bugReport": "Raportează o problemă",
     "dataDeletion": "Ștergerea datelor",
     "terms": "Termeni și condiții",
-    "nonBinding": "Voturile de susținere sunt neobligatorii și colectate exclusiv pentru testarea prototipului."
+    "nonBinding": "Voturile de susținere sunt neobligatorii și colectate exclusiv pentru testarea prototipului.",
+    "languageLabel": "Alege limba"
   },
   "Privacy": {
     "title": "Confidențialitate și notă de prototip",
@@ -48,8 +49,8 @@
   },
   "Home": {
     "eyebrow": "ClujParticipa",
-    "title": "Prototip de participare civică pentru Cluj-Napoca",
-    "description": "Un MVP concentrat pentru propuneri de cartier, descoperire pe hartă, susținere, comentarii și actualizări publice de status.",
+    "title": "ClujParticipa",
+    "description": "Prototip de participare civică pentru Cluj-Napoca. Trimite propuneri de cartier, descoperă-le pe hartă, susține, comentează și urmărește actualizările publice de status.",
     "submitIdea": "Trimite o idee",
     "browseIdeas": "Caută idei",
     "openMap": "Deschide harta",
@@ -58,7 +59,10 @@
     "totalVotes": "Voturi de susținere",
     "totalComments": "Comentarii",
     "recentIdeas": "Idei recente",
-    "viewAll": "Vezi toate ideile"
+    "viewAll": "Vezi toate ideile",
+    "civicStatus": "Status civic",
+    "votingPhase": "Faza de votare",
+    "activeDistricts": "Cartiere active"
   },
   "Ideas": {
     "title": "Idei",
@@ -315,7 +319,7 @@
     "allVotesHeading": "Toate voturile",
     "noResults": "Nicio idee în procesul de votare încă.",
     "votingPeriod": "Perioada de votare",
-    "winner": "Câștigător"
+    "winner": "Selectată"
   },
   "Unsubscribe": {
     "successTitle": "Dezabonare reușită",

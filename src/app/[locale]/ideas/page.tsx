@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useCallback } from "react";
-import { IdeaCard } from "@/components/ideas/idea-card";
+import { IdeaListRow } from "@/components/ideas/idea-list-row";
 
 type IdeaSummary = {
   id: string;
@@ -118,18 +118,18 @@ export default function IdeasPage() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-12">
-      <h1 className="text-2xl font-semibold text-slate-950 sm:text-3xl">
+    <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+      <h1 className="font-serif text-2xl font-bold text-ink sm:text-3xl">
         {t("title")}
       </h1>
-      <p className="mt-2 max-w-2xl text-slate-600">{t("description")}</p>
+      <p className="mt-2 max-w-2xl text-sm text-ink-muted">{t("description")}</p>
 
       <div className="mt-6 flex flex-wrap gap-3">
         <select
           aria-label={t("filterCategory")}
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded-sm border border-ink/15 bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
         >
           <option value="">{t("allCategories")}</option>
           {CATEGORIES.map((c) => (
@@ -143,7 +143,7 @@ export default function IdeasPage() {
           aria-label={t("filterDistrict")}
           value={district}
           onChange={(e) => setDistrict(e.target.value)}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded-sm border border-ink/15 bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
         >
           <option value="">{t("allDistricts")}</option>
           {DISTRICTS.map((d) => (
@@ -157,7 +157,7 @@ export default function IdeasPage() {
           aria-label={t("filterStatus")}
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded-sm border border-ink/15 bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
         >
           <option value="">{t("allStatuses")}</option>
           {STATUSES.map((s) => (
@@ -171,7 +171,7 @@ export default function IdeasPage() {
           aria-label={t("sortLabel")}
           value={sort}
           onChange={(e) => setSort(e.target.value as SortOption)}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded-sm border border-ink/15 bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
         >
           {SORT_OPTIONS.map((o) => (
             <option key={o} value={o}>
@@ -182,7 +182,7 @@ export default function IdeasPage() {
 
         <button
           onClick={() => setShowRejected((v) => !v)}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 transition hover:bg-slate-50 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded-sm border border-ink/15 bg-paper px-3 py-1.5 text-sm text-ink transition hover:bg-paper-muted focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
         >
           {showRejected ? t("hideRejected") : t("showRejected")}
         </button>
@@ -195,13 +195,13 @@ export default function IdeasPage() {
       )}
 
       {!fetchError && ideas.length === 0 && !loading && (
-        <p className="mt-8 text-slate-500">{t("noIdeas")}</p>
+        <p className="mt-8 text-sm text-ink-muted">{t("noIdeas")}</p>
       )}
 
       {ideas.length > 0 && (
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6">
           {ideas.map((idea) => (
-            <IdeaCard
+            <IdeaListRow
               key={idea.id}
               id={idea.id}
               title={idea.title}
@@ -212,14 +212,13 @@ export default function IdeasPage() {
               supportCount={idea.supportCount}
               commentCount={idea.commentCount}
               firstImage={idea.firstImage}
-              rejectionNote={idea.rejectionNote}
             />
           ))}
         </div>
       )}
 
       {loading && (
-        <div className="mt-6 flex items-center gap-2 text-sm text-slate-400" aria-busy="true" role="status">
+        <div className="mt-6 flex items-center gap-2 text-sm text-ink-muted" aria-busy="true" role="status">
           <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
         </div>
       )}
@@ -227,14 +226,14 @@ export default function IdeasPage() {
       {!loading && hasMore && (
         <button
           onClick={loadMore}
-          className="mt-4 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          className="mt-4 rounded-sm border border-ink/15 bg-paper px-4 py-2 text-sm font-medium text-ink transition hover:bg-paper-muted"
         >
           {t("loadMore")}
         </button>
       )}
 
       {!loading && !hasMore && ideas.length > 0 && (
-        <p className="mt-4 text-sm text-slate-400">{t("noMore")}</p>
+        <p className="mt-4 text-sm text-ink-muted">{t("noMore")}</p>
       )}
     </main>
   );
