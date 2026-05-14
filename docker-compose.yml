@@ -1,0 +1,41 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        - NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+    container_name: clujparticipa-app
+    restart: unless-stopped
+    ports:
+      - "3030:3030"
+    environment:
+      - DATABASE_URL=postgresql://clujparticipa:clujparticipa@clujparticipa-postgres:5432/clujparticipa
+      - ADMIN_SECRET=${ADMIN_SECRET:-change-me}
+      - NEXT_PUBLIC_APP_URL=https://cluj.gbfcj.my
+      - AUTH_SECRET=${AUTH_SECRET:-change-me}
+      - AUTH_URL=https://cluj.gbfcj.my
+      - AUTH_TRUST_HOST=true
+      - GOOGLE_ID=${GOOGLE_ID:-}
+      - GOOGLE_SECRET=${GOOGLE_SECRET:-}
+      - FACEBOOK_ID=${FACEBOOK_ID:-}
+      - FACEBOOK_SECRET=${FACEBOOK_SECRET:-}
+      - NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+      - PORT=3030
+      - HOSTNAME=0.0.0.0
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:16
+    container_name: clujparticipa-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=clujparticipa
+      - POSTGRES_PASSWORD=clujparticipa
+      - POSTGRES_DB=clujparticipa
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - clujparticipa-pgdata:/var/lib/postgresql/data
+
+volumes:
+  clujparticipa-pgdata:
