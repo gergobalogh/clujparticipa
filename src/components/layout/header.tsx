@@ -55,16 +55,15 @@ export function Header() {
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
       <div className="mx-auto grid w-full max-w-5xl grid-cols-[1fr_auto_1fr] items-center px-4 py-3 sm:px-6 sm:py-4">
         <Link
-          className="flex items-center gap-2 text-base font-semibold text-slate-950"
+          className="flex items-center"
           href="/"
           locale={locale}
         >
           <img
             src="/logo.png"
-            alt=""
-            className="h-8 w-auto"
+            alt="ClujParticipa"
+            className="h-12 w-auto"
           />
-          ClujParticipa
         </Link>
 
         {/* Desktop nav */}
