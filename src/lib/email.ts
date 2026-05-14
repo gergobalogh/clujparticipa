@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "noreply@clujparticipa.ro";
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "noreply@clujparticipa.digital";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 let _resend: Resend | null = null;

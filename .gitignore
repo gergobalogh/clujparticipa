@@ -54,3 +54,6 @@ node_modules/@prisma/client
 
 # docker
 docker-data/
+
+# pgbouncer TLS certs (generated locally — never commit private keys)
+pgbouncer/tls/

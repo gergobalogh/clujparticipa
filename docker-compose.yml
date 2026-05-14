@@ -9,7 +9,7 @@ services:
     ports:
       - "3030:3030"
     environment:
-      - DATABASE_URL=postgresql://clujparticipa:clujparticipa@clujparticipa-postgres:5432/clujparticipa
+      - DATABASE_URL=postgresql://clujparticipa:${DB_PASSWORD:-clujparticipa}@clujparticipa-pgbouncer:5432/clujparticipa?sslmode=require&uselibpqcompat=true&connection_limit=1
       - ADMIN_SECRET=${ADMIN_SECRET:-change-me}
       - NEXT_PUBLIC_APP_URL=https://cluj.gbfcj.my
       - AUTH_SECRET=${AUTH_SECRET:-change-me}
@@ -23,17 +23,42 @@ services:
       - PORT=3030
       - HOSTNAME=0.0.0.0
     depends_on:
+      - pgbouncer
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: clujparticipa-pgbouncer
+    restart: unless-stopped
+    environment:
+      - DB_HOST=clujparticipa-postgres
+      - DB_PORT=5432
+      - DB_USER=clujparticipa
+      - DB_PASSWORD=${DB_PASSWORD:-clujparticipa}
+      - DB_NAME=clujparticipa
+      - POOL_MODE=session
+      - MAX_CLIENT_CONN=100
+      - DEFAULT_POOL_SIZE=10
+      - AUTH_TYPE=scram-sha-256
+      - CLIENT_TLS_SSLMODE=require
+      - CLIENT_TLS_CERT_FILE=/etc/pgbouncer/tls/server.crt
+      - CLIENT_TLS_KEY_FILE=/etc/pgbouncer/tls/server.key
+    volumes:
+      - ./pgbouncer/tls:/etc/pgbouncer/tls:ro
+    ports:
+      # Exposed publicly so Vercel can reach it. Protect with a firewall rule
+      # allowing inbound 6543 only from trusted IPs if possible.
+      - "0.0.0.0:6543:5432"
+    depends_on:
       - postgres
+
   postgres:
     image: postgres:16
     container_name: clujparticipa-postgres
     restart: unless-stopped
     environment:
       - POSTGRES_USER=clujparticipa
-      - POSTGRES_PASSWORD=clujparticipa
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-clujparticipa}
       - POSTGRES_DB=clujparticipa
-    ports:
-      - "127.0.0.1:55432:5432"
     volumes:
       - clujparticipa-pgdata:/var/lib/postgresql/data
 

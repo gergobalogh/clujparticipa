@@ -30,6 +30,22 @@ export function Footer() {
           >
             {t("privacy")}
           </Link>
+          <span className="text-sm text-slate-400">|</span>
+          <Link
+            href="/data-deletion"
+            locale={locale}
+            className="text-sm text-blue-700 underline hover:text-blue-900"
+          >
+            {t("dataDeletion")}
+          </Link>
+          <span className="text-sm text-slate-400">|</span>
+          <Link
+            href="/terms"
+            locale={locale}
+            className="text-sm text-blue-700 underline hover:text-blue-900"
+          >
+            {t("terms")}
+          </Link>
         </div>
       </div>
     </footer>

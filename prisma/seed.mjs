@@ -252,8 +252,8 @@ const ideas = [
     category: "TRANSPORT",
     district: "CENTRU",
     status: "SUBMITTED",
-    latitude: 46.7755,
-    longitude: 23.5940,
+    latitude: 46.766329971734244,
+    longitude: 23.554104145941157,
     statusChanges: [
       {
         fromStatus: null,
