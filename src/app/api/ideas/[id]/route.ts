@@ -18,6 +18,10 @@ export async function GET(
       images: {
         orderBy: { order: "asc" },
       },
+      feasibilityNote: true,
+      progressUpdates: {
+        orderBy: { createdAt: "asc" },
+      },
     },
   });
 

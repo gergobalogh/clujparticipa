@@ -43,6 +43,9 @@ export const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(
     const previewsRef = useRef(previews);
     previewsRef.current = previews;
 
+    const [dragIndex, setDragIndex] = useState<number | null>(null);
+    const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
+
     const validateAndAddFiles = useCallback(
       (incoming: FileList | File[]) => {
         const newErrors: string[] = [];
@@ -85,7 +88,11 @@ export const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(
     const handleDrop = useCallback(
       (e: React.DragEvent) => {
         e.preventDefault();
-        validateAndAddFiles(e.dataTransfer.files);
+        // If reordering within previews, the reorder drag handlers manage it.
+        // Only add files when dataTransfer has files (external drop).
+        if (e.dataTransfer.files.length > 0) {
+          validateAndAddFiles(e.dataTransfer.files);
+        }
       },
       [validateAndAddFiles]
     );
@@ -109,6 +116,30 @@ export const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(
       });
       setErrors([]);
     }, []);
+
+    // Drag-to-reorder handlers
+    const handleDragStart = useCallback((index: number) => {
+      setDragIndex(index);
+    }, []);
+
+    const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      setDropTargetIndex(index);
+    }, []);
+
+    const handleDragEnd = useCallback(() => {
+      if (dragIndex !== null && dropTargetIndex !== null && dragIndex !== dropTargetIndex) {
+        setPreviews((prev) => {
+          const next = [...prev];
+          const [moved] = next.splice(dragIndex, 1);
+          next.splice(dropTargetIndex, 0, moved);
+          return next;
+        });
+      }
+      setDragIndex(null);
+      setDropTargetIndex(null);
+    }, [dragIndex, dropTargetIndex]);
 
     const uploadImages = useCallback(async (): Promise<ImageUploadResult[]> => {
       const currentPreviews = previewsRef.current;
@@ -138,7 +169,13 @@ export const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(
         }
 
         const data = await res.json();
-        return data.images;
+        // Assign order based on current preview order
+        return data.images.map(
+          (img: Omit<ImageUploadResult, "order">, i: number) => ({
+            ...img,
+            order: i,
+          })
+        );
       } catch {
         setErrors([t("uploadFailed")]);
         return [];
@@ -190,13 +227,27 @@ export const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(
         {previews.length > 0 && (
           <ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
             {previews.map((p, i) => (
-              <li key={p.preview} className="group relative aspect-[4/3] overflow-hidden rounded-md border border-slate-200">
+              <li
+                key={p.preview}
+                draggable
+                onDragStart={() => handleDragStart(i)}
+                onDragOver={(e) => handleDragOver(e, i)}
+                onDragEnd={handleDragEnd}
+                className={`group relative aspect-[4/3] overflow-hidden rounded-md border transition ${
+                  dropTargetIndex === i && dragIndex !== null && dragIndex !== i
+                    ? "border-blue-500 ring-2 ring-blue-300"
+                    : "border-slate-200"
+                } ${dragIndex === i ? "opacity-50" : ""} cursor-grab active:cursor-grabbing`}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={p.preview}
                   alt={p.file.name}
                   className="h-full w-full object-cover"
                 />
+                <span className="absolute left-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-slate-800/70 text-[10px] font-medium text-white">
+                  {i + 1}
+                </span>
                 <button
                   type="button"
                   onClick={(e) => {

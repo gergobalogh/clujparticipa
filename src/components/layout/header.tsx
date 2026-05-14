@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { type AppLocale } from "@/i18n/routing";
 import { LanguageSwitcher } from "./language-switcher";
 import { UserMenu } from "./user-menu";
@@ -19,6 +19,37 @@ export function Header() {
   const locale = useLocale() as AppLocale;
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/voting-config")
+      .then((r) => r.ok ? r.json() : { config: null })
+      .then((data) => {
+        if (data.config) {
+          setShowResults(true);
+          return;
+        }
+        // Fallback: check if any IN_VOTING or SELECTED ideas exist
+        return fetch("/api/ideas?status=IN_VOTING&limit=1")
+          .then((r) => r.ok ? r.json() : { ideas: [] })
+          .then((d) => {
+            if (d.ideas?.length > 0) {
+              setShowResults(true);
+              return;
+            }
+            return fetch("/api/ideas?status=SELECTED&limit=1")
+              .then((r) => r.ok ? r.json() : { ideas: [] })
+              .then((d2) => {
+                setShowResults(d2.ideas?.length > 0);
+              });
+          });
+      })
+      .catch(() => setShowResults(false));
+  }, []);
+
+  const allNavItems = showResults
+    ? [...navItems.slice(0, 3), { key: "results", href: "/results" }, navItems[3]]
+    : navItems;
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
@@ -38,7 +69,7 @@ export function Header() {
 
         {/* Desktop nav */}
         <nav aria-label="Primary" className="hidden items-center gap-1 sm:flex">
-          {navItems.map(({ key, href }) => {
+          {allNavItems.map(({ key, href }) => {
             const isActive =
               href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (
@@ -54,7 +85,7 @@ export function Header() {
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-950",
                 ].join(" ")}
               >
-                {t(key)}
+                {t(key as Parameters<typeof t>[0])}
               </Link>
             );
           })}
@@ -85,7 +116,7 @@ export function Header() {
       {/* Mobile nav */}
       {menuOpen && (
         <nav aria-label="Primary" className="border-t border-slate-100 px-4 pb-3 sm:hidden">
-          {navItems.map(({ key, href }) => {
+          {allNavItems.map(({ key, href }) => {
             const isActive =
               href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (
@@ -102,7 +133,7 @@ export function Header() {
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-950",
                 ].join(" ")}
               >
-                {t(key)}
+                {t(key as Parameters<typeof t>[0])}
               </Link>
             );
           })}

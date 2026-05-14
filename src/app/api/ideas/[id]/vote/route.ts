@@ -8,6 +8,7 @@ import { z } from "zod";
 
 const voteSchema = z.object({
   participantToken: z.string().optional(),
+  notifyOnStatusChange: z.boolean().optional().default(false),
 });
 
 export async function POST(
@@ -24,6 +25,18 @@ export async function POST(
   }
   if (!VOTE_ELIGIBLE_STATUSES.includes(idea.status)) {
     return NextResponse.json({ error: "Idea is not open for voting" }, { status: 403 });
+  }
+
+  // Enforce voting deadline
+  const votingConfig = await prisma.votingConfig.findFirst();
+  if (votingConfig) {
+    const now = new Date();
+    if (now < votingConfig.startsAt || now > votingConfig.endsAt) {
+      return NextResponse.json(
+        { error: "Voting is not currently open" },
+        { status: 403 }
+      );
+    }
   }
 
   let body: unknown;
@@ -103,6 +116,8 @@ export async function POST(
       ideaId: id,
       participantHash,
       direction: "SUPPORT",
+      notifyOnStatusChange: parsed.data.notifyOnStatusChange,
+      unsubscribeToken: parsed.data.notifyOnStatusChange ? crypto.randomUUID() : null,
     },
   });
 

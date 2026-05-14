@@ -1,9 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
 
-/**
- * Truncates all tables in the test database.
- * Tables are truncated in dependency order to respect foreign keys.
- */
 export async function truncateAll(prisma: PrismaClient): Promise<void> {
   const tablenames = await prisma.$queryRaw<
     { tablename: string }[]

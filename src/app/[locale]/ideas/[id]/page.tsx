@@ -9,7 +9,9 @@ import { statusToBadgeVariant } from "@/lib/status";
 import { VOTE_ELIGIBLE_STATUSES, SUPPORT_LABEL_STATUSES } from "@/lib/transitions";
 import { MapPickerLoader } from "@/components/map/map-picker-loader";
 import { IdeaCarousel, CarouselImage } from "@/components/ideas/idea-carousel";
+import { VotingCountdown } from "@/components/ideas/voting-countdown";
 import { getOrCreateParticipantToken } from "@/lib/client-participant";
+import Image from "next/image";
 
 type StatusChange = {
   id: string;
@@ -29,6 +31,31 @@ type Comment = {
   replies?: Comment[];
 };
 
+type FeasibilityNote = {
+  id: string;
+  responseText: string;
+  department: string | null;
+  estimatedCostRonMin: number | null;
+  estimatedCostRonMax: number | null;
+  author: string;
+  createdAt: string;
+};
+
+type ProgressUpdate = {
+  id: string;
+  text: string;
+  imageUrl: string | null;
+  author: string;
+  createdAt: string;
+};
+
+type VotingConfigData = {
+  startsAt: string;
+  endsAt: string;
+  label: string | null;
+  isOpen: boolean;
+};
+
 type Idea = {
   id: string;
   title: string;
@@ -43,6 +70,8 @@ type Idea = {
   commentCount: number;
   statusChanges: StatusChange[];
   images?: CarouselImage[];
+  feasibilityNote: FeasibilityNote | null;
+  progressUpdates: ProgressUpdate[];
 };
 
 export default function IdeaDetailPage() {
@@ -66,6 +95,8 @@ export default function IdeaDetailPage() {
   const [replyText, setReplyText] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
   const [commentError, setCommentError] = useState("");
+  const [notifyOnVote, setNotifyOnVote] = useState(false);
+  const [votingConfig, setVotingConfig] = useState<VotingConfigData | null>(null);
 
   const refreshComments = async () => {
     try {
@@ -103,6 +134,13 @@ export default function IdeaDetailPage() {
       })
       .catch(() => {});
 
+    fetch("/api/voting-config")
+      .then((r) => r.ok ? r.json() : { config: null })
+      .then((data) => {
+        if (!cancelled) setVotingConfig(data.config ?? null);
+      })
+      .catch(() => {});
+
     return () => { cancelled = true; };
   }, [id]);
 
@@ -117,7 +155,7 @@ export default function IdeaDetailPage() {
       const res = await fetch(`/api/ideas/${id}/vote`, {
         method: "POST",
         headers,
-        body: JSON.stringify({}),
+        body: JSON.stringify({ notifyOnStatusChange: notifyOnVote }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -261,6 +299,61 @@ export default function IdeaDetailPage() {
         ) : null;
       })()}
 
+      {/* Feasibility note */}
+      {idea.feasibilityNote && (
+        <div className="mt-6 rounded-md border-l-4 border-blue-700 bg-blue-50 px-4 py-3">
+          <h3 className="text-sm font-semibold text-blue-900">{t("feasibilityHeading")}</h3>
+          <p className="mt-2 whitespace-pre-line text-sm text-slate-800">
+            {idea.feasibilityNote.responseText}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-600">
+            {idea.feasibilityNote.department && (
+              <span>{t("feasibilityDepartment")}: {idea.feasibilityNote.department}</span>
+            )}
+            {(idea.feasibilityNote.estimatedCostRonMin != null || idea.feasibilityNote.estimatedCostRonMax != null) && (
+              <span>
+                {t("feasibilityCostRange")}: RON{" "}
+                {idea.feasibilityNote.estimatedCostRonMin != null && idea.feasibilityNote.estimatedCostRonMax != null
+                  ? `${idea.feasibilityNote.estimatedCostRonMin.toLocaleString()} – ${idea.feasibilityNote.estimatedCostRonMax.toLocaleString()}`
+                  : idea.feasibilityNote.estimatedCostRonMin != null
+                    ? `${idea.feasibilityNote.estimatedCostRonMin.toLocaleString()}+`
+                    : `– ${idea.feasibilityNote.estimatedCostRonMax!.toLocaleString()}`}
+              </span>
+            )}
+            <span>{t("feasibilityAuthor")} · {new Date(idea.feasibilityNote.createdAt).toLocaleDateString()}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Progress updates */}
+      {idea.progressUpdates.length > 0 && (
+        <div className="mt-6">
+          <h3 className="text-sm font-semibold text-slate-900">{t("progressUpdatesHeading")}</h3>
+          <ol className="mt-3 space-y-3 border-l-2 border-blue-200 pl-4">
+            {idea.progressUpdates.map((update) => (
+              <li key={update.id} className="relative">
+                <div className="absolute -left-[21px] top-1 h-3 w-3 rounded-full border-2 border-white bg-blue-500" />
+                <p className="text-sm text-slate-800">{update.text}</p>
+                {update.imageUrl && (
+                  <div className="relative mt-2 h-48 w-full overflow-hidden rounded-md">
+                    <Image
+                      src={update.imageUrl}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, 640px"
+                    />
+                  </div>
+                )}
+                <p className="mt-1 text-xs text-slate-400">
+                  {new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(update.createdAt))}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
       {/* Vote */}
       {VOTE_ELIGIBLE_STATUSES.includes(idea.status as typeof VOTE_ELIGIBLE_STATUSES[number]) && (
       <div className="mt-8 rounded-md border border-slate-200 px-4 py-3">
@@ -278,39 +371,59 @@ export default function IdeaDetailPage() {
           .vote-count-pop { animation: countPop 0.4s ease-out; }
           .vote-check-in { animation: checkIn 0.35s ease-out; }
         `}</style>
+        {idea.status === "IN_VOTING" && votingConfig && (
+          <div className="mb-2">
+            <VotingCountdown endsAt={votingConfig.endsAt} />
+          </div>
+        )}
         {session?.user ? (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleVote}
-              disabled={supported}
-              aria-pressed={supported}
-              className={`inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-blue-700 ${
-                supported
-                  ? "bg-green-50 text-green-700"
-                  : "bg-blue-700 text-white hover:bg-blue-800"
-              }`}
-            >
-              {supported && (
-                <svg
-                  className="h-4 w-4 vote-check-in"
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              )}
-              {supported
-                ? t("alreadySupported")
-                : SUPPORT_LABEL_STATUSES.includes(idea.status as typeof SUPPORT_LABEL_STATUSES[number])
-                  ? t("backThisIdea")
-                  : t("voteButton")
-              }
-            </button>
-            <span
-              key={supportCount}
-              className={`text-sm text-slate-600 ${supported ? "vote-count-pop" : ""}`}
-            >
-              {t("supportCount", { count: supportCount })}
-            </span>
+          <div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleVote}
+                disabled={supported}
+                aria-pressed={supported}
+                className={`inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-blue-700 ${
+                  supported
+                    ? "bg-green-50 text-green-700"
+                    : "bg-blue-700 text-white hover:bg-blue-800"
+                }`}
+              >
+                {supported && (
+                  <svg
+                    className="h-4 w-4 vote-check-in"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+                {supported
+                  ? t("alreadySupported")
+                  : SUPPORT_LABEL_STATUSES.includes(idea.status as typeof SUPPORT_LABEL_STATUSES[number])
+                    ? t("backThisIdea")
+                    : t("voteButton")
+                }
+              </button>
+              <span
+                key={supportCount}
+                className={`text-sm text-slate-600 ${supported ? "vote-count-pop" : ""}`}
+              >
+                {t("supportCount", { count: supportCount })}
+              </span>
+            </div>
+            {!supported ? (
+              <label className="mt-2 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={notifyOnVote}
+                  onChange={(e) => setNotifyOnVote(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-500"
+                />
+                <span className="text-sm text-slate-700">{t("notifyVoteLabel")}</span>
+              </label>
+            ) : notifyOnVote ? (
+              <p className="mt-2 text-sm text-slate-500">{t("notifyVoteConfirm")}</p>
+            ) : null}
           </div>
         ) : (
           <div>

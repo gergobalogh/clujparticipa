@@ -6,7 +6,8 @@
     "home": "Home",
     "ideas": "Ideas",
     "map": "Map",
-    "admin": "Admin"
+    "admin": "Admin",
+    "results": "Results"
   },
   "Footer": {
     "prototypeNote": "This is a prototype for demonstration purposes. Data and votes are not binding.",
@@ -85,7 +86,8 @@
     "submitting": "Submitting...",
     "success": "Idea submitted successfully!",
     "viewIdea": "View idea",
-    "required": "Required"
+    "required": "Required",
+    "notifyLabel": "Notify me by email when the idea's status changes."
   },
   "ImageUpload": {
     "label": "Photos (optional)",
@@ -99,6 +101,11 @@
     "tooManyFiles": "Maximum {max} images allowed.",
     "uploading": "Uploading images...",
     "uploadFailed": "Image upload failed. Please try again."
+  },
+  "IdeaCarousel": {
+    "prev": "Previous image",
+    "next": "Next image",
+    "goToImage": "Go to image {index}"
   },
   "IdeaDetail": {
     "title": "Idea details",
@@ -130,7 +137,19 @@
     "statusBy": "Changed by",
     "replyTo": "Reply",
     "cancelReply": "Cancel",
-    "location": "Location"
+    "location": "Location",
+    "notifyVoteLabel": "Notify me by email when the idea's status changes.",
+    "notifyVoteConfirm": "You will be notified of updates by email.",
+    "feasibilityHeading": "Feasibility assessment",
+    "feasibilityDepartment": "Responsible department",
+    "feasibilityCostRange": "Estimated cost",
+    "feasibilityAuthor": "Official assessment",
+    "votingClosesIn": "Voting closes in",
+    "votingClosed": "Voting has closed",
+    "votingDays": "days",
+    "votingHours": "hours",
+    "votingMinutes": "minutes",
+    "progressUpdatesHeading": "Progress updates"
   },
   "Map": {
     "title": "Map",
@@ -182,7 +201,33 @@
       "markCompleted": "Mark completed",
       "reject": "Reject",
       "reopen": "Reopen"
-    }
+    },
+    "feasibilitySection": "Feasibility assessment",
+    "feasibilityResponseLabel": "Official response",
+    "feasibilityResponsePlaceholder": "Official response regarding the idea's feasibility...",
+    "feasibilityDepartmentLabel": "Responsible department",
+    "feasibilityDepartmentPlaceholder": "e.g. Infrastructure Department",
+    "feasibilityCostMinLabel": "Estimated minimum cost (RON)",
+    "feasibilityCostMaxLabel": "Estimated maximum cost (RON)",
+    "feasibilitySave": "Save assessment",
+    "feasibilitySaved": "Assessment saved successfully.",
+    "votingConfigSection": "Voting period",
+    "votingConfigStartsAt": "Starts at",
+    "votingConfigEndsAt": "Ends at",
+    "votingConfigLabel": "Label (optional)",
+    "votingConfigSave": "Save voting period",
+    "votingConfigSaved": "Voting period saved successfully.",
+    "votingConfigStatus": "Status",
+    "votingConfigOpen": "Open",
+    "votingConfigScheduled": "Scheduled (opens {date})",
+    "votingConfigNotConfigured": "Not configured",
+    "progressUpdateSection": "Post progress update",
+    "progressUpdateTextLabel": "Update text",
+    "progressUpdateTextPlaceholder": "Describe the progress...",
+    "progressUpdateImageUrlLabel": "Image URL (optional)",
+    "progressUpdateImageUrlPlaceholder": "/uploads/ideas/...",
+    "progressUpdateSubmit": "Post update",
+    "progressUpdatePosted": "Progress update posted successfully."
   },
   "Categories": {
     "INFRASTRUCTURE": "Infrastructure",
@@ -248,5 +293,20 @@
     "submitting": "Submitting...",
     "success": "Thank you! Your bug report has been submitted successfully.",
     "backHome": "Back to home"
+  },
+  "Results": {
+    "title": "Voting results",
+    "description": "Official results of the participatory voting process.",
+    "selectedHeading": "Selected ideas",
+    "allVotesHeading": "All votes",
+    "noResults": "No ideas in the voting process yet.",
+    "votingPeriod": "Voting period",
+    "winner": "Winner"
+  },
+  "Unsubscribe": {
+    "successTitle": "Unsubscribed successfully",
+    "successMessage": "You will no longer receive updates for this idea.",
+    "alreadyUnsubscribed": "Already unsubscribed or link has expired.",
+    "backToIdea": "Back to idea"
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { validateAdminAuth } from "@/lib/admin-auth";
 import { isValidTransition } from "@/lib/transitions";
+import { sendStatusChangeEmails } from "@/lib/email";
 import { z } from "zod";
 import { Status } from "@prisma/client";
 
@@ -96,6 +97,23 @@ export async function PATCH(
 
     return updatedIdea;
   });
+
+  // Fire-and-forget email fan-out
+  const ideaForEmail = await prisma.idea.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      submitterParticipantHash: true,
+      notifyOnStatusChange: true,
+      unsubscribeToken: true,
+    },
+  });
+
+  if (ideaForEmail) {
+    void sendStatusChangeEmails({ idea: ideaForEmail, adminNote: note });
+  }
 
   return NextResponse.json({
     id: updated.id,

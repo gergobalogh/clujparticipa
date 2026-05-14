@@ -6,7 +6,8 @@
     "home": "Főoldal",
     "ideas": "Ötletek",
     "map": "Térkép",
-    "admin": "Admin"
+    "admin": "Admin",
+    "results": "Eredmények"
   },
   "Footer": {
     "prototypeNote": "Ez egy bemutató célú prototípus. Az adatok és a szavazatok nem kötelező érvényűek.",
@@ -85,7 +86,8 @@
     "submitting": "Beküldés...",
     "success": "Az ötlet sikeresen beküldve!",
     "viewIdea": "Ötlet megtekintése",
-    "required": "Kötelező"
+    "required": "Kötelező",
+    "notifyLabel": "Értesíts e-mailben, ha az ötlet státusza megváltozik."
   },
   "ImageUpload": {
     "label": "Fényképek (nem kötelező)",
@@ -99,6 +101,11 @@
     "tooManyFiles": "Legfeljebb {max} kép engedélyezett.",
     "uploading": "Képek feltöltése...",
     "uploadFailed": "A képek feltöltése sikertelen. Kérjük, próbálja újra."
+  },
+  "IdeaCarousel": {
+    "prev": "Előző kép",
+    "next": "Következő kép",
+    "goToImage": "Ugrás a(z) {index}. képhez"
   },
   "IdeaDetail": {
     "title": "Ötlet részletei",
@@ -130,7 +137,19 @@
     "statusBy": "Módosította",
     "replyTo": "Válasz",
     "cancelReply": "Mégse",
-    "location": "Helyszín"
+    "location": "Helyszín",
+    "notifyVoteLabel": "Értesíts e-mailben, ha az ötlet státusza megváltozik.",
+    "notifyVoteConfirm": "Frissítésekről e-mailben értesítjük.",
+    "feasibilityHeading": "Megvalósíthatósági értékelés",
+    "feasibilityDepartment": "Felelős igazgatóság",
+    "feasibilityCostRange": "Becsült költség",
+    "feasibilityAuthor": "Hivatalos értékelés",
+    "votingClosesIn": "A szavazás lezárul",
+    "votingClosed": "A szavazás lezárult",
+    "votingDays": "nap",
+    "votingHours": "óra",
+    "votingMinutes": "perc",
+    "progressUpdatesHeading": "Előrehaladási jelentések"
   },
   "Map": {
     "title": "Térkép",
@@ -182,7 +201,33 @@
       "markCompleted": "Befejezettnek jelölés",
       "reject": "Elutasítás",
       "reopen": "Újranyitás"
-    }
+    },
+    "feasibilitySection": "Megvalósíthatósági értékelés",
+    "feasibilityResponseLabel": "Hivatalos válasz",
+    "feasibilityResponsePlaceholder": "Hivatalos válasz az ötlet megvalósíthatóságáról...",
+    "feasibilityDepartmentLabel": "Felelős igazgatóság",
+    "feasibilityDepartmentPlaceholder": "pl. Infrastrukturális Igazgatóság",
+    "feasibilityCostMinLabel": "Becsült minimális költség (RON)",
+    "feasibilityCostMaxLabel": "Becsült maximális költség (RON)",
+    "feasibilitySave": "Értékelés mentése",
+    "feasibilitySaved": "Értékelés sikeresen mentve.",
+    "votingConfigSection": "Szavazási időszak",
+    "votingConfigStartsAt": "Kezdés",
+    "votingConfigEndsAt": "Befejezés",
+    "votingConfigLabel": "Címke (nem kötelező)",
+    "votingConfigSave": "Szavazási időszak mentése",
+    "votingConfigSaved": "Szavazási időszak sikeresen mentve.",
+    "votingConfigStatus": "Státusz",
+    "votingConfigOpen": "Nyitva",
+    "votingConfigScheduled": "Ütemezett (nyitás: {date})",
+    "votingConfigNotConfigured": "Nincs beállítva",
+    "progressUpdateSection": "Előrehaladási jelentés",
+    "progressUpdateTextLabel": "Jelentés szövege",
+    "progressUpdateTextPlaceholder": "Írd le az előrehaladást...",
+    "progressUpdateImageUrlLabel": "Kép URL (nem kötelező)",
+    "progressUpdateImageUrlPlaceholder": "/uploads/ideas/...",
+    "progressUpdateSubmit": "Jelentés beküldése",
+    "progressUpdatePosted": "Előrehaladási jelentés sikeresen beküldve."
   },
   "Categories": {
     "INFRASTRUCTURE": "Infrastruktúra",
@@ -248,5 +293,20 @@
     "submitting": "Küldés...",
     "success": "Köszönjük! A hibabejelentésed sikeresen elküldve.",
     "backHome": "Vissza a főoldalra"
+  },
+  "Results": {
+    "title": "Szavazási eredmények",
+    "description": "A részvételi szavazási folyamat hivatalos eredményei.",
+    "selectedHeading": "Kiválasztott ötletek",
+    "allVotesHeading": "Összes szavazat",
+    "noResults": "Még nincsenek ötletek a szavazási folyamatban.",
+    "votingPeriod": "Szavazási időszak",
+    "winner": "Győztes"
+  },
+  "Unsubscribe": {
+    "successTitle": "Sikeres leiratkozás",
+    "successMessage": "Többé nem kap frissítéseket erről az ötletről.",
+    "alreadyUnsubscribed": "Már leiratkozott, vagy a link lejárt.",
+    "backToIdea": "Vissza az ötlethez"
   }
 }

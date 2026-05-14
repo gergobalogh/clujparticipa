@@ -33,6 +33,28 @@ type CommentSummary = {
   createdAt: string;
 };
 
+type IdeaImageDetail = {
+  url: string;
+  alt: string | null;
+  width: number | null;
+  height: number | null;
+};
+
+type ProgressUpdateData = {
+  id: string;
+  text: string;
+  imageUrl: string | null;
+  author: string;
+  createdAt: string;
+};
+
+type VotingConfigData = {
+  startsAt: string;
+  endsAt: string;
+  label: string | null;
+  isOpen: boolean;
+};
+
 export default function AdminPage() {
   const t = useTranslations("Admin");
   const ts = useTranslations("Statuses");
@@ -41,7 +63,7 @@ export default function AdminPage() {
   const [secret, setSecret] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
   const [authError, setAuthError] = useState(false);
-  const [tab, setTab] = useState<"ideas" | "comments">("ideas");
+  const [tab, setTab] = useState<"ideas" | "comments" | "voting">("ideas");
 
   const [ideas, setIdeas] = useState<IdeaSummary[]>([]);
   const [comments, setComments] = useState<CommentSummary[]>([]);
@@ -58,6 +80,31 @@ export default function AdminPage() {
   const [modCommentId, setModCommentId] = useState<string | null>(null);
   const [modReason, setModReason] = useState("");
   const [commentMsg, setCommentMsg] = useState("");
+
+  const [editingImages, setEditingImages] = useState<IdeaImageDetail[]>([]);
+  const [editingImageLoading, setEditingImageLoading] = useState(false);
+
+  // Feasibility note state
+  const [feasOpen, setFeasOpen] = useState(false);
+  const [feasResponseText, setFeasResponseText] = useState("");
+  const [feasDepartment, setFeasDepartment] = useState("");
+  const [feasCostMin, setFeasCostMin] = useState("");
+  const [feasCostMax, setFeasCostMax] = useState("");
+  const [feasMsg, setFeasMsg] = useState("");
+
+  // Progress update state
+  const [progressOpen, setProgressOpen] = useState(false);
+  const [progressText, setProgressText] = useState("");
+  const [progressImageUrl, setProgressImageUrl] = useState("");
+  const [progressUpdates, setProgressUpdates] = useState<ProgressUpdateData[]>([]);
+  const [progressMsg, setProgressMsg] = useState("");
+
+  // Voting config state
+  const [votingConfig, setVotingConfig] = useState<VotingConfigData | null>(null);
+  const [vcStartsAt, setVcStartsAt] = useState("");
+  const [vcEndsAt, setVcEndsAt] = useState("");
+  const [vcLabel, setVcLabel] = useState("");
+  const [vcMsg, setVcMsg] = useState("");
 
   useEffect(() => {
     const stored = localStorage.getItem("admin-secret");
@@ -118,10 +165,83 @@ export default function AdminPage() {
     }
   }, []);
 
+  const fetchVotingConfig = useCallback(async () => {
+    try {
+      const res = await fetch("/api/voting-config");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.config) {
+        setVotingConfig(data.config);
+        setVcStartsAt(new Date(data.config.startsAt).toISOString().slice(0, 16));
+        setVcEndsAt(new Date(data.config.endsAt).toISOString().slice(0, 16));
+        setVcLabel(data.config.label ?? "");
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     if (authenticated && tab === "ideas") requestAnimationFrame(() => fetchIdeas());
     if (authenticated && tab === "comments") requestAnimationFrame(() => fetchComments());
-  }, [authenticated, tab, fetchIdeas, fetchComments]);
+    if (authenticated && tab === "voting") requestAnimationFrame(() => fetchVotingConfig());
+  }, [authenticated, tab, fetchIdeas, fetchComments, fetchVotingConfig]);
+
+  const openIdeaEditor = useCallback(async (ideaId: string) => {
+    setEditingIdea(ideaId);
+    setEditingImages([]);
+    setFeasOpen(false);
+    setFeasResponseText("");
+    setFeasDepartment("");
+    setFeasCostMin("");
+    setFeasCostMax("");
+    setFeasMsg("");
+    setProgressOpen(false);
+    setProgressText("");
+    setProgressImageUrl("");
+    setProgressUpdates([]);
+    setProgressMsg("");
+
+    const idea = ideas.find((i) => i.id === ideaId);
+    if (idea?._count?.images) {
+      setEditingImageLoading(true);
+      try {
+        const res = await fetch(`/api/ideas/${ideaId}`);
+        const data = res.ok ? await res.json() : null;
+        setEditingImages(data?.images ?? []);
+        // Pre-fill feasibility note
+        if (data?.feasibilityNote) {
+          setFeasOpen(true);
+          setFeasResponseText(data.feasibilityNote.responseText);
+          setFeasDepartment(data.feasibilityNote.department ?? "");
+          setFeasCostMin(data.feasibilityNote.estimatedCostRonMin?.toString() ?? "");
+          setFeasCostMax(data.feasibilityNote.estimatedCostRonMax?.toString() ?? "");
+        }
+        // Pre-fill progress updates
+        if (data?.progressUpdates?.length > 0) {
+          setProgressUpdates(data.progressUpdates);
+        }
+      } catch {
+        setEditingImages([]);
+      } finally {
+        setEditingImageLoading(false);
+      }
+    } else {
+      // Still fetch idea detail for feasibility/progress data
+      try {
+        const res = await fetch(`/api/ideas/${ideaId}`);
+        const data = res.ok ? await res.json() : null;
+        if (data?.feasibilityNote) {
+          setFeasOpen(true);
+          setFeasResponseText(data.feasibilityNote.responseText);
+          setFeasDepartment(data.feasibilityNote.department ?? "");
+          setFeasCostMin(data.feasibilityNote.estimatedCostRonMin?.toString() ?? "");
+          setFeasCostMax(data.feasibilityNote.estimatedCostRonMax?.toString() ?? "");
+        }
+        if (data?.progressUpdates?.length > 0) {
+          setProgressUpdates(data.progressUpdates);
+        }
+      } catch {}
+    }
+  }, [ideas]);
 
   const getAdminSecret = () => secret || localStorage.getItem("admin-secret") || "";
 
@@ -216,6 +336,107 @@ export default function AdminPage() {
     }
   };
 
+  const handleSaveFeasibility = async (ideaId: string) => {
+    setFeasMsg("");
+    if (!feasResponseText.trim()) return;
+    try {
+      const body: Record<string, unknown> = {
+        responseText: feasResponseText,
+      };
+      if (feasDepartment.trim()) body.department = feasDepartment;
+      if (feasCostMin) body.estimatedCostRonMin = parseInt(feasCostMin, 10);
+      if (feasCostMax) body.estimatedCostRonMax = parseInt(feasCostMax, 10);
+
+      const res = await fetch(`/api/admin/ideas/${ideaId}/feasibility`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-secret": getAdminSecret(),
+        },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        setFeasMsg(t("feasibilitySaved"));
+      } else {
+        const data = await res.json();
+        setFeasMsg(data.error || "Error");
+      }
+    } catch {
+      setFeasMsg("Error");
+    }
+  };
+
+  const handlePostProgress = async (ideaId: string) => {
+    setProgressMsg("");
+    if (!progressText.trim()) return;
+    try {
+      const body: Record<string, unknown> = { text: progressText };
+      if (progressImageUrl.trim()) body.imageUrl = progressImageUrl;
+
+      const res = await fetch(`/api/admin/ideas/${ideaId}/updates`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-secret": getAdminSecret(),
+        },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProgressText("");
+        setProgressImageUrl("");
+        setProgressMsg(t("progressUpdatePosted"));
+        setProgressUpdates((prev) => [...prev, data]);
+      } else {
+        const data = await res.json();
+        setProgressMsg(data.error || "Error");
+      }
+    } catch {
+      setProgressMsg("Error");
+    }
+  };
+
+  const handleSaveVotingConfig = async () => {
+    setVcMsg("");
+    if (!vcStartsAt || !vcEndsAt) return;
+    try {
+      const body: Record<string, unknown> = {
+        startsAt: new Date(vcStartsAt).toISOString(),
+        endsAt: new Date(vcEndsAt).toISOString(),
+      };
+      if (vcLabel.trim()) body.label = vcLabel;
+
+      const res = await fetch("/api/admin/voting-config", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-secret": getAdminSecret(),
+        },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setVotingConfig(data.config);
+        setVcMsg(t("votingConfigSaved"));
+      } else {
+        const data = await res.json();
+        setVcMsg(data.error || "Error");
+      }
+    } catch {
+      setVcMsg("Error");
+    }
+  };
+
+  const getVotingConfigStatus = () => {
+    if (!votingConfig) return t("votingConfigNotConfigured");
+    const now = new Date();
+    const starts = new Date(votingConfig.startsAt);
+    const ends = new Date(votingConfig.endsAt);
+    if (now >= starts && now <= ends) return t("votingConfigOpen");
+    if (now < starts) return t("votingConfigScheduled", { date: starts.toLocaleDateString() });
+    return t("votingConfigNotConfigured");
+  };
+
   if (!authenticated) {
     return (
       <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
@@ -285,6 +506,16 @@ export default function AdminPage() {
         >
           {t("commentsTab")}
         </button>
+        <button
+          onClick={() => setTab("voting")}
+          className={`px-4 py-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-blue-700 ${
+            tab === "voting"
+              ? "border-b-2 border-blue-700 text-blue-700"
+              : "text-slate-500 hover:text-slate-700"
+          }`}
+        >
+          {t("votingConfigSection")}
+        </button>
       </div>
 
       {tab === "ideas" && (
@@ -336,7 +567,25 @@ export default function AdminPage() {
                       </td>
                       <td className="py-2">
                         {editingIdea === idea.id ? (
-                          <div className="space-y-2">
+                          <div className="space-y-3">
+                            {editingImages.length > 0 && (
+                              <div className="flex gap-2 overflow-x-auto pb-1">
+                                {editingImages.map((img, idx) => (
+                                  <div key={idx} className="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded border border-slate-200">
+                                    <Image
+                                      src={img.url}
+                                      alt={img.alt || `Image ${idx + 1}`}
+                                      fill
+                                      className="object-cover"
+                                      sizes="96px"
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {editingImageLoading && (
+                              <span className="text-xs text-slate-400">Loading images…</span>
+                            )}
                             {pendingAction && pendingAction.to === "REJECTED" ? (
                               <div className="flex flex-wrap items-center gap-2">
                                 <input
@@ -421,19 +670,124 @@ export default function AdminPage() {
                                 >
                                   {t("advancedOverride")}
                                 </button>
-                                <button
-                                  onClick={() => { setEditingIdea(null); setStatusNote(""); }}
-                                  aria-label="Cancel"
-                                  className="ml-1 text-xs text-slate-500 hover:text-slate-700"
-                                >
-                                  ✕
-                                </button>
                               </>
                             )}
+
+                            {/* Feasibility note section */}
+                            <div className="mt-3 border-t border-slate-100 pt-3">
+                              <button
+                                onClick={() => setFeasOpen(!feasOpen)}
+                                className="text-xs font-medium text-blue-700 hover:text-blue-800"
+                              >
+                                {t("feasibilitySection")} {feasOpen ? "▾" : "▸"}
+                              </button>
+                              {feasOpen && (
+                                <div className="mt-2 space-y-2">
+                                  {feasMsg && (
+                                    <p role="status" className={`text-xs ${feasMsg === t("feasibilitySaved") ? "text-green-700" : "text-red-600"}`}>
+                                      {feasMsg}
+                                    </p>
+                                  )}
+                                  <textarea
+                                    value={feasResponseText}
+                                    onChange={(e) => setFeasResponseText(e.target.value)}
+                                    placeholder={t("feasibilityResponsePlaceholder")}
+                                    rows={3}
+                                    className="block w-full rounded-md border border-slate-300 px-2 py-1 text-xs"
+                                  />
+                                  <input
+                                    value={feasDepartment}
+                                    onChange={(e) => setFeasDepartment(e.target.value)}
+                                    placeholder={t("feasibilityDepartmentPlaceholder")}
+                                    className="block w-full rounded-md border border-slate-300 px-2 py-1 text-xs"
+                                  />
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="number"
+                                      value={feasCostMin}
+                                      onChange={(e) => setFeasCostMin(e.target.value)}
+                                      placeholder={t("feasibilityCostMinLabel")}
+                                      className="w-40 rounded-md border border-slate-300 px-2 py-1 text-xs"
+                                    />
+                                    <input
+                                      type="number"
+                                      value={feasCostMax}
+                                      onChange={(e) => setFeasCostMax(e.target.value)}
+                                      placeholder={t("feasibilityCostMaxLabel")}
+                                      className="w-40 rounded-md border border-slate-300 px-2 py-1 text-xs"
+                                    />
+                                  </div>
+                                  <button
+                                    onClick={() => handleSaveFeasibility(idea.id)}
+                                    disabled={!feasResponseText.trim()}
+                                    className="rounded-md bg-blue-700 px-2 py-1 text-xs text-white hover:bg-blue-800 disabled:opacity-50"
+                                  >
+                                    {t("feasibilitySave")}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Progress update section */}
+                            <div className="mt-3 border-t border-slate-100 pt-3">
+                              <button
+                                onClick={() => setProgressOpen(!progressOpen)}
+                                className="text-xs font-medium text-blue-700 hover:text-blue-800"
+                              >
+                                {t("progressUpdateSection")} {progressOpen ? "▾" : "▸"}
+                              </button>
+                              {progressOpen && (
+                                <div className="mt-2 space-y-2">
+                                  {progressMsg && (
+                                    <p role="status" className={`text-xs ${progressMsg === t("progressUpdatePosted") ? "text-green-700" : "text-red-600"}`}>
+                                      {progressMsg}
+                                    </p>
+                                  )}
+                                  <textarea
+                                    value={progressText}
+                                    onChange={(e) => setProgressText(e.target.value)}
+                                    placeholder={t("progressUpdateTextPlaceholder")}
+                                    rows={3}
+                                    className="block w-full rounded-md border border-slate-300 px-2 py-1 text-xs"
+                                  />
+                                  <input
+                                    value={progressImageUrl}
+                                    onChange={(e) => setProgressImageUrl(e.target.value)}
+                                    placeholder={t("progressUpdateImageUrlPlaceholder")}
+                                    className="block w-full rounded-md border border-slate-300 px-2 py-1 text-xs"
+                                  />
+                                  <button
+                                    onClick={() => handlePostProgress(idea.id)}
+                                    disabled={!progressText.trim()}
+                                    className="rounded-md bg-blue-700 px-2 py-1 text-xs text-white hover:bg-blue-800 disabled:opacity-50"
+                                  >
+                                    {t("progressUpdateSubmit")}
+                                  </button>
+                                  {progressUpdates.length > 0 && (
+                                    <ul className="mt-2 space-y-1">
+                                      {[...progressUpdates].reverse().map((u) => (
+                                        <li key={u.id} className="rounded border border-slate-100 px-2 py-1 text-xs text-slate-700">
+                                          <span className="text-slate-400">{new Date(u.createdAt).toLocaleDateString()}</span> — {u.text.slice(0, 100)}{u.text.length > 100 ? "…" : ""}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="mt-2 flex gap-2">
+                              <button
+                                onClick={() => { setEditingIdea(null); setStatusNote(""); setPendingAction(null); setAdvancedOpen(false); }}
+                                className="text-xs text-slate-500 hover:text-slate-700"
+                              >
+                                ✕ {t("changeStatus")}
+                              </button>
+                            </div>
                           </div>
                         ) : (
                           <button
-                            onClick={() => setEditingIdea(idea.id)}
+                            onClick={() => openIdeaEditor(idea.id)}
                             className="text-xs font-medium text-blue-700 hover:text-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-blue-700"
                           >
                             {t("changeStatus")}
@@ -527,6 +881,70 @@ export default function AdminPage() {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {tab === "voting" && (
+        <div className="mt-4">
+          <h2 className="text-lg font-semibold text-slate-900">{t("votingConfigSection")}</h2>
+
+          {votingConfig && (
+            <p className="mt-2 text-sm text-slate-600">
+              {t("votingConfigStatus")}: <span className="font-medium">{getVotingConfigStatus()}</span>
+            </p>
+          )}
+
+          {vcMsg && (
+            <p role="status" className={`mt-2 text-sm ${vcMsg === t("votingConfigSaved") ? "text-green-700" : "text-red-600"}`}>
+              {vcMsg}
+            </p>
+          )}
+
+          <div className="mt-4 space-y-3 max-w-md">
+            <div>
+              <label htmlFor="vc-starts" className="block text-sm font-medium text-slate-700">
+                {t("votingConfigStartsAt")}
+              </label>
+              <input
+                id="vc-starts"
+                type="datetime-local"
+                value={vcStartsAt}
+                onChange={(e) => setVcStartsAt(e.target.value)}
+                className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="vc-ends" className="block text-sm font-medium text-slate-700">
+                {t("votingConfigEndsAt")}
+              </label>
+              <input
+                id="vc-ends"
+                type="datetime-local"
+                value={vcEndsAt}
+                onChange={(e) => setVcEndsAt(e.target.value)}
+                className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="vc-label" className="block text-sm font-medium text-slate-700">
+                {t("votingConfigLabel")}
+              </label>
+              <input
+                id="vc-label"
+                type="text"
+                value={vcLabel}
+                onChange={(e) => setVcLabel(e.target.value)}
+                className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            <button
+              onClick={handleSaveVotingConfig}
+              disabled={!vcStartsAt || !vcEndsAt}
+              className="inline-flex items-center rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-800 disabled:opacity-50"
+            >
+              {t("votingConfigSave")}
+            </button>
+          </div>
         </div>
       )}
     </main>

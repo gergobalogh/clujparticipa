@@ -6,7 +6,8 @@
     "home": "Acasă",
     "ideas": "Idei",
     "map": "Hartă",
-    "admin": "Admin"
+    "admin": "Admin",
+    "results": "Rezultate"
   },
   "Footer": {
     "prototypeNote": "Acesta este un prototip în scop demonstrativ. Datele și voturile nu sunt cu valoare decizională.",
@@ -85,7 +86,8 @@
     "submitting": "Se trimite...",
     "success": "Ideea a fost trimisă cu succes!",
     "viewIdea": "Vezi ideea",
-    "required": "Obligatoriu"
+    "required": "Obligatoriu",
+    "notifyLabel": "Notifică-mă pe email când statusul ideii se schimbă."
   },
   "ImageUpload": {
     "label": "Fotografii (opțional)",
@@ -99,6 +101,11 @@
     "tooManyFiles": "Maxim {max} imagini permise.",
     "uploading": "Se încarcă imaginile...",
     "uploadFailed": "Încărcarea imaginilor a eșuat. Vă rugăm să încercați din nou."
+  },
+  "IdeaCarousel": {
+    "prev": "Imaginea anterioară",
+    "next": "Imaginea următoare",
+    "goToImage": "Mergi la imaginea {index}"
   },
   "IdeaDetail": {
     "title": "Detalii idee",
@@ -130,7 +137,19 @@
     "statusBy": "Modificat de",
     "replyTo": "Răspunde",
     "cancelReply": "Anulează",
-    "location": "Locație"
+    "location": "Locație",
+    "notifyVoteLabel": "Notifică-mă pe email când statusul ideii se schimbă.",
+    "notifyVoteConfirm": "Veți fi notificat pe email la actualizări.",
+    "feasibilityHeading": "Evaluare de fezabilitate",
+    "feasibilityDepartment": "Direcție responsabilă",
+    "feasibilityCostRange": "Cost estimat",
+    "feasibilityAuthor": "Evaluare oficială",
+    "votingClosesIn": "Votarea se încheie în",
+    "votingClosed": "Votarea s-a încheiat",
+    "votingDays": "zile",
+    "votingHours": "ore",
+    "votingMinutes": "minute",
+    "progressUpdatesHeading": "Actualizări de progres"
   },
   "Map": {
     "title": "Hartă",
@@ -182,7 +201,33 @@
       "markCompleted": "Marchează finalizată",
       "reject": "Respinge",
       "reopen": "Redeschide"
-    }
+    },
+    "feasibilitySection": "Evaluare de fezabilitate",
+    "feasibilityResponseLabel": "Răspuns oficial",
+    "feasibilityResponsePlaceholder": "Răspunsul oficial privind fezabilitatea ideii...",
+    "feasibilityDepartmentLabel": "Direcție responsabilă",
+    "feasibilityDepartmentPlaceholder": "ex. Direcția de Infrastructură",
+    "feasibilityCostMinLabel": "Cost minim estimat (RON)",
+    "feasibilityCostMaxLabel": "Cost maxim estimat (RON)",
+    "feasibilitySave": "Salvează evaluarea",
+    "feasibilitySaved": "Evaluarea a fost salvată cu succes.",
+    "votingConfigSection": "Perioada de votare",
+    "votingConfigStartsAt": "Începe la",
+    "votingConfigEndsAt": "Se încheie la",
+    "votingConfigLabel": "Etichetă (opțional)",
+    "votingConfigSave": "Salvează perioada de votare",
+    "votingConfigSaved": "Perioada de votare salvată cu succes.",
+    "votingConfigStatus": "Status",
+    "votingConfigOpen": "Deschisă",
+    "votingConfigScheduled": "Programată (se deschide {date})",
+    "votingConfigNotConfigured": "Neconfigurată",
+    "progressUpdateSection": "Actualizare de progres",
+    "progressUpdateTextLabel": "Textul actualizării",
+    "progressUpdateTextPlaceholder": "Descrieți progresul...",
+    "progressUpdateImageUrlLabel": "URL imagine (opțional)",
+    "progressUpdateImageUrlPlaceholder": "/uploads/ideas/...",
+    "progressUpdateSubmit": "Postează actualizarea",
+    "progressUpdatePosted": "Actualizarea a fost postată cu succes."
   },
   "Categories": {
     "INFRASTRUCTURE": "Infrastructură",
@@ -248,5 +293,20 @@
     "submitting": "Se trimite...",
     "success": "Mulțumim! Raportul tău a fost trimis cu succes.",
     "backHome": "Înapoi la pagina principală"
+  },
+  "Results": {
+    "title": "Rezultate votare",
+    "description": "Rezultatele oficiale ale procesului de votare participativ.",
+    "selectedHeading": "Idei selectate",
+    "allVotesHeading": "Toate voturile",
+    "noResults": "Nicio idee în procesul de votare încă.",
+    "votingPeriod": "Perioada de votare",
+    "winner": "Câștigător"
+  },
+  "Unsubscribe": {
+    "successTitle": "Dezabonare reușită",
+    "successMessage": "Nu veți mai primi actualizări pentru această idee.",
+    "alreadyUnsubscribed": "Deja dezabonat sau link-ul a expirat.",
+    "backToIdea": "Înapoi la idee"
   }
 }

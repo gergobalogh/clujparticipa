@@ -88,9 +88,10 @@ export function checkRateLimit(
   };
 }
 
-/** Reset all rate-limit buckets (used in tests) */
-export function _resetBuckets(): void {
+/** @internal Test-only: clear all rate limit buckets */
+export function _resetBuckets() {
   buckets.clear();
+  lastCleanup = Date.now();
 }
 
 /** Pre-configured rate limits for different endpoint types */

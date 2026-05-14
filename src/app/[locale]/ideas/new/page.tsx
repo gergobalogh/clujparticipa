@@ -36,6 +36,7 @@ export default function NewIdeaPage() {
   const [error, setError] = useState("");
   const [createdId, setCreatedId] = useState("");
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [notifyOnStatusChange, setNotifyOnStatusChange] = useState(false);
   const imageUploadRef = useRef<ImageUploadHandle>(null);
 
   const handleUploadingChange = useCallback((uploading: boolean) => {
@@ -84,6 +85,7 @@ export default function NewIdeaPage() {
           district,
           latitude,
           longitude,
+          notifyOnStatusChange: session?.user ? notifyOnStatusChange : undefined,
           images,
         }),
       });
@@ -226,6 +228,18 @@ export default function NewIdeaPage() {
             </p>
           )}
         </div>
+
+        {session?.user && (
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={notifyOnStatusChange}
+              onChange={(e) => setNotifyOnStatusChange(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-500"
+            />
+            <span className="text-sm text-slate-700">{t("notifyLabel")}</span>
+          </label>
+        )}
 
         {error && (
           <p className="text-sm text-red-600">{error}</p>

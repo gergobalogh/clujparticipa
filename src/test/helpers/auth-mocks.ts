@@ -1,12 +1,31 @@
 import { vi } from "vitest";
 
-/**
- * Creates mock implementations for auth-participant module
- * that simulate an anonymous participant.
- */
 export function mockAnonymousAuth() {
-  const getAuthSession = vi.fn().mockResolvedValue(null);
-  const resolveParticipantHash = vi.fn().mockResolvedValue("test-participant-hash-abc123");
+  return {
+    getAuthSession: vi.fn().mockResolvedValue(null),
+    resolveParticipantHash: vi.fn().mockImplementation(
+      async (_session: null, token: string | null) => {
+        if (!token) return null;
+        const encoder = new TextEncoder();
+        const data = encoder.encode(token);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        return Array.from(new Uint8Array(hashBuffer))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+      }
+    ),
+  };
+}
 
-  return { getAuthSession, resolveParticipantHash };
+export function mockAuthenticatedAuth(
+  userId = "user-001",
+  participantHash = "hash-authenticated-001"
+) {
+  return {
+    getAuthSession: vi.fn().mockResolvedValue({
+      user: { id: userId },
+      participantHash,
+    }),
+    resolveParticipantHash: vi.fn().mockResolvedValue(participantHash),
+  };
 }

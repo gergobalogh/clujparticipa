@@ -133,6 +133,8 @@
 | 2026-05-12 | Romanian default locale, plus Hungarian and English | Reflects local audience and international visibility |
 | 2026-05-12 | Vercel for prototype hosting | Zero-config Next.js deployment; sufficient for demo and partner review; revisit if city/NGO requires self-hosted infrastructure |
 | 2026-05-12 | Add optional Google/Facebook login after MVP polish | Improves participant continuity and duplicate-vote controls, but remains non-binding without municipal eligibility verification |
+| 2026-05-14 | Local filesystem for image uploads (Docker bind-mount) | Uploads write to `public/uploads/ideas/` (configurable via `UPLOAD_DIR` env). Works with Docker + persistent volume; NOT compatible with Vercel/serverless (files lost on cold start). Cloud object storage (R2/S3) deferred to post-MVP. |
+| 2026-05-14 | Orphaned file cleanup: accepted for MVP | Files uploaded via `/api/upload` but never attached to an idea remain on disk. Accepted for MVP scope; a scheduled orphan sweep or client-side cleanup-on-failure will be added post-MVP. See comment in upload handler. |
 
 ## Open Questions
 

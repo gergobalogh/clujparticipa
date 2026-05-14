@@ -65,33 +65,36 @@ enum ModerationAction {
 }
 
 model Idea {
-  id                      String         @id @default(cuid())
+  id                      String           @id @default(cuid())
   title                   String
   description             String
   category                Category
   latitude                Float
   longitude               Float
   district                District
-  status                  Status         @default(SUBMITTED)
+  status                  Status           @default(SUBMITTED)
   submitterParticipantHash String?
-  notifyOnStatusChange    Boolean        @default(false)
-  unsubscribeToken        String?
-  createdAt               DateTime       @default(now())
-  updatedAt               DateTime       @updatedAt
+  notifyOnStatusChange     Boolean          @default(false)
+  unsubscribeToken         String?          @unique
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
   votes                   Vote[]
   comments                Comment[]
   statusChanges           StatusChange[]
   images                  IdeaImage[]
+  feasibilityNote         FeasibilityNote?
   progressUpdates         ProgressUpdate[]
 }
 
 model Vote {
-  id              String        @id @default(cuid())
-  ideaId          String
-  participantHash String
-  direction       VoteDirection @default(SUPPORT)
-  createdAt       DateTime      @default(now())
-  idea            Idea          @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  id                   String        @id @default(cuid())
+  ideaId               String
+  participantHash      String
+  direction            VoteDirection @default(SUPPORT)
+  notifyOnStatusChange Boolean       @default(false)
+  unsubscribeToken     String?       @unique
+  createdAt            DateTime      @default(now())
+  idea                 Idea          @relation(fields: [ideaId], references: [id], onDelete: Cascade)
 
   @@unique([ideaId, participantHash])
   @@index([participantHash])
@@ -216,6 +219,41 @@ model BugReport {
   createdAt       DateTime @default(now())
 
   @@index([participantHash])
+}
+
+model FeasibilityNote {
+  id                  String   @id @default(cuid())
+  ideaId              String   @unique
+  estimatedCostRonMin Int?
+  estimatedCostRonMax Int?
+  department          String?
+  responseText        String
+  author              String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  idea                Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+}
+
+model VotingConfig {
+  id        String   @id @default(cuid())
+  startsAt  DateTime
+  endsAt    DateTime
+  label     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DataDeletionRequest {
+  id                String    @id @default(cuid())
+  confirmationCode  String    @unique
+  userId            String?
+  provider          String
+  providerAccountId String
+  status            String    @default("pending")
+  completedAt       DateTime?
+  createdAt         DateTime  @default(now())
+
+  @@index([provider, providerAccountId])
 }
 
 model ProgressUpdate {

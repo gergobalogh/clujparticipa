@@ -3,6 +3,7 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useState, useEffect } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 export interface CarouselImage {
   url: string;
@@ -16,6 +17,7 @@ interface IdeaCarouselProps {
 }
 
 export function IdeaCarousel({ images }: IdeaCarouselProps) {
+  const t = useTranslations("IdeaCarousel");
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -67,7 +69,7 @@ export function IdeaCarousel({ images }: IdeaCarouselProps) {
             type="button"
             onClick={scrollPrev}
             className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-800 shadow backdrop-blur-sm transition hover:bg-white"
-            aria-label="Previous image"
+            aria-label={t("prev")}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -77,7 +79,7 @@ export function IdeaCarousel({ images }: IdeaCarouselProps) {
             type="button"
             onClick={scrollNext}
             className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-800 shadow backdrop-blur-sm transition hover:bg-white"
-            aria-label="Next image"
+            aria-label={t("next")}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -93,7 +95,7 @@ export function IdeaCarousel({ images }: IdeaCarouselProps) {
                 className={`h-2 w-2 rounded-full transition ${
                   i === selectedIndex ? "bg-white" : "bg-white/50"
                 }`}
-                aria-label={`Go to image ${i + 1}`}
+                aria-label={t("goToImage", { index: i + 1 })}
                 aria-current={i === selectedIndex ? "true" : undefined}
               />
             ))}
