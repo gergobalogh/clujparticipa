@@ -167,7 +167,6 @@ function makeUploadRequest(
       "x-participant-token": token,
     },
     body: bufferToReadableStream(body),
-    // @ts-expect-error Next.js requires duplex for streaming
     duplex: "half",
   });
 }
@@ -294,7 +293,6 @@ describe("POST /api/upload", () => {
         "Content-Type": `multipart/form-data; boundary=${boundary}`,
       },
       body: bufferToReadableStream(body),
-      // @ts-expect-error Next.js requires duplex for streaming
       duplex: "half",
     });
     const { POST } = await import("./route");
@@ -353,14 +351,14 @@ describe("POST /api/upload", () => {
   });
 
   it("returns 502 when Cloudflare API rejects the upload", async () => {
-    vi.mocked(fetch).mockImplementationOnce(async (url: string) => {
+    vi.mocked(fetch).mockImplementationOnce(async (url: string | Request | URL) => {
       if (typeof url === "string" && url.includes("cloudflare.com")) {
         return new Response(
           JSON.stringify({ success: false, errors: [{ message: "Upload failed" }] }),
           { status: 400, headers: { "Content-Type": "application/json" } }
         );
       }
-      return originalFetch(url);
+      return originalFetch(url as string, undefined as unknown as RequestInit);
     });
 
     const req = makeUploadRequest(
@@ -376,14 +374,14 @@ describe("POST /api/upload", () => {
   });
 
   it("returns 502 when Cloudflare API returns non-JSON response", async () => {
-    vi.mocked(fetch).mockImplementationOnce(async (url: string) => {
+    vi.mocked(fetch).mockImplementationOnce(async (url: string | Request | URL) => {
       if (typeof url === "string" && url.includes("cloudflare.com")) {
         return new Response("Internal Server Error", {
           status: 500,
           headers: { "Content-Type": "text/plain" },
         });
       }
-      return originalFetch(url);
+      return originalFetch(url as string, undefined as unknown as RequestInit);
     });
 
     const req = makeUploadRequest(
@@ -405,7 +403,7 @@ describe("POST /api/upload", () => {
     expect(res.status).toBe(201);
 
     const cfCalls = vi.mocked(fetch).mock.calls.filter(
-      (call) => typeof call[0] === "string" && (call[0] as string).includes("cloudflare.com")
+      (call: unknown[]) => typeof call[0] === "string" && (call[0] as string).includes("cloudflare.com")
     );
     expect(cfCalls.length).toBe(1);
     const [cfUrl, cfOptions] = cfCalls[0];
@@ -427,14 +425,14 @@ describe("POST /api/upload", () => {
         requireSignedURLs: false,
       },
     };
-    vi.mocked(fetch).mockImplementationOnce(async (url: string) => {
+    vi.mocked(fetch).mockImplementationOnce(async (url: string | Request | URL) => {
       if (typeof url === "string" && url.includes("cloudflare.com")) {
         return new Response(JSON.stringify(customResponse), {
           status: 200,
           headers: { "Content-Type": "application/json" },
         });
       }
-      return originalFetch(url);
+      return originalFetch(url as string, undefined as unknown as RequestInit);
     });
 
     const req = makeUploadRequest(

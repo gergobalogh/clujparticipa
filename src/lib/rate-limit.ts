@@ -88,6 +88,11 @@ export function checkRateLimit(
   };
 }
 
+/** Reset all rate-limit buckets (used in tests) */
+export function _resetBuckets(): void {
+  buckets.clear();
+}
+
 /** Pre-configured rate limits for different endpoint types */
 export const RATE_LIMITS = {
   /** For idea creation */

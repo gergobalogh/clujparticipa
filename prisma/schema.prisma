@@ -65,20 +65,24 @@ enum ModerationAction {
 }
 
 model Idea {
-  id            String         @id @default(cuid())
-  title         String
-  description   String
-  category      Category
-  latitude      Float
-  longitude     Float
-  district      District
-  status        Status         @default(SUBMITTED)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  votes         Vote[]
-  comments      Comment[]
-  statusChanges StatusChange[]
-  images        IdeaImage[]
+  id                      String         @id @default(cuid())
+  title                   String
+  description             String
+  category                Category
+  latitude                Float
+  longitude               Float
+  district                District
+  status                  Status         @default(SUBMITTED)
+  submitterParticipantHash String?
+  notifyOnStatusChange    Boolean        @default(false)
+  unsubscribeToken        String?
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+  votes                   Vote[]
+  comments                Comment[]
+  statusChanges           StatusChange[]
+  images                  IdeaImage[]
+  progressUpdates         ProgressUpdate[]
 }
 
 model Vote {
@@ -212,4 +216,16 @@ model BugReport {
   createdAt       DateTime @default(now())
 
   @@index([participantHash])
+}
+
+model ProgressUpdate {
+  id        String   @id @default(cuid())
+  ideaId    String
+  text      String
+  imageUrl  String?
+  author    String
+  createdAt DateTime @default(now())
+  idea      Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+
+  @@index([ideaId, createdAt])
 }
