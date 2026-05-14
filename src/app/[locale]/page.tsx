@@ -200,9 +200,3 @@ export default function LocaleHomePage() {
     </main>
   );
 }
-  );
-}
-      </div>
-    </main>
-  );
-}

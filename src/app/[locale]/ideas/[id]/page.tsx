@@ -483,7 +483,7 @@ export default function IdeaDetailPage() {
                     <div className="absolute -left-[21px] top-1 h-3 w-3 rounded-full border-2 border-paper bg-ink/30" />
                     <div className="text-sm">
                       <span className="font-medium text-ink">
-                        {sc.fromStatus ? ts(sc.fromStatus as Parameters<typeof ts>[0]) : tcom("none")}
+                        {sc.fromStatus ? ts(sc.fromStatus as Parameters<typeof ts>[0]) : ts("none")}
                       </span>
                       {" → "}
                       <span className="font-medium text-civic-blue">
@@ -526,7 +526,7 @@ export default function IdeaDetailPage() {
                 disabled={submittingComment || !commentText.trim()}
                 className="mt-2 inline-flex items-center rounded-sm bg-ink px-3 py-1.5 text-sm font-medium text-paper transition hover:bg-ink/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-ink disabled:opacity-50"
               >
-                {submittingComment ? tcom("loading") : t("submitComment")}
+                {submittingComment ? t("loading") : t("submitComment")}
               </button>
             </form>
 
@@ -618,13 +618,6 @@ export default function IdeaDetailPage() {
           </div>
         </aside>
       </div>
-    </main>
-  );
-}
-}
-
-}
-    </div>
     </main>
   );
 }
