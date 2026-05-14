@@ -53,16 +53,15 @@ export function Header() {
     <header className="sticky top-0 z-30 border-b border-ink/10 bg-paper">
       <div className="mx-auto grid w-full max-w-5xl grid-cols-[1fr_auto_1fr] items-center px-4 py-3 sm:px-6">
         <Link
-          className="flex items-center gap-2 text-base font-semibold text-ink font-serif"
+          className="flex items-center"
           href="/"
           locale={locale}
         >
           <img
             src="/logo.png"
-            alt=""
-            className="h-7 w-auto"
+            alt="ClujParticipa"
+            className="h-12 w-auto"
           />
-          <span className="tracking-tight">ClujParticipa</span>
         </Link>
 
         {/* Desktop nav */}
