@@ -169,7 +169,7 @@ export default function LocaleHomePage() {
               ))}
             </div>
           ) : stats ? (
-            <p className="mt-4 text-sm text-ink-muted">No ideas yet.</p>
+            <p className="mt-4 text-sm text-ink-muted">{t("noIdeas")}</p>
           ) : (
             <div className="mt-4 space-y-3" aria-busy="true">
               {[1, 2, 3].map((i) => (
@@ -196,6 +196,12 @@ export default function LocaleHomePage() {
             </Link>
           </div>
         </section>
+      </div>
+    </main>
+  );
+}
+  );
+}
       </div>
     </main>
   );

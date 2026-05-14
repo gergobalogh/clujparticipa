@@ -9,19 +9,18 @@ function participantHash(seed) {
   return createHash("sha256").update(`demo-participant:${seed}`).digest("hex");
 }
 
-const ADMIN = "echipa-clujparticipa";
+const ADMIN = "clujparticipa-team";
 
 const seedImages = [
-  { path: "https://imagedelivery.net/placeholder/seed-1/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
-  { path: "https://imagedelivery.net/placeholder/seed-2/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
-  { path: "https://imagedelivery.net/placeholder/seed-3/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
-  { path: "https://imagedelivery.net/placeholder/seed-4/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
-  { path: "https://imagedelivery.net/placeholder/seed-5/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
-  { path: "https://imagedelivery.net/placeholder/seed-6/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
-  { path: "https://imagedelivery.net/placeholder/seed-7/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+  { path: "https://imagedelivery.net/placeholder/seed-1/public", alt: "Demo image", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+  { path: "https://imagedelivery.net/placeholder/seed-2/public", alt: "Demo image", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+  { path: "https://imagedelivery.net/placeholder/seed-3/public", alt: "Demo image", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+  { path: "https://imagedelivery.net/placeholder/seed-4/public", alt: "Demo image", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+  { path: "https://imagedelivery.net/placeholder/seed-5/public", alt: "Demo image", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+  { path: "https://imagedelivery.net/placeholder/seed-6/public", alt: "Demo image", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+  { path: "https://imagedelivery.net/placeholder/seed-7/public", alt: "Demo image", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
 ];
 
-// Which ideas get images: idea index -> array of seedImages indices (0-based)
 const ideaImageMap = {
   0: [0, 1, 2],
   1: [3],
@@ -32,9 +31,9 @@ const ideaImageMap = {
 
 const ideas = [
   {
-    title: "Cinema în aer liber la Plaja Grigorescu",
+    title: "Outdoor cinema at Grigorescu Beach",
     description:
-      "Organizarea unei serii de proiecții de film în aer liber pe malul Someșului, la Plaja Grigorescu. Intrare liberă, echipament de proiecție și licențe asigurate de Primărie. Participanții își aduc pături și scaune. Model inspirat din programele similare de la TIFF și din experiența Vantaa (Finlanda).",
+      "Organizing a series of outdoor film screenings on the banks of the Someș River at Grigorescu Beach. Free entry, projection equipment, and licenses provided by the City Hall. Participants bring their own blankets and chairs. Model inspired by similar programs at TIFF and the Vantaa experience (Finland).",
     category: "CULTURE",
     district: "GRIGORESCU",
     status: "COMPLETED",
@@ -44,69 +43,69 @@ const ideas = [
       {
         fromStatus: null,
         toStatus: "SUBMITTED",
-        note: "Propunere depusă de un locuitor din Grigorescu.",
+        note: "Proposal submitted by a Grigorescu resident.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "SUBMITTED",
         toStatus: "UNDER_REVIEW",
-        note: "Propunerea a intrat în evaluare tehnică. Echipa verifică fezabilitatea, costurile și disponibilitatea spațiului.",
+        note: "Proposal entered technical evaluation. Team is checking feasibility, costs, and venue availability.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "UNDER_REVIEW",
         toStatus: "ELIGIBLE",
-        note: "Propunere declarată eligibilă. Cost estimat: 7.200 €. Spațiul Plaja Grigorescu este disponibil și potrivit.",
+        note: "Proposal declared eligible. Estimated cost: €7,200. Grigorescu Beach space is available and suitable.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "ELIGIBLE",
         toStatus: "IN_VOTING",
-        note: "Propunerea este deschisă la vot public pentru 30 de zile.",
+        note: "Proposal is open for public voting for 30 days.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "IN_VOTING",
         toStatus: "SELECTED",
-        note: "Propunerea a câștigat votul public cu 47 de susțineri. Finanțare aprobată.",
+        note: "Proposal won the public vote with 47 supports. Funding approved.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "SELECTED",
         toStatus: "IN_PROGRESS",
-        note: "Contract semnat cu organizatorul. Prima proiecție planificată pentru 18 iulie.",
+        note: "Contract signed with the organizer. First screening planned for July 18.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "IN_PROGRESS",
         toStatus: "COMPLETED",
-        note: "Trei proiecții organizate în iulie–august. Peste 320 de participanți. Proiect finalizat cu succes.",
+        note: "Three screenings organized in July–August. Over 320 participants. Project successfully completed.",
         changedBy: ADMIN,
       },
     ],
     votes: 47,
     comments: [
       {
-        text: "Exact ce lipsea pe malul Someșului. Sper să devină o tradiție anuală!",
+        text: "Exactly what was missing on the Someș banks. Hope it becomes an annual tradition!",
         participantSeed: "c1-1",
         status: "VISIBLE",
       },
       {
-        text: "Am fost la prima proiecție — atmosfera a fost fantastică. Felicitări echipei!",
+        text: "I was at the first screening — the atmosphere was fantastic. Congratulations to the team!",
         participantSeed: "c1-2",
         status: "VISIBLE",
       },
       {
-        text: "Când vine ediția 2026? Așteptăm cu nerăbdare.",
+        text: "When is the 2026 edition? Looking forward to it.",
         participantSeed: "c1-3",
         status: "VISIBLE",
       },
     ],
   },
   {
-    title: "Parc de calisthenics pe faleza Someșului, zona Grigorescu",
+    title: "Calisthenics park on the Someș embankment, Grigorescu area",
     description:
-      "Amenajarea unui parc de calisthenics cu bare fixe, paralele și echipamente de fitness pe faleza Someșului în zona Grigorescu. Inspirat de parcul similar de pe malul Begăi din Timișoara. Acces gratuit, deschis publicului larg, cu echipamente pentru toate nivelurile de fitness.",
+      "Developing a calisthenics park with pull-up bars, parallel bars, and fitness equipment on the Someș embankment in the Grigorescu area. Inspired by the similar park on the Bega embankment in Timișoara. Free access, open to the general public, with equipment for all fitness levels.",
     category: "HEALTH",
     district: "GRIGORESCU",
     status: "IN_PROGRESS",
@@ -116,58 +115,58 @@ const ideas = [
       {
         fromStatus: null,
         toStatus: "SUBMITTED",
-        note: "Propunere depusă de un grup de locuitori din Grigorescu.",
+        note: "Proposal submitted by a group of Grigorescu residents.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "SUBMITTED",
         toStatus: "UNDER_REVIEW",
-        note: "Propunerea a intrat în evaluare tehnică.",
+        note: "Proposal entered technical evaluation.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "UNDER_REVIEW",
         toStatus: "ELIGIBLE",
-        note: "Propunere eligibilă. Cost estimat: 22.000 €. Teren disponibil pe faleză, fără conflict cu alte utilizări.",
+        note: "Proposal eligible. Estimated cost: €22,000. Land available on the embankment, no conflict with other uses.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "ELIGIBLE",
         toStatus: "IN_VOTING",
-        note: "Propunerea este deschisă la vot public.",
+        note: "Proposal is open for public voting.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "IN_VOTING",
         toStatus: "SELECTED",
-        note: "Propunerea a câștigat cu 31 de susțineri. Finanțare aprobată.",
+        note: "Proposal won with 31 supports. Funding approved.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "SELECTED",
         toStatus: "IN_PROGRESS",
-        note: "Licitație finalizată. Lucrările de instalare au început. Finalizare estimată: septembrie.",
+        note: "Auction completed. Installation works have started. Estimated completion: September.",
         changedBy: ADMIN,
       },
     ],
     votes: 31,
     comments: [
       {
-        text: "Timișoara are deja asta pe Bega. E timpul și pentru Cluj pe Someș.",
+        text: "Timișoara already has this on the Bega. It's time for Cluj on the Someș too.",
         participantSeed: "c2-1",
         status: "VISIBLE",
       },
       {
-        text: "Important să fie echipamente și pentru seniori, nu doar pentru tineri.",
+        text: "Important to have equipment for seniors as well, not just for youth.",
         participantSeed: "c2-2",
         status: "VISIBLE",
       },
     ],
   },
   {
-    title: "Structuri de umbră și zone de odihnă pe malul Someșului",
+    title: "Shade structures and seating areas on the Someș embankment",
     description:
-      "Instalarea de structuri de umbră (pergole sau voile), bănci și coșuri de gunoi pe faleza Someșului în zona Mărăști. Verile din Cluj sunt tot mai calde, iar malul râului este practic inutilizabil în orele de vârf fără infrastructură de umbră. Proiecte similare au fost finanțate prin bugetare participativă în Riga și Cambridge.",
+      "Installing shade structures (pergolas or sails), benches, and trash bins on the Someș embankment in the Mărăști area. Summers in Cluj are getting hotter, and the riverbank is practically unusable during peak hours without shade infrastructure. Similar projects have been funded through participatory budgeting in Riga and Cambridge.",
     category: "ENVIRONMENT",
     district: "MARASTI",
     status: "IN_VOTING",
@@ -177,46 +176,46 @@ const ideas = [
       {
         fromStatus: null,
         toStatus: "SUBMITTED",
-        note: "Propunere depusă de o locuitoare din Mărăști.",
+        note: "Proposal submitted by a Mărăști resident.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "SUBMITTED",
         toStatus: "UNDER_REVIEW",
-        note: "Propunerea a intrat în evaluare.",
+        note: "Proposal entered evaluation.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "UNDER_REVIEW",
         toStatus: "ELIGIBLE",
-        note: "Propunere eligibilă. Cost estimat: 14.500 €. Se vor analiza și opțiunile de mobilier urban rezistent la intemperii.",
+        note: "Proposal eligible. Estimated cost: €14,500. Weather-resistant street furniture options will be analyzed.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "ELIGIBLE",
         toStatus: "IN_VOTING",
-        note: "Propunerea este deschisă la vot public.",
+        note: "Proposal is open for public voting.",
         changedBy: ADMIN,
       },
     ],
     votes: 18,
     comments: [
       {
-        text: "Vara trecută era imposibil să stai pe malul Someșului după ora 12 fără umbră. Această propunere e necesară.",
+        text: "Last summer it was impossible to stay on the Someș bank after 12 PM without shade. This proposal is necessary.",
         participantSeed: "c3-1",
         status: "VISIBLE",
       },
       {
-        text: "Susțin, dar aș include și câteva coșuri de gunoi suplimentare în zonă.",
+        text: "I support this, but I would also include some additional trash bins in the area.",
         participantSeed: "c3-2",
         status: "VISIBLE",
       },
     ],
   },
   {
-    title: "Pontoane pentru caiac și SUP sezonier la Plaja Grigorescu",
+    title: "Kayaking and SUP seasonal access point at Grigorescu Beach",
     description:
-      "Amenajarea unui punct de acces la apă cu pontoane flotante pentru caiac, SUP (stand-up paddleboard) și alte activități nautice neMotorizate, activ în sezonul estival (mai–septembrie). Include și posibilitatea unui serviciu de închiriere gestionat de un operator local.",
+      "Setting up a water access point with floating docks for kayaking, SUP (stand-up paddleboarding), and other non-motorized nautical activities, active during the summer season (May–September). Includes the possibility of a rental service managed by a local operator.",
     category: "CULTURE",
     district: "GRIGORESCU",
     status: "UNDER_REVIEW",
@@ -226,29 +225,29 @@ const ideas = [
       {
         fromStatus: null,
         toStatus: "SUBMITTED",
-        note: "Propunere depusă de un grup de entuziaști de sporturi nautice.",
+        note: "Proposal submitted by a group of water sports enthusiasts.",
         changedBy: ADMIN,
       },
       {
         fromStatus: "SUBMITTED",
         toStatus: "UNDER_REVIEW",
-        note: "Propunerea este în evaluare tehnică și juridică. Se verifică reglementările privind accesul la cursul de apă și posibilele restricții de mediu.",
+        note: "Proposal is under technical and legal evaluation. Checking water access regulations and possible environmental restrictions.",
         changedBy: ADMIN,
       },
     ],
     votes: 12,
     comments: [
       {
-        text: "Excelent! Ar trebui incluse și cursuri de inițiere pentru copii în parteneriat cu o școală de caiac.",
+        text: "Excellent! We should also include introductory courses for children in partnership with a kayaking school.",
         participantSeed: "c4-1",
         status: "VISIBLE",
       },
     ],
   },
   {
-    title: "Pietonal temporar pe malul stâng al Someșului în weekenduri",
+    title: "Temporary weekend pedestrian zone on the left bank of the Someș",
     description:
-      "Închiderea temporară a drumului de pe malul stâng al Someșului pentru traficul auto în weekenduri (sâmbătă–duminică, mai–septembrie), transformând zona într-un spațiu pietonal și ciclist. Model aplicat cu succes în orașe europene precum Viena (Ringstrasse) și Paris (malurile Senei).",
+      "Temporarily closing the road on the left bank of the Someș for car traffic on weekends (Saturday–Sunday, May–September), transforming the area into a pedestrian and cycling space. Model successfully applied in European cities like Vienna (Ringstrasse) and Paris (banks of the Seine).",
     category: "TRANSPORT",
     district: "CENTRU",
     status: "SUBMITTED",
@@ -258,14 +257,14 @@ const ideas = [
       {
         fromStatus: null,
         toStatus: "SUBMITTED",
-        note: "Propunere depusă. Urmează evaluarea inițială.",
+        note: "Proposal submitted. Initial evaluation follows.",
         changedBy: ADMIN,
       },
     ],
     votes: 3,
     comments: [
       {
-        text: "Viena face asta pe Ringstrasse, Paris pe malurile Senei. De ce nu și Cluj pe Someș?",
+        text: "Vienna does this on Ringstrasse, Paris on the Seine banks. Why not Cluj on the Someș too?",
         participantSeed: "c5-1",
         status: "VISIBLE",
       },
@@ -334,7 +333,7 @@ async function main() {
       targetType: "IDEA",
       targetId: "seed-dataset",
       action: "STATUS_CHANGE",
-      reason: "Date demonstrative create pentru validarea prototipului ClujParticipa.",
+      reason: "Demonstration data created for validating the ClujParticipa prototype.",
       changedBy: ADMIN,
     },
   });

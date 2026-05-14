@@ -62,7 +62,8 @@
     "viewAll": "Vezi toate ideile",
     "civicStatus": "Status civic",
     "votingPhase": "Faza de votare",
-    "activeDistricts": "Cartiere active"
+    "activeDistricts": "Cartiere active",
+    "noIdeas": "Nicio idee încă."
   },
   "Ideas": {
     "title": "Idei",
@@ -367,6 +368,11 @@
     "changesText": "Ne rezervăm dreptul de a modifica acești termeni în orice moment. Modificările vor fi publicate pe această pagină. Utilizarea continuă a platformei după modificări constituie acceptul termenilor revizuiți.",
     "governingHeading": "Legea aplicabilă",
     "governingText": "Acești termeni sunt guvernați de legislația României. Orice litigiu va fi soluționat de instanțele competente din Cluj-Napoca, România.",
+    "privacyHeading": "Confidențialitate",
+    "privacyText": "Pentru informații despre prelucrarea datelor personale, consultați pagina noastră de confidențialitate."
+  }
+}
+ia.",
     "privacyHeading": "Confidențialitate",
     "privacyText": "Pentru informații despre prelucrarea datelor personale, consultați pagina noastră de confidențialitate."
   }

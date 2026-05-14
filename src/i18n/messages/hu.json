@@ -62,7 +62,8 @@
     "viewAll": "Összes ötlet megtekintése",
     "civicStatus": "Polgári státusz",
     "votingPhase": "Szavazási fázis",
-    "activeDistricts": "Aktív körzetek"
+    "activeDistricts": "Aktív körzetek",
+    "noIdeas": "Még nincsenek ötletek."
   },
   "Ideas": {
     "title": "Ötletek",
@@ -368,6 +369,10 @@
     "governingHeading": "Alkalmazandó jog",
     "governingText": "Ezeket a feltételek a román jog hatálya alá tartoznak. Minden vitában a kolozsvári, romániai illetékes bíróságok döntenek.",
     "privacyHeading": "Adatvédelem",
+    "privacyText": "A személyes adatok kezelésével kapcsolatos információkért kérjük, látogassa meg adatvédelmi oldalunkat."
+  }
+}
+  "privacyHeading": "Adatvédelem",
     "privacyText": "A személyes adatok kezelésével kapcsolatos információkért kérjük, látogassa meg adatvédelmi oldalunkat."
   }
 }
