@@ -6,15 +6,18 @@ import {
   IMAGE_MAX_COUNT,
   IMAGE_MAX_SIZE_BYTES,
   IMAGE_ALLOWED_MIME_TYPES,
-  IMAGE_UPLOAD_DIR,
   isAllowedMimeType,
 } from "@/lib/image-validation";
 import { randomUUID } from "crypto";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { existsSync } from "fs";
 
 export async function POST(request: NextRequest) {
+  if (!process.env.CLOUDFLARE_ACCOUNT_ID || !process.env.CLOUDFLARE_IMAGES_API_TOKEN) {
+    return NextResponse.json(
+      { error: "Image uploads are not configured (missing Cloudflare credentials)" },
+      { status: 503 }
+    );
+  }
+
   const session = await getAuthSession();
   const participantToken = request.headers.get("x-participant-token");
 
@@ -64,11 +67,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const uploadDir = path.join(process.cwd(), "public", IMAGE_UPLOAD_DIR);
-  if (!existsSync(uploadDir)) {
-    await mkdir(uploadDir, { recursive: true });
-  }
-
   const results: Array<{
     url: string;
     width: number | null;
@@ -95,17 +93,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const ext = mimeToExt(file.type);
-    const filename = `${randomUUID()}${ext}`;
-    const filePath = path.join(uploadDir, filename);
-
     const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filePath, buffer);
+
+    // Magic-byte validation: verify file content matches declared MIME type
+    const magicError = validateMagicBytes(buffer, file.type);
+    if (magicError) {
+      return NextResponse.json(
+        { error: `File ${i + 1}: ${magicError}` },
+        { status: 400 }
+      );
+    }
 
     const dimensions = await getImageDimensions(buffer);
 
+    // Upload to Cloudflare Images
+    const cfForm = new FormData();
+    cfForm.append(
+      "file",
+      new Blob([buffer], { type: file.type }),
+      `${randomUUID()}${mimeToExt(file.type)}`
+    );
+
+    const cfRes = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/images/v1`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_IMAGES_API_TOKEN}` },
+        body: cfForm,
+      }
+    );
+
+    if (!cfRes.ok) {
+      const err = await cfRes.json().catch(() => ({}));
+      return NextResponse.json(
+        { error: "Image upload failed", detail: err },
+        { status: 502 }
+      );
+    }
+
+    const cfData = await cfRes.json();
+    const url: string = cfData.result.variants[0];
+
     results.push({
-      url: `/${IMAGE_UPLOAD_DIR}/${filename}`,
+      url,
       width: dimensions.width,
       height: dimensions.height,
       mimeType: file.type,
@@ -147,14 +177,45 @@ async function getImageDimensions(buffer: Buffer): Promise<{ width: number | nul
       offset += 2 + segLen;
     }
   }
-  // WebP: "RIFF....WEBP" then lossy has "VP8 " at byte 12
+  // WebP: "RIFF....WEBP"
   if (buffer.toString("ascii", 0, 4) === "RIFF" && buffer.toString("ascii", 8, 12) === "WEBP") {
     const chunkType = buffer.toString("ascii", 12, 16);
+    // VP8 — lossy
     if (chunkType === "VP8 ") {
       const width = (buffer.readUInt16LE(26) & 0x3fff);
       const height = (buffer.readUInt16LE(28) & 0x3fff);
       return { width, height };
     }
+    // VP8L — lossless
+    if (chunkType === "VP8L") {
+      const word = buffer.readUInt32LE(21);
+      const width = (word & 0x3fff) + 1;
+      const height = ((word >> 14) & 0x3fff) + 1;
+      return { width, height };
+    }
+    // VP8X — extended (alpha, animation, etc.)
+    if (chunkType === "VP8X") {
+      const canvasWidth = (buffer[24] | (buffer[25] << 8) | (buffer[26] << 16)) + 1;
+      const canvasHeight = (buffer[27] | (buffer[28] << 8) | (buffer[29] << 16)) + 1;
+      return { width: canvasWidth, height: canvasHeight };
+    }
   }
   return { width: null, height: null };
+}
+
+function validateMagicBytes(buffer: Buffer, mimeType: string): string | null {
+  if (mimeType === "image/jpeg") {
+    if (!(buffer[0] === 0xff && buffer[1] === 0xd8)) {
+      return "File content does not match declared type (image/jpeg).";
+    }
+  } else if (mimeType === "image/png") {
+    if (!(buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47)) {
+      return "File content does not match declared type (image/png).";
+    }
+  } else if (mimeType === "image/webp") {
+    if (!(buffer.toString("ascii", 0, 4) === "RIFF" && buffer.toString("ascii", 8, 12) === "WEBP")) {
+      return "File content does not match declared type (image/webp).";
+    }
+  }
+  return null;
 }

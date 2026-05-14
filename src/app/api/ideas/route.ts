@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { validateParticipantToken } from "@/lib/participant";
 import { getAuthSession, resolveParticipantHash } from "@/lib/auth-participant";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
-import { IMAGE_UPLOAD_DIR, isAllowedMimeType } from "@/lib/image-validation";
+import { isAllowedMimeType, CLOUDFLARE_IMAGE_BASE } from "@/lib/image-validation";
 import { Prisma, Status } from "@prisma/client";
 import { z } from "zod";
 
@@ -52,7 +52,9 @@ export async function GET(request: NextRequest) {
   const skip = (page - 1) * limit;
 
   // Sort REJECTED to the bottom: fetch non-rejected and rejected separately, then concatenate
-  const nonRejectedWhere: Prisma.IdeaWhereInput = { ...where, status: status === "REJECTED" ? ("REJECTED" as Status) : { not: "REJECTED" as Status } };
+  const nonRejectedWhere: Prisma.IdeaWhereInput = status
+    ? where // specific status already set in where — don't override
+    : { ...where, status: { not: "REJECTED" as Status } };
   const rejectedWhere: Prisma.IdeaWhereInput = { ...where, status: "REJECTED" as Status };
 
   const effectiveOrderBy = sort === "votes"
@@ -61,7 +63,7 @@ export async function GET(request: NextRequest) {
 
   const rejectionStatus: Status = "REJECTED";
   const includeArgs = {
-    _count: { select: { votes: true, comments: true } },
+    _count: { select: { votes: true, comments: true, images: true } },
     statusChanges: {
       where: { toStatus: rejectionStatus },
       select: { note: true },
@@ -75,7 +77,7 @@ export async function GET(request: NextRequest) {
     },
   };
 
-  if (status === "REJECTED" || !showRejected) {
+  if (status || !showRejected) {
     const singleWhere = status === "REJECTED" ? rejectedWhere : (showRejected ? where : nonRejectedWhere);
     const [ideas, total] = await Promise.all([
       prisma.idea.findMany({
@@ -155,6 +157,7 @@ const createIdeaSchema = z.object({
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
   participantToken: z.string().optional(),
+  notifyOnStatusChange: z.boolean().optional().default(false),
   images: z.array(z.object({
     url: z.string(),
     width: z.number().nullable().optional(),
@@ -194,7 +197,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { participantToken, images, ...ideaData } = parsed.data;
+  const { participantToken, images, notifyOnStatusChange, ...ideaData } = parsed.data;
 
   const participantHash = await resolveParticipantHash(
     session,
@@ -228,11 +231,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Validate that image URLs point to our upload directory
+  // Validate that image URLs point to Cloudflare Images
   if (images && images.length > 0) {
-    const allowedPrefix = `/${IMAGE_UPLOAD_DIR}/`;
     for (const img of images) {
-      if (!img.url.startsWith(allowedPrefix)) {
+      if (!img.url.startsWith(CLOUDFLARE_IMAGE_BASE)) {
         return NextResponse.json(
           { error: `Invalid image URL: ${img.url}` },
           { status: 400 }
@@ -251,6 +253,9 @@ export async function POST(request: NextRequest) {
     data: {
       ...ideaData,
       status: "SUBMITTED",
+      submitterParticipantHash: participantHash,
+      notifyOnStatusChange,
+      unsubscribeToken: notifyOnStatusChange ? crypto.randomUUID() : null,
       images: images?.length
         ? {
             create: images.map((img) => ({
@@ -268,5 +273,6 @@ export async function POST(request: NextRequest) {
     include: { images: { orderBy: { order: "asc" } } },
   });
 
-  return NextResponse.json(idea, { status: 201 });
+  const { submitterParticipantHash: _submitterHash, unsubscribeToken: _unsubToken, ...safeIdea } = idea;
+  return NextResponse.json(safeIdea, { status: 201 });
 }

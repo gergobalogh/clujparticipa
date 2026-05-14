@@ -11,6 +11,25 @@ function participantHash(seed) {
 
 const ADMIN = "echipa-clujparticipa";
 
+const seedImages = [
+  { path: "https://imagedelivery.net/placeholder/seed-1/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+  { path: "https://imagedelivery.net/placeholder/seed-2/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+  { path: "https://imagedelivery.net/placeholder/seed-3/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+  { path: "https://imagedelivery.net/placeholder/seed-4/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+  { path: "https://imagedelivery.net/placeholder/seed-5/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+  { path: "https://imagedelivery.net/placeholder/seed-6/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+  { path: "https://imagedelivery.net/placeholder/seed-7/public", alt: "Imagine demonstrativă", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
+];
+
+// Which ideas get images: idea index -> array of seedImages indices (0-based)
+const ideaImageMap = {
+  0: [0, 1, 2],
+  1: [3],
+  2: [4, 5],
+  3: [6],
+  4: [0],
+};
+
 const ideas = [
   {
     title: "Cinema în aer liber la Plaja Grigorescu",
@@ -292,6 +311,21 @@ async function main() {
           status: comment.status,
         },
       });
+    }
+
+    // Attach seed images
+    if (ideaImageMap[index]) {
+      const imageRecords = ideaImageMap[index].map((imgIdx, order) => ({
+        url: seedImages[imgIdx].path,
+        alt: seedImages[imgIdx].alt,
+        width: seedImages[imgIdx].width,
+        height: seedImages[imgIdx].height,
+        mimeType: seedImages[imgIdx].mimeType,
+        sizeBytes: seedImages[imgIdx].sizeBytes,
+        order,
+        ideaId: created.id,
+      }));
+      await prisma.ideaImage.createMany({ data: imageRecords });
     }
   }
 
