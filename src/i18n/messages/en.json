@@ -379,5 +379,9 @@
     "governingText": "These terms are governed by the laws of Romania. Any disputes shall be resolved by the competent courts in Cluj-Napoca, Romania.",
     "privacyHeading": "Privacy",
     "privacyText": "For information about how we process personal data, please see our privacy page."
+  },
+  "Pipeline": {
+    "waitingFor": "Waiting for",
+    "daysAgo": "days ago"
   }
 }

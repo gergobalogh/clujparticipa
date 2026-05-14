@@ -370,10 +370,9 @@
     "governingText": "Acești termeni sunt guvernați de legislația României. Orice litigiu va fi soluționat de instanțele competente din Cluj-Napoca, România.",
     "privacyHeading": "Confidențialitate",
     "privacyText": "Pentru informații despre prelucrarea datelor personale, consultați pagina noastră de confidențialitate."
-  }
-}
-ia.",
-    "privacyHeading": "Confidențialitate",
-    "privacyText": "Pentru informații despre prelucrarea datelor personale, consultați pagina noastră de confidențialitate."
+  },
+  "Pipeline": {
+    "waitingFor": "Așteaptă",
+    "daysAgo": "zile în urmă"
   }
 }

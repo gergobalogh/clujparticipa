@@ -370,9 +370,9 @@
     "governingText": "Ezeket a feltételek a román jog hatálya alá tartoznak. Minden vitában a kolozsvári, romániai illetékes bíróságok döntenek.",
     "privacyHeading": "Adatvédelem",
     "privacyText": "A személyes adatok kezelésével kapcsolatos információkért kérjük, látogassa meg adatvédelmi oldalunkat."
-  }
-}
-  "privacyHeading": "Adatvédelem",
-    "privacyText": "A személyes adatok kezelésével kapcsolatos információkért kérjük, látogassa meg adatvédelmi oldalunkat."
+  },
+  "Pipeline": {
+    "waitingFor": "Várakozik",
+    "daysAgo": "napja"
   }
 }
