@@ -382,6 +382,12 @@
   },
   "Pipeline": {
     "waitingFor": "Waiting for",
-    "daysAgo": "days ago"
+    "daysAgo": "days ago",
+    "rejected": "Rejected",
+    "stalled": "Stalled"
+  },
+  "Stalled": {
+    "label": "Stalled",
+    "waitingDays": "{days} days without update"
   }
 }

@@ -9,8 +9,12 @@ import { statusToBadgeVariant } from "@/lib/status";
 import { VOTE_ELIGIBLE_STATUSES, SUPPORT_LABEL_STATUSES } from "@/lib/transitions";
 import { MapPickerLoader } from "@/components/map/map-picker-loader";
 import { IdeaCarousel, CarouselImage } from "@/components/ideas/idea-carousel";
+import { IdeaPipeline } from "@/components/ideas/idea-pipeline";
 import { VotingCountdown } from "@/components/ideas/voting-countdown";
 import { getOrCreateParticipantToken } from "@/lib/client-participant";
+import { computePipelineStages, getExceptionState } from "@/lib/pipeline-computation";
+import { detectStalledIdea } from "@/lib/stalled-detector";
+import type { Status } from "@prisma/client";
 import Image from "next/image";
 
 type StatusChange = {
@@ -80,6 +84,7 @@ export default function IdeaDetailPage() {
   const td = useTranslations("Districts");
   const ts = useTranslations("Statuses");
   const ta = useTranslations("Auth");
+  const tp = useTranslations("Pipeline");
   const { data: session } = useSession();
   const { id } = useParams<{ id: string }>();
 
@@ -251,6 +256,27 @@ export default function IdeaDetailPage() {
 
   const showVoteSection = VOTE_ELIGIBLE_STATUSES.includes(idea.status as typeof VOTE_ELIGIBLE_STATUSES[number]);
 
+  const ideaStatus = idea.status as Status;
+  const pipelineStages = computePipelineStages({
+    status: ideaStatus,
+    createdAt: idea.createdAt,
+    statusChanges: idea.statusChanges,
+  });
+  const exceptionState = getExceptionState(ideaStatus);
+  const lastStatusChangeDate = idea.statusChanges.length > 0
+    ? new Date(idea.statusChanges[idea.statusChanges.length - 1].createdAt)
+    : new Date(idea.createdAt);
+  const stalledInfo = detectStalledIdea(
+    ideaStatus,
+    lastStatusChangeDate
+  );
+  const stalledLabel = stalledInfo.isStalled
+    ? `${tp("waitingFor")}: ${stalledInfo.waitingForLabel}`
+    : undefined;
+  const stalledDays = stalledInfo.isStalled
+    ? stalledInfo.daysSinceLastChange
+    : undefined;
+
   const voteSection = showVoteSection ? (
     <div className="rounded-sm border border-ink/10 px-4 py-4 bg-paper">
       <style>{`
@@ -358,6 +384,16 @@ export default function IdeaDetailPage() {
           <span>{new Date(idea.createdAt).toLocaleDateString()}</span>
         </div>
 
+        <div className="mt-4">
+          <IdeaPipeline
+            stages={pipelineStages}
+            exceptionState={exceptionState}
+            stalledLabel={stalledLabel}
+            stalledDays={stalledDays}
+            isMobile={true}
+          />
+        </div>
+
         {/* Vote section on mobile near top */}
         {voteSection && <div className="mt-4">{voteSection}</div>}
       </div>
@@ -382,6 +418,16 @@ export default function IdeaDetailPage() {
               <span className="uppercase tracking-wide font-semibold">{td(idea.district as Parameters<typeof td>[0])}</span>
               <span className="text-ink/20">·</span>
               <span>{new Date(idea.createdAt).toLocaleDateString()}</span>
+            </div>
+
+            <div className="mt-4">
+              <IdeaPipeline
+                stages={pipelineStages}
+                exceptionState={exceptionState}
+                stalledLabel={stalledLabel}
+                stalledDays={stalledDays}
+                isMobile={false}
+              />
             </div>
           </div>
 

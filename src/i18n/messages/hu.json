@@ -373,6 +373,12 @@
   },
   "Pipeline": {
     "waitingFor": "Várakozik",
-    "daysAgo": "napja"
+    "daysAgo": "napja",
+    "rejected": "Elutasítva",
+    "stalled": "Akadályozva"
+  },
+  "Stalled": {
+    "label": "Akadályozva",
+    "waitingDays": "{days} nap frissítés nélkül"
   }
 }

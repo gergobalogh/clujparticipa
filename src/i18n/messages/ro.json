@@ -373,6 +373,12 @@
   },
   "Pipeline": {
     "waitingFor": "Așteaptă",
-    "daysAgo": "zile în urmă"
+    "daysAgo": "zile în urmă",
+    "rejected": "Respinsă",
+    "stalled": "Blocată"
+  },
+  "Stalled": {
+    "label": "Blocată",
+    "waitingDays": "{days} zile fără actualizare"
   }
 }
