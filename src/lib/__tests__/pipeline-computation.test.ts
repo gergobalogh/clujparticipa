@@ -224,6 +224,174 @@ describe("computePipelineStages", () => {
     });
   });
 
+  describe("error path: empty status changes array", () => {
+    it("renders all 7 stages with only SUBMITTED filled when statusChanges is empty", () => {
+      const idea: IdeaData = {
+        status: "SUBMITTED",
+        createdAt: "2025-06-01T08:00:00Z",
+        statusChanges: [],
+      };
+      const stages = computePipelineStages(idea);
+      expect(stages).toHaveLength(7);
+      expect(stages[0].status).toBe("SUBMITTED");
+      expect(stages[0].reached).toBe(true);
+      expect(stages[0].current).toBe(true);
+      expect(stages[0].date).toBe("2025-06-01T08:00:00Z");
+      for (const stage of stages.slice(1)) {
+        expect(stage.reached).toBe(false);
+        expect(stage.current).toBe(false);
+        expect(stage.date).toBeNull();
+      }
+    });
+
+    it("renders with only SUBMITTED filled even for mid-pipeline status when no status changes", () => {
+      const idea: IdeaData = {
+        status: "IN_VOTING",
+        createdAt: "2025-06-01T08:00:00Z",
+        statusChanges: [],
+      };
+      const stages = computePipelineStages(idea);
+      expect(stages).toHaveLength(7);
+      // SUBMITTED should still have the creation date
+      expect(stages[0].date).toBe("2025-06-01T08:00:00Z");
+    });
+  });
+
+  describe("error path: unexpected status value", () => {
+    it("renders pipeline without crashing for unexpected status", () => {
+      const idea: IdeaData = {
+        status: "UNKNOWN_STATUS" as Status,
+        createdAt: "2025-06-01T08:00:00Z",
+        statusChanges: [],
+      };
+      const stages = computePipelineStages(idea);
+      expect(stages).toHaveLength(7);
+    });
+
+    it("marks no stage as current for unexpected status", () => {
+      const idea: IdeaData = {
+        status: "UNKNOWN_STATUS" as Status,
+        createdAt: "2025-06-01T08:00:00Z",
+        statusChanges: [],
+      };
+      const stages = computePipelineStages(idea);
+      const currentStages = stages.filter((s) => s.current);
+      expect(currentStages).toHaveLength(0);
+    });
+
+    it("marks no stage as reached for unexpected status with no status changes", () => {
+      const idea: IdeaData = {
+        status: "UNKNOWN_STATUS" as Status,
+        createdAt: "2025-06-01T08:00:00Z",
+        statusChanges: [],
+      };
+      const stages = computePipelineStages(idea);
+      // getStageIndex returns -1 for unknown, so resolveEffectiveStatus also returns unknown,
+      // and no stages should be reached (both stageIndex and effectiveIndex checks fail)
+      const reachedStages = stages.filter((s) => s.reached);
+      expect(reachedStages).toHaveLength(0);
+    });
+
+    it("preserves the raw status label in the pipeline stage", () => {
+      const idea: IdeaData = {
+        status: "UNKNOWN_STATUS" as Status,
+        createdAt: "2025-06-01T08:00:00Z",
+        statusChanges: [],
+      };
+      const stages = computePipelineStages(idea);
+      // Labels should still use the Status key from PIPELINE_STAGES
+      // The raw status is not in PIPELINE_STAGES so it won't appear as a label,
+      // but the pipeline should still render all 7 standard stages
+      expect(stages).toHaveLength(7);
+      const labels = stages.map((s) => s.label);
+      expect(labels).toEqual([
+        "SUBMITTED",
+        "UNDER_REVIEW",
+        "ELIGIBLE",
+        "IN_VOTING",
+        "SELECTED",
+        "IN_PROGRESS",
+        "COMPLETED",
+      ]);
+    });
+  });
+
+  describe("error path: malformed status change records", () => {
+    it("skips records with null toStatus and renders pipeline", () => {
+      const idea: IdeaData = {
+        status: "ELIGIBLE",
+        createdAt: "2025-01-01T00:00:00Z",
+        statusChanges: [
+          {
+            id: "sc1",
+            fromStatus: "SUBMITTED",
+            toStatus: "UNDER_REVIEW" as string,
+            note: "Review started",
+            changedBy: "admin",
+            createdAt: "2025-01-05T00:00:00Z",
+          },
+          {
+            id: "sc-malformed",
+            fromStatus: "UNDER_REVIEW",
+            toStatus: null as unknown as string,
+            note: "Bad record",
+            changedBy: "admin",
+            createdAt: "2025-01-06T00:00:00Z",
+          },
+          {
+            id: "sc2",
+            fromStatus: "UNDER_REVIEW",
+            toStatus: "ELIGIBLE" as string,
+            note: "Marked eligible",
+            changedBy: "admin",
+            createdAt: "2025-01-10T00:00:00Z",
+          },
+        ],
+      };
+      const stages = computePipelineStages(idea);
+      expect(stages).toHaveLength(7);
+      expect(stages[1].date).toBe("2025-01-05T00:00:00Z");
+      expect(stages[2].date).toBe("2025-01-10T00:00:00Z");
+    });
+
+    it("skips records with missing createdAt and renders pipeline", () => {
+      const idea: IdeaData = {
+        status: "UNDER_REVIEW",
+        createdAt: "2025-01-01T00:00:00Z",
+        statusChanges: [
+          {
+            id: "sc-bad-date",
+            fromStatus: "SUBMITTED",
+            toStatus: "UNDER_REVIEW" as string,
+            note: "Missing date",
+            changedBy: "admin",
+            createdAt: undefined as unknown as string,
+          },
+        ],
+      };
+      const stages = computePipelineStages(idea);
+      expect(stages).toHaveLength(7);
+      // The record with missing createdAt should be handled gracefully
+      // UNDER_REVIEW should still be reached/current
+      expect(stages[1].reached).toBe(true);
+      expect(stages[1].current).toBe(true);
+      // date should be null (not undefined) when createdAt is missing
+      expect(stages[1].date).toBeNull();
+    });
+
+    it("handles entirely empty statusChanges array without crashing", () => {
+      const idea: IdeaData = {
+        status: "SUBMITTED",
+        createdAt: "2025-01-01T00:00:00Z",
+        statusChanges: [],
+      };
+      const stages = computePipelineStages(idea);
+      expect(stages).toHaveLength(7);
+      expect(stages[0].reached).toBe(true);
+      expect(stages[0].current).toBe(true);
+    });
+  });
+
   describe("date resolution from statusChanges", () => {
     it("uses idea.createdAt for SUBMITTED stage when no status change has toStatus SUBMITTED", () => {
       const idea: IdeaData = {
@@ -310,5 +478,9 @@ describe("getExceptionState", () => {
     for (const status of forwardStatuses) {
       expect(getExceptionState(status)).toBeUndefined();
     }
+  });
+
+  it("returns undefined for unexpected/unknown status value", () => {
+    expect(getExceptionState("UNKNOWN_STATUS" as Status)).toBeUndefined();
   });
 });

@@ -89,6 +89,14 @@ describe("POST /api/ideas/[id]/vote", () => {
     expect(res.status).toBe(403);
   });
 
+  it("rejects vote on IN_PROGRESS idea (403)", async () => {
+    await truncateAll(testPrisma);
+    _resetBuckets();
+    const idea = await createIdea(testPrisma, { status: "IN_PROGRESS" });
+    const res = await vote(idea.id, TOKEN);
+    expect(res.status).toBe(403);
+  });
+
   it("prevents duplicate vote (409)", async () => {
     await vote(ideaId, TOKEN);
     const res = await vote(ideaId, TOKEN);
@@ -220,5 +228,66 @@ describe("POST /api/ideas/[id]/vote", () => {
     const { POST } = await import("./route");
     const res = await POST(req, { params: Promise.resolve({ id: idea.id }) });
     expect(res.status).toBe(201);
+  });
+
+  it("returns 429 when rate limit exceeded", async () => {
+    await truncateAll(testPrisma);
+    _resetBuckets();
+    const idea = await createIdea(testPrisma, { status: "SUBMITTED" });
+
+    // Exhaust the vote rate limit (20 per minute)
+    const rateLimitToken = "rate-limit-test-token-9999";
+    for (let i = 0; i < 20; i++) {
+      const req = new NextRequest(`http://localhost:3000/api/ideas/${idea.id}/vote`, {
+        method: "POST",
+        headers: { "x-participant-token": `${rateLimitToken}-${i}` },
+        body: JSON.stringify({}),
+      });
+      const { POST } = await import("./route");
+      const res = await POST(req, { params: Promise.resolve({ id: idea.id }) });
+      expect(res.status).toBe(201);
+    }
+
+    // The 21st request with a token that maps to the same hash should trigger 429.
+    // Since each unique token gets a unique hash, we need to use a token that
+    // has already been rate-limited. Use the same token as one of the earlier votes,
+    // but it will hit duplicate vote check first. Instead, test rate limit directly.
+    // The rate limit is per participant hash. We need a token whose hash has
+    // already exceeded the limit. Use the same token twice (first vote succeeds,
+    // second is duplicate 409 -- rate limit is consumed but different check fires first).
+    // The cleanest way: use checkRateLimit directly to exhaust a key, then call the endpoint.
+    const { checkRateLimit, RATE_LIMITS, _resetBuckets: reset } = await import("@/lib/rate-limit");
+    // Reset to start clean
+    reset();
+
+    // Exhaust the rate limit bucket for the hash of a known token
+    const rlToken = "rate-limit-exhaust-token-abc";
+    // We need to compute the hash that resolveParticipantHash would produce
+    // then exhaust that key. Since the auth mock computes SHA-256 of the token,
+    // let's compute it and exhaust the rate limit directly.
+    const encoder = new TextEncoder();
+    const data = encoder.encode(rlToken);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashHex = Array.from(new Uint8Array(hashBuffer))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    const rateLimitKey = `vote:${hashHex}`;
+    for (let i = 0; i < RATE_LIMITS.vote.maxRequests; i++) {
+      checkRateLimit(rateLimitKey, RATE_LIMITS.vote);
+    }
+
+    // Now voting with that token should get 429
+    const req = new NextRequest(`http://localhost:3000/api/ideas/${idea.id}/vote`, {
+      method: "POST",
+      headers: { "x-participant-token": rlToken },
+      body: JSON.stringify({}),
+    });
+    const { POST } = await import("./route");
+    const res = await POST(req, { params: Promise.resolve({ id: idea.id }) });
+    expect(res.status).toBe(429);
+    const body = await res.json();
+    expect(body.error).toContain("Rate limit");
+    // Verify Retry-After header is present
+    expect(res.headers.get("Retry-After")).not.toBeNull();
   });
 });

@@ -113,4 +113,32 @@ describe("pipeline-stages", () => {
       expect(isCurrentStage("ELIGIBLE", "UNKNOWN_CURRENT" as Status)).toBe(false);
     });
   });
+
+  describe("error path: defensive handling for unexpected status values", () => {
+    it("getStageIndex returns -1 for various unexpected status values", () => {
+      const unexpectedStatuses: Status[] = [
+        "UNKNOWN_STATUS" as Status,
+        "" as Status,
+        "random_string" as Status,
+      ];
+      for (const status of unexpectedStatuses) {
+        expect(getStageIndex(status)).toBe(-1);
+      }
+    });
+
+    it("isStageReached returns false when both stage and current are unexpected", () => {
+      expect(isStageReached("FOO" as Status, "BAR" as Status)).toBe(false);
+    });
+
+    it("isCurrentStage returns false when both stage and current are unexpected", () => {
+      expect(isCurrentStage("FOO" as Status, "BAR" as Status)).toBe(false);
+    });
+
+    it("REJECTED is consistently treated as non-pipeline stage across all functions", () => {
+      expect(getStageIndex("REJECTED")).toBe(-1);
+      expect(isStageReached("REJECTED", "SUBMITTED")).toBe(false);
+      expect(isStageReached("SUBMITTED", "REJECTED")).toBe(false);
+      expect(isCurrentStage("REJECTED", "REJECTED")).toBe(false);
+    });
+  });
 });

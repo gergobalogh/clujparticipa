@@ -32,12 +32,14 @@ function findStageDate(
   if (stage === "SUBMITTED") {
     return ideaCreatedAt;
   }
-  const matching = statusChanges.filter((sc) => sc.toStatus === stage);
+  const matching = statusChanges.filter(
+    (sc) => sc.toStatus != null && sc.toStatus === stage
+  );
   if (matching.length === 0) {
     return null;
   }
   const mostRecent = matching[matching.length - 1];
-  return mostRecent.createdAt;
+  return mostRecent.createdAt ?? null;
 }
 
 /** For REJECTED ideas, find the highest forward pipeline stage reached before rejection.
