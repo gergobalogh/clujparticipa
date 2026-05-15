@@ -141,8 +141,8 @@ vi.mock("@/components/ideas/idea-carousel", () => ({
   IdeaCarousel: () => <div data-testid="idea-carousel" />,
 }));
 
-vi.mock("@/components/ideas/idea-pipeline", () => ({
-  IdeaPipeline: () => <div data-testid="idea-pipeline" />,
+vi.mock("@/components/ideas/pipeline-track", () => ({
+  PipelineTrack: () => <div data-testid="pipeline-track" />,
 }));
 
 vi.mock("@/components/ideas/status-change-timeline", () => ({

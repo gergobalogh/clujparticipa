@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { Status } from "@prisma/client";
-import type { PipelineStage } from "@/components/ideas/idea-pipeline";
+import type { PipelineStage } from "@/components/ideas/pipeline-track";
 
 /**
  * The computePipelineStages function is the driving port for this test suite.

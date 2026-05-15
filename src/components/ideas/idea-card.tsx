@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
-import { MiniPipeline } from "@/components/ideas/mini-pipeline";
+import { MiniPipelineTrack } from "@/components/ideas/mini-pipeline-track";
 import { statusToBadgeVariant } from "@/lib/status";
 import { resolveCategoryCardColor } from "@/lib/category-colors";
 import type { Status } from "@prisma/client";
@@ -85,7 +85,7 @@ export function IdeaCard({
             <span>{ti("supportCount", { count: supportCount })}</span>
           </div>
           <div className="mt-1">
-            <MiniPipeline currentStatus={status as Status} />
+            <MiniPipelineTrack currentStatus={status as Status} />
           </div>
         </div>
       </a>
@@ -129,7 +129,7 @@ export function IdeaCard({
         </div>
 
         <div className="mt-2">
-          <MiniPipeline currentStatus={status as Status} />
+          <MiniPipelineTrack currentStatus={status as Status} />
         </div>
 
         <p className="mt-1.5 line-clamp-2 text-sm text-ink-muted">

@@ -6,7 +6,7 @@
  */
 import type { Status } from "@prisma/client";
 import { PIPELINE_STAGES, getStageIndex, isCurrentStage } from "./pipeline-stages";
-import type { PipelineStage } from "@/components/ideas/idea-pipeline";
+import type { PipelineStage } from "@/components/ideas/pipeline-track";
 import type { StatusChange } from "./types";
 
 export type IdeaData = {

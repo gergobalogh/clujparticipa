@@ -9,7 +9,7 @@ import { statusToBadgeVariant } from "@/lib/status";
 import { VOTE_ELIGIBLE_STATUSES, SUPPORT_LABEL_STATUSES } from "@/lib/transitions";
 import { MapPickerLoader } from "@/components/map/map-picker-loader";
 import { IdeaCarousel, CarouselImage } from "@/components/ideas/idea-carousel";
-import { IdeaPipeline } from "@/components/ideas/idea-pipeline";
+import { PipelineTrack } from "@/components/ideas/pipeline-track";
 import { StatusChangeTimeline } from "@/components/ideas/status-change-timeline";
 import { VotingCountdown } from "@/components/ideas/voting-countdown";
 import { mapStatusChangesToTimelineEntries } from "@/lib/timeline-mapping";
@@ -449,7 +449,7 @@ export default function IdeaDetailPage() {
         </div>
 
         <div className="mt-4">
-          <IdeaPipeline
+          <PipelineTrack
             stages={pipelineStages}
             exceptionState={exceptionState}
             stalledLabel={stalledLabel}
@@ -485,7 +485,7 @@ export default function IdeaDetailPage() {
             </div>
 
             <div className="mt-4">
-              <IdeaPipeline
+              <PipelineTrack
                 stages={pipelineStages}
                 exceptionState={exceptionState}
                 stalledLabel={stalledLabel}

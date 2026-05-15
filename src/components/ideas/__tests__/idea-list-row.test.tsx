@@ -35,19 +35,19 @@ describe("IdeaListRow - Acceptance: MiniPipeline integration", () => {
   it("renders MiniPipeline component for a non-REJECTED status", () => {
     render(<IdeaListRow {...baseProps} status="SUBMITTED" />);
 
-    expect(screen.getByTestId("mini-pipeline")).toBeInTheDocument();
+    expect(screen.getByTestId("mini-pipeline-track")).toBeInTheDocument();
   });
 
   it("renders MiniPipeline for IN_VOTING status", () => {
     render(<IdeaListRow {...baseProps} status="IN_VOTING" />);
 
-    expect(screen.getByTestId("mini-pipeline")).toBeInTheDocument();
+    expect(screen.getByTestId("mini-pipeline-track")).toBeInTheDocument();
   });
 
   it("does not render MiniPipeline for REJECTED status", () => {
     render(<IdeaListRow {...baseProps} status="REJECTED" />);
 
-    expect(screen.queryByTestId("mini-pipeline")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("mini-pipeline-track")).not.toBeInTheDocument();
   });
 
   it("preserves existing Badge alongside MiniPipeline", () => {
@@ -56,14 +56,14 @@ describe("IdeaListRow - Acceptance: MiniPipeline integration", () => {
     // Badge for status should still be present
     expect(screen.getByText("Statuses.SUBMITTED")).toBeInTheDocument();
     // MiniPipeline should also be present
-    expect(screen.getByTestId("mini-pipeline")).toBeInTheDocument();
+    expect(screen.getByTestId("mini-pipeline-track")).toBeInTheDocument();
   });
 
   it("preserves Badge for REJECTED status even without MiniPipeline", () => {
     render(<IdeaListRow {...baseProps} status="REJECTED" />);
 
     expect(screen.getByText("Statuses.REJECTED")).toBeInTheDocument();
-    expect(screen.queryByTestId("mini-pipeline")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("mini-pipeline-track")).not.toBeInTheDocument();
   });
 });
 

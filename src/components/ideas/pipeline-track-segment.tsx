@@ -3,7 +3,7 @@
 import type { JSX } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
-import type { PipelineStage } from "./idea-pipeline";
+import type { PipelineStage } from "./pipeline-track";
 
 export type PipelineTrackSegmentProps = {
   stage: PipelineStage;

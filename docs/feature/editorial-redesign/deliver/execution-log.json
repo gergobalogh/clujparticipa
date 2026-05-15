@@ -102,6 +102,40 @@
           "data": "PASS: commit d9fc96b on redesign. 2 files: pipeline-track-segment.tsx, pipeline-track-segment.test.tsx. Test budget 8/10."
         }
       ]
+    },
+    "01-04": {
+      "phases": [
+        {
+          "phase": "PREPARE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:23:00Z",
+          "data": "PASS: All consumer files and old components read. Dependencies verified. 3 consumer files + 3 test files need updates beyond files_to_modify (PipelineStage type import chain)."
+        },
+        {
+          "phase": "RED_ACCEPTANCE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:24:00Z",
+          "data": "PASS: PipelineTrack test passes 11/11. TypeScript compiles. Deleting idea-pipeline.tsx would break imports in pipeline-track.tsx, pipeline-track-segment.tsx, pipeline-computation.ts — confirms migration need."
+        },
+        {
+          "phase": "RED_UNIT",
+          "status": "APPROVED_SKIP",
+          "timestamp": "2026-05-15T12:24:30Z",
+          "data": "Migration step — no new logic, no new unit tests needed."
+        },
+        {
+          "phase": "GREEN",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:28:43Z",
+          "data": "PASS: 144 tests pass across 12 test files. TypeScript compiles. No remaining imports of old components. Old files deleted. PipelineStage type moved to pipeline-track.tsx."
+        },
+        {
+          "phase": "COMMIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:29:30Z",
+          "data": "PASS: All consumers migrated, old components deleted, PipelineStage type relocated, full test suite green."
+        }
+      ]
     }
   }
 }

@@ -1,10 +1,18 @@
 "use client";
 
 import type { JSX } from "react";
+import type { Status } from "@prisma/client";
 import { motion } from "motion/react";
-import type { PipelineStage } from "./idea-pipeline";
 import { PipelineTrackSegment } from "./pipeline-track-segment";
 import { StalledIndicator } from "./stalled-indicator";
+
+export type PipelineStage = {
+  status: Status;
+  label: string;
+  reached: boolean;
+  current: boolean;
+  date: string | null;
+};
 
 export type PipelineTrackProps = {
   stages: PipelineStage[];

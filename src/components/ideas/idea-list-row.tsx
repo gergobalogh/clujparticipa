@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
-import { MiniPipeline } from "@/components/ideas/mini-pipeline";
+import { MiniPipelineTrack } from "@/components/ideas/mini-pipeline-track";
 import { statusToBadgeVariant } from "@/lib/status";
 import { resolveCategoryListColor } from "@/lib/category-colors";
 import type { Status } from "@prisma/client";
@@ -69,7 +69,7 @@ export function IdeaListRow({
 
           {/* Mini pipeline indicator */}
           <div className="mt-1">
-            <MiniPipeline currentStatus={status as Status} />
+            <MiniPipelineTrack currentStatus={status as Status} />
           </div>
 
           {/* Title */}

@@ -36,19 +36,19 @@ describe("IdeaCard - Acceptance: MiniPipeline integration", () => {
   it("renders MiniPipeline component for a non-REJECTED status in full mode", () => {
     render(<IdeaCard {...baseProps} status="SUBMITTED" />);
 
-    expect(screen.getByTestId("mini-pipeline")).toBeInTheDocument();
+    expect(screen.getByTestId("mini-pipeline-track")).toBeInTheDocument();
   });
 
   it("renders MiniPipeline component for a non-REJECTED status in compact mode", () => {
     render(<IdeaCard {...baseProps} compact status="IN_VOTING" />);
 
-    expect(screen.getByTestId("mini-pipeline")).toBeInTheDocument();
+    expect(screen.getByTestId("mini-pipeline-track")).toBeInTheDocument();
   });
 
   it("does not render MiniPipeline for REJECTED status in full mode", () => {
     render(<IdeaCard {...baseProps} status="REJECTED" />);
 
-    expect(screen.queryByTestId("mini-pipeline")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("mini-pipeline-track")).not.toBeInTheDocument();
   });
 
   it("preserves existing Badge alongside MiniPipeline in full mode", () => {
@@ -57,7 +57,7 @@ describe("IdeaCard - Acceptance: MiniPipeline integration", () => {
     // Badge for status should still be present
     expect(screen.getByText("Statuses.SUBMITTED")).toBeInTheDocument();
     // MiniPipeline should also be present
-    expect(screen.getByTestId("mini-pipeline")).toBeInTheDocument();
+    expect(screen.getByTestId("mini-pipeline-track")).toBeInTheDocument();
   });
 
   it("preserves existing Badge for REJECTED status even without MiniPipeline", () => {
@@ -65,7 +65,7 @@ describe("IdeaCard - Acceptance: MiniPipeline integration", () => {
 
     expect(screen.getByText("Statuses.REJECTED")).toBeInTheDocument();
     expect(screen.getByText("Ideas.notEligible")).toBeInTheDocument();
-    expect(screen.queryByTestId("mini-pipeline")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("mini-pipeline-track")).not.toBeInTheDocument();
   });
 });
 
@@ -77,13 +77,13 @@ describe("IdeaCard - Unit: compact mode MiniPipeline", () => {
   it("renders MiniPipeline in compact mode for IN_VOTING status", () => {
     render(<IdeaCard {...baseProps} compact status="IN_VOTING" />);
 
-    expect(screen.getByTestId("mini-pipeline")).toBeInTheDocument();
+    expect(screen.getByTestId("mini-pipeline-track")).toBeInTheDocument();
   });
 
   it("does not render MiniPipeline in compact mode for REJECTED status but Badge remains", () => {
     render(<IdeaCard {...baseProps} compact status="REJECTED" />);
 
-    expect(screen.queryByTestId("mini-pipeline")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("mini-pipeline-track")).not.toBeInTheDocument();
     expect(screen.getByText("Statuses.REJECTED")).toBeInTheDocument();
   });
 });

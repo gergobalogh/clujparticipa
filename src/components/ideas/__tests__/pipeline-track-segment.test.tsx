@@ -5,7 +5,7 @@ import { describe, it, expect, vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
 import { PipelineTrackSegment } from "../pipeline-track-segment";
-import type { PipelineStage } from "../idea-pipeline";
+import type { PipelineStage } from "../pipeline-track";
 
 vi.mock("next-intl", () => ({
   useTranslations: (namespace: string) => (key: string) =>

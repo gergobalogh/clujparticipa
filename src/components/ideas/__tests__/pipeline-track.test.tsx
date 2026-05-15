@@ -5,7 +5,7 @@ import { describe, it, expect, vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
 import { PipelineTrack } from "../pipeline-track";
-import type { PipelineStage } from "../idea-pipeline";
+import type { PipelineStage } from "../pipeline-track";
 
 vi.mock("next-intl", () => ({
   useTranslations: (namespace: string) => (key: string) =>
@@ -139,8 +139,8 @@ describe("PipelineTrack", () => {
   });
 
   // AC-P13: PipelineStage type and pipeline-stages.ts remain unchanged
-  // Verified structurally: PipelineTrack accepts PipelineStage[] from idea-pipeline unchanged
-  it("accepts PipelineStage array from idea-pipeline without modification", () => {
+  // Verified structurally: PipelineTrack accepts PipelineStage[] from pipeline-track unchanged
+  it("accepts PipelineStage array from pipeline-track without modification", () => {
     // This test validates the contract: same PipelineStage type, no adaptation needed
     const stages: PipelineStage[] = makeStages("ELIGIBLE");
     const { container } = render(<PipelineTrack stages={stages} />);
