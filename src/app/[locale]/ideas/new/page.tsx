@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useCallback, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { MapPickerLoader } from "@/components/map/map-picker-loader";
 import { DISTRICT_CENTERS } from "@/lib/district-centers";
 import { getOrCreateParticipantToken } from "@/lib/client-participant";
@@ -25,13 +26,19 @@ export default function NewIdeaPage() {
   const tc = useTranslations("Categories");
   const td = useTranslations("Districts");
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
+
+  const urlLat = searchParams.get("lat");
+  const urlLng = searchParams.get("lng");
+  const initialLat = urlLat != null && Number.isFinite(Number(urlLat)) ? Number(urlLat) : 46.77;
+  const initialLng = urlLng != null && Number.isFinite(Number(urlLng)) ? Number(urlLng) : 23.59;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [district, setDistrict] = useState("");
-  const [latitude, setLatitude] = useState<number | null>(46.77);
-  const [longitude, setLongitude] = useState<number | null>(23.59);
+  const [latitude, setLatitude] = useState<number | null>(initialLat);
+  const [longitude, setLongitude] = useState<number | null>(initialLng);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [createdId, setCreatedId] = useState("");

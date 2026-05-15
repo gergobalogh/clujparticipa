@@ -1,6 +1,7 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useRef } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useLocale, useTranslations } from "next-intl";
@@ -55,23 +56,46 @@ function markerIcon(status: string) {
   });
 }
 
+function MapClickHandler({ onMapTap, markerClickedRef }: { onMapTap?: (lat: number, lng: number) => void; markerClickedRef: React.RefObject<boolean> }) {
+  useMapEvents({
+    click(e) {
+      if (markerClickedRef.current) {
+        markerClickedRef.current = false;
+        return;
+      }
+      if (onMapTap) {
+        onMapTap(e.latlng.lat, e.latlng.lng);
+      }
+    },
+  });
+  return null;
+}
+
 type MapViewProps = {
   ideas: IdeaMapData[];
   compact?: boolean;
+  defaultCenter?: [number, number];
+  onMapTap?: (lat: number, lng: number) => void;
 };
 
-export default function MapView({ ideas, compact = false }: MapViewProps) {
+export default function MapView({ ideas, compact = false, defaultCenter = CLUJ_CENTER, onMapTap }: MapViewProps) {
   const t = useTranslations("Map");
   const ts = useTranslations("Statuses");
   const locale = useLocale() as AppLocale;
+  const markerClickedRef = useRef(false);
+
+  const handleMarkerClick = () => {
+    markerClickedRef.current = true;
+  };
 
   return (
     <MapContainer
-      center={CLUJ_CENTER}
+      center={defaultCenter}
       zoom={DEFAULT_ZOOM}
       scrollWheelZoom
       className={`w-full rounded-sm border border-ink/8 ${compact ? "h-[280px] sm:h-[360px]" : "h-[500px] sm:h-[calc(100vh-200px)] min-h-[400px] max-h-[700px]"}`}
     >
+      <MapClickHandler onMapTap={onMapTap} markerClickedRef={markerClickedRef} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -82,6 +106,7 @@ export default function MapView({ ideas, compact = false }: MapViewProps) {
           key={idea.id}
           position={[idea.latitude, idea.longitude]}
           icon={markerIcon(idea.status)}
+          eventHandlers={{ click: handleMarkerClick }}
         >
           <Popup>
             <div className="min-w-[180px] space-y-1.5">
