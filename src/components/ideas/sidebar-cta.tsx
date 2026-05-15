@@ -11,7 +11,7 @@ export function SidebarCta() {
   return (
     <Link href="/ideas/new" className="mt-auto block w-full">
       <motion.button
-        className="flex w-full items-center justify-center gap-2 bg-ink text-paper px-4 py-3 rounded-sm transition"
+        className="flex w-full items-center justify-center gap-2 bg-ink text-paper px-4 py-3 rounded-sm transition cursor-pointer"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >

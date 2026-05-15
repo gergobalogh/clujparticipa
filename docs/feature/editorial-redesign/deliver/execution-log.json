@@ -141,6 +141,254 @@
       "status": "EXECUTED",
       "data": "PASS",
       "timestamp": "2026-05-15T08:23:00Z"
+    },
+    {
+      "step_id": "02-02",
+      "phase": "PREPARE",
+      "status": "EXECUTED",
+      "data": "PASS",
+      "timestamp": "2026-05-15T08:29:00Z"
+    },
+    {
+      "step_id": "02-02",
+      "phase": "RED_ACCEPTANCE",
+      "status": "EXECUTED",
+      "data": "PASS: 4 acceptance tests written (header nav style, idea feed heading font-serif italic, map overlay heading font-serif, global selection CSS)",
+      "timestamp": "2026-05-15T08:29:30Z"
+    },
+    {
+      "step_id": "02-02",
+      "phase": "RED_UNIT",
+      "status": "SKIPPED",
+      "data": "NOT_APPLICABLE: acceptance tests cover all 4 distinct behaviors through driving port; unit tests would be redundant per TDD methodology rule",
+      "timestamp": "2026-05-15T08:29:45Z"
+    },
+    {
+      "step_id": "02-02",
+      "phase": "GREEN",
+      "status": "EXECUTED",
+      "data": "PASS: header nav text-[11px] font-bold, idea feed font-serif italic, map overlay font-serif, ::selection CSS rule added; 115 component tests + 181 lib tests pass, tsc clean, next build clean",
+      "timestamp": "2026-05-15T08:30:30Z"
+    },
+    {
+      "step_id": "02-02",
+      "phase": "COMMIT",
+      "status": "EXECUTED",
+      "data": "PASS: 540ae64 feat(editorial-redesign): apply editorial typographic styles",
+      "timestamp": "2026-05-15T08:31:00Z"
     }
-  ]
+  ],
+  "events": [
+    {
+      "sid": "03-01",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T08:52:33Z"
+    },
+    {
+      "sid": "03-01",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS: 4 EditorialIdeaCard acceptance tests + 3 LiveBadge parametrized tests",
+      "t": "2026-05-15T08:52:36Z"
+    },
+    {
+      "sid": "03-01",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: acceptance tests cover all 6 distinct behaviors through driving port; unit tests would test internal structure",
+      "t": "2026-05-15T08:52:37Z"
+    },
+    {
+      "sid": "03-01",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS: EditorialIdeaCard + LiveBadge implemented, lucide-react installed, 9 component tests pass, tsc clean",
+      "t": "2026-05-15T08:52:38Z"
+    },
+    {
+      "sid": "03-01",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "PASS: e6cf155 feat(editorial-redesign): create EditorialIdeaCard + LiveBadge components",
+      "t": "2026-05-15T08:52:39Z"
+    },
+    {
+      "sid": "03-02",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T08:55:22Z"
+    },
+    {
+      "sid": "03-02",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T08:56:36Z"
+    },
+    {
+      "sid": "03-02",
+      "p": "RED_UNIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T08:57:47Z"
+    },
+    {
+      "sid": "03-02",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T08:58:18Z"
+    },
+    {
+      "sid": "03-02",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T09:01:22Z"
+    },
+    {
+      "sid": "03-02",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T09:01:56Z"
+    },
+    {
+      "sid": "03-02",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS: 6 acceptance tests (EditorialIdeaCard replaces IdeaListRow, stagger delays, reduced-motion, SidebarCta, hero CTA removed, CTA label)",
+      "t": "2026-05-15T09:01:57Z"
+    },
+    {
+      "sid": "03-02",
+      "p": "RED_UNIT",
+      "s": "EXECUTED",
+      "d": "PASS: 5 unit tests for SidebarCta (bg-ink, Send icon, uppercase tracking, /ideas/new link, motion scales)",
+      "t": "2026-05-15T09:01:57Z"
+    },
+    {
+      "sid": "03-02",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS: EditorialIdeaCard wired with stagger, SidebarCta created, hero CTA removed, 24 tests pass, tsc clean",
+      "t": "2026-05-15T09:01:58Z"
+    },
+    {
+      "sid": "03-02",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "PASS: 1f7e6f4 feat(editorial-redesign): wire editorial cards with stagger + sidebar CTA",
+      "t": "2026-05-15T09:01:59Z"
+    },
+    {
+      "sid": "04-01",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T10:28:58Z"
+    },
+    {
+      "sid": "04-01",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T10:30:29Z"
+    },
+    {
+      "sid": "04-01",
+      "p": "RED_UNIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T10:30:35Z"
+    },
+    {
+      "sid": "04-01",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T10:32:20Z"
+    },
+    {
+      "sid": "04-01",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T10:32:43Z"
+    },
+    {
+      "sid": "04-02",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T10:38:25Z"
+    },
+    {
+      "sid": "04-02",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS: 4 acceptance tests for hover tooltip (district text, dark styling, hidden-by-default, marker preserved)",
+      "t": "2026-05-15T10:38:28Z"
+    },
+    {
+      "sid": "04-02",
+      "p": "RED_UNIT",
+      "s": "EXECUTED",
+      "d": "PASS: 4 unit tests for tooltip HTML structure (group wrapper, absolute position, group-hover opacity, whitespace-nowrap)",
+      "t": "2026-05-15T10:38:30Z"
+    },
+    {
+      "sid": "04-02",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS: markerIcon extended with district param, CSS-only hover tooltip, 16 map-view tests pass, tsc clean",
+      "t": "2026-05-15T10:38:33Z"
+    },
+    {
+      "sid": "04-02",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "PASS: efb8eb3 feat(editorial-redesign): add hover tooltips to map markers",
+      "t": "2026-05-15T10:38:36Z"
+    },
+    {
+      "sid": "05-01",
+      "p": "PREPARE",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T11:29:59.107406+00:00"
+    },
+    {
+      "sid": "05-01",
+      "p": "RED_ACCEPTANCE",
+      "s": "EXECUTED",
+      "d": "PASS: LiveBadge wiring acceptance test (2 tests: badge renders next to heading, hidden when no ideas/no voting)",
+      "t": "2026-05-15T11:29:59.107406+00:00"
+    },
+    {
+      "sid": "05-01",
+      "p": "RED_UNIT",
+      "s": "SKIPPED",
+      "d": "NOT_APPLICABLE: integration verification step; unit tests covered in prior steps",
+      "t": "2026-05-15T11:29:59.107406+00:00"
+    },
+    {
+      "sid": "05-01",
+      "p": "GREEN",
+      "s": "EXECUTED",
+      "d": "PASS: LiveBadge wired into sidebar heading, prefers-reduced-motion CSS rule added, overflow-x-hidden on sidebar, motion-reduce:animate-none on LiveBadge, 357 tests pass, tsc clean, next build clean",
+      "t": "2026-05-15T11:29:59.107406+00:00"
+    },
+    {
+      "sid": "05-01",
+      "p": "COMMIT",
+      "s": "EXECUTED",
+      "d": "PASS",
+      "t": "2026-05-15T11:29:59.107406+00:00"
+    }
+  ],
+  "schema_version": "3.0"
 }

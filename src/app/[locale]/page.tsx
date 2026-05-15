@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { EditorialIdeaCard } from "@/components/ideas/editorial-idea-card";
 import { SidebarCta } from "@/components/ideas/sidebar-cta";
+import { LiveBadge } from "@/components/ui/live-badge";
 import { HomeMapPreview } from "@/components/map/home-map-preview";
 import { computeCompletedCount, resolveZeroState } from "@/lib/home-stats";
 import type { IdeaMapData } from "@/components/map/map-view";
@@ -157,15 +158,21 @@ export default function LocaleHomePage() {
         {/* Sidebar: idea list */}
         <motion.aside
           data-testid="sidebar"
-          className="w-full md:w-[400px] shrink-0 flex flex-col overflow-y-auto max-h-[80vh]"
+          className="w-full md:w-[400px] shrink-0 flex flex-col overflow-y-auto overflow-x-hidden max-h-[80vh]"
           initial={prefersReducedMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
         >
           <div className="flex items-center justify-between border-b border-ink/10 pb-2">
-            <h2 className="font-serif italic text-ink">
-              {t("recentIdeas")}
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="font-serif italic text-ink">
+                {t("recentIdeas")}
+              </h2>
+              <LiveBadge
+                votingOpen={votingConfig?.isOpen ?? false}
+                totalIdeas={stats?.totalIdeas ?? 0}
+              />
+            </div>
             {stats && stats.recentIdeas.length > 0 && (
               <Link
                 href="/ideas"

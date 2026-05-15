@@ -149,6 +149,14 @@ vi.mock("@/components/ideas/sidebar-cta", () => ({
   ),
 }));
 
+// LiveBadge: lightweight stub — renders badge with data-testid
+vi.mock("@/components/ui/live-badge", () => ({
+  LiveBadge: ({ votingOpen, totalIdeas }: { votingOpen: boolean; totalIdeas: number }) => {
+    if (!votingOpen && totalIdeas <= 0) return null;
+    return <div data-testid="live-badge">Home.liveBadge</div>;
+  },
+}));
+
 // Fetch: return mock data so the page renders with stats and ideas
 const mockRecentIdeas = [
   { id: "1", title: "Park", category: "ENVIRONMENT", district: "CENTRU", status: "SUBMITTED", supportCount: 5, commentCount: 2, createdAt: "2025-01-01", firstImage: null },
@@ -394,5 +402,54 @@ describe("LocaleHomePage — Editorial cards in sidebar with stagger + CTA", () 
     const cta = screen.getByTestId("sidebar-cta");
     // The SidebarCta stub renders "Home.sendIdea" text
     expect(cta.textContent).toContain("Home.sendIdea");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Acceptance: LIVE Activity Badge (US-5 / Step 05-01 integration)
+// ---------------------------------------------------------------------------
+
+describe("LocaleHomePage — LIVE Activity Badge", () => {
+  it("renders LiveBadge next to the idea feed heading", async () => {
+    render(<LocaleHomePage />);
+    await waitFor(() => {
+      const badge = screen.getByTestId("live-badge");
+      expect(badge).toBeInTheDocument();
+    });
+  });
+
+  it("LiveBadge is hidden when no ideas and no voting", async () => {
+    // Override fetch to return zero ideas and no voting config
+    const fetchMock = vi.fn((url: string | Request | URL) => {
+      const path = typeof url === "string" ? url : url.toString();
+      if (path.includes("/api/stats")) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            totalIdeas: 0,
+            totalVotes: 0,
+            totalComments: 0,
+            recentIdeas: [],
+            statusCounts: {},
+          }),
+        } as Response);
+      }
+      if (path.includes("/api/voting-config")) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ config: { isOpen: false, startsAt: "", endsAt: "", label: null } }) } as Response);
+      }
+      if (path.includes("/api/ideas")) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ ideas: [] }) } as Response);
+      }
+      return Promise.resolve({ ok: false, json: () => Promise.resolve({}) } as Response);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<LocaleHomePage />);
+    await waitFor(() => {
+      // With zero ideas and no voting, badge should NOT be rendered
+      expect(screen.queryByTestId("live-badge")).not.toBeInTheDocument();
+    });
+
+    vi.restoreAllMocks();
   });
 });

@@ -15,7 +15,7 @@ export function LiveBadge({ votingOpen, totalIdeas }: LiveBadgeProps) {
   }
 
   return (
-    <span className="bg-ink text-paper animate-pulse rounded-sm px-2 py-0.5 text-xs font-semibold uppercase tracking-wide">
+    <span className="bg-ink text-paper animate-pulse motion-reduce:animate-none rounded-sm px-2 py-0.5 text-xs font-semibold uppercase tracking-wide">
       {t("liveBadge")}
     </span>
   );
