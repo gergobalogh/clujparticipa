@@ -38,7 +38,7 @@ export const categoryMarkerColors: Record<string, string> = {
 
 const activeStatuses = new Set(["IN_PROGRESS", "SELECTED"]);
 
-export function markerIcon(category: string, status: string) {
+export function markerIcon(category: string, status: string, district: string = "") {
   const color = categoryMarkerColors[category] ?? categoryMarkerColors.OTHER;
   const pulse = activeStatuses.has(status) ? "animate-pulse" : "";
   return L.divIcon({
@@ -46,7 +46,7 @@ export function markerIcon(category: string, status: string) {
     iconSize: [16, 16],
     iconAnchor: [8, 8],
     popupAnchor: [0, -10],
-    html: `<div class="ring-8 ${pulse}" style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>`,
+    html: `<div class="group relative" style="width:16px;height:16px"><div class="ring-8 ${pulse}" style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>${district ? `<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded px-1.5 py-0.5 text-xs opacity-0 transition-opacity group-hover:opacity-100 bg-ink text-paper pointer-events-none">${district}</div>` : ""}</div>`,
   });
 }
 
@@ -99,7 +99,7 @@ export default function MapView({ ideas, compact = false, defaultCenter = CLUJ_C
         <Marker
           key={idea.id}
           position={[idea.latitude, idea.longitude]}
-          icon={markerIcon(idea.category, idea.status)}
+          icon={markerIcon(idea.category, idea.status, idea.district)}
           eventHandlers={{ click: handleMarkerClick }}
         >
           <Popup>
