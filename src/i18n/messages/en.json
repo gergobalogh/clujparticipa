@@ -389,5 +389,10 @@
   "Stalled": {
     "label": "Stalled",
     "waitingDays": "{days} days without update"
+  },
+  "MiniPipeline": {
+    "submitted": "Submitted",
+    "inVoting": "In Voting",
+    "completed": "Completed"
   }
 }

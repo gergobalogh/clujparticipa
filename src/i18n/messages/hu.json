@@ -380,5 +380,10 @@
   "Stalled": {
     "label": "Akadályozva",
     "waitingDays": "{days} nap frissítés nélkül"
+  },
+  "MiniPipeline": {
+    "submitted": "Beküldve",
+    "inVoting": "Szavazás alatt",
+    "completed": "Befejezett"
   }
 }

@@ -380,5 +380,10 @@
   "Stalled": {
     "label": "Blocată",
     "waitingDays": "{days} zile fără actualizare"
+  },
+  "MiniPipeline": {
+    "submitted": "Trimisă",
+    "inVoting": "În votare",
+    "completed": "Finalizată"
   }
 }
