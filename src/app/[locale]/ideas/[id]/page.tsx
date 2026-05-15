@@ -10,7 +10,9 @@ import { VOTE_ELIGIBLE_STATUSES, SUPPORT_LABEL_STATUSES } from "@/lib/transition
 import { MapPickerLoader } from "@/components/map/map-picker-loader";
 import { IdeaCarousel, CarouselImage } from "@/components/ideas/idea-carousel";
 import { IdeaPipeline } from "@/components/ideas/idea-pipeline";
+import { StatusChangeTimeline } from "@/components/ideas/status-change-timeline";
 import { VotingCountdown } from "@/components/ideas/voting-countdown";
+import { mapStatusChangesToTimelineEntries } from "@/lib/timeline-mapping";
 import { getOrCreateParticipantToken } from "@/lib/client-participant";
 import { computePipelineStages, getExceptionState } from "@/lib/pipeline-computation";
 import { detectStalledIdea } from "@/lib/stalled-detector";
@@ -85,6 +87,7 @@ export default function IdeaDetailPage() {
   const ts = useTranslations("Statuses");
   const ta = useTranslations("Auth");
   const tp = useTranslations("Pipeline");
+  const ttl = useTranslations("Timeline");
   const { data: session } = useSession();
   const { id } = useParams<{ id: string }>();
 
@@ -276,6 +279,8 @@ export default function IdeaDetailPage() {
   const stalledDays = stalledInfo.isStalled
     ? stalledInfo.daysSinceLastChange
     : undefined;
+
+  const timelineEntries = mapStatusChangesToTimelineEntries(idea.statusChanges);
 
   const voteSection = showVoteSection ? (
     <div className="rounded-sm border border-ink/10 px-4 py-4 bg-paper">
@@ -520,31 +525,13 @@ export default function IdeaDetailPage() {
           </div>
 
           {/* Status timeline */}
-          {idea.statusChanges.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-ink-muted">{t("statusTimeline")}</h2>
-              <ol className="mt-3 space-y-3 border-l-2 border-ink/10 pl-4">
-                {idea.statusChanges.map((sc) => (
-                  <li key={sc.id} className="relative">
-                    <div className="absolute -left-[21px] top-1 h-3 w-3 rounded-full border-2 border-paper bg-ink/30" />
-                    <div className="text-sm">
-                      <span className="font-medium text-ink">
-                        {sc.fromStatus ? ts(sc.fromStatus as Parameters<typeof ts>[0]) : ts("none")}
-                      </span>
-                      {" → "}
-                      <span className="font-medium text-civic-blue">
-                        {ts(sc.toStatus as Parameters<typeof ts>[0])}
-                      </span>
-                    </div>
-                    <p className="text-sm text-ink-muted">{sc.note}</p>
-                    <p className="text-xs text-ink-muted">
-                      {new Date(sc.createdAt).toLocaleDateString()} · {sc.changedBy}
-                    </p>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
+          <div className="mt-8">
+            <StatusChangeTimeline
+              entries={timelineEntries}
+              noUpdatesLabel={ttl("noUpdatesYet")}
+              viewHistoryLabel={ttl("viewFullHistory")}
+            />
+          </div>
 
           {/* Comments */}
           <div className="mt-8">
