@@ -102,7 +102,7 @@ export default function NewIdeaPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Error");
+        setError(data.error || t("submissionError"));
         return;
       }
 
@@ -112,7 +112,7 @@ export default function NewIdeaPage() {
       // Prompt for notification permission after successful submission
       requestPermission();
     } catch {
-      setError("Error");
+      setError(t("submissionError"));
     } finally {
       setSubmitting(false);
     }

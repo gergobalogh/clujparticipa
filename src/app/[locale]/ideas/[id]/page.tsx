@@ -210,10 +210,10 @@ export default function IdeaDetailPage() {
         setCommentText("");
         await refreshComments();
       } else {
-        setCommentError("Error");
+        setCommentError(t("commentError"));
       }
     } catch {
-      setCommentError("Error");
+      setCommentError(t("commentError"));
     } finally {
       setSubmittingComment(false);
     }
@@ -238,10 +238,10 @@ export default function IdeaDetailPage() {
         setReplyTo(null);
         await refreshComments();
       } else {
-        setCommentError("Error");
+        setCommentError(t("commentError"));
       }
     } catch {
-      setCommentError("Error");
+      setCommentError(t("commentError"));
     } finally {
       setSubmittingComment(false);
     }
@@ -293,7 +293,7 @@ export default function IdeaDetailPage() {
     lastStatusChangeDate
   );
   const stalledLabel = stalledInfo.isStalled
-    ? `${tp("waitingFor")}: ${stalledInfo.waitingForLabel}`
+    ? stalledInfo.waitingForLabel
     : undefined;
   const stalledDays = stalledInfo.isStalled
     ? stalledInfo.daysSinceLastChange

@@ -124,7 +124,7 @@ export default function LocaleHomePage() {
             <div className="flex items-center gap-2 rounded-sm border border-ink/8 bg-paper px-3 py-2">
               <span className={`h-2 w-2 rounded-full ${votingConfig.isOpen ? "bg-civic-teal" : "bg-ink-muted"}`} aria-hidden="true" />
               <span className="text-xs text-ink-muted">{t("votingPhase")}:</span>
-              <span className="text-xs font-semibold text-ink">{votingConfig.isOpen ? "Open" : "Closed"}</span>
+              <span className="text-xs font-semibold text-ink">{votingConfig.isOpen ? t("votingOpen") : t("votingClosed")}</span>
             </div>
           )}
         </section>
@@ -142,7 +142,7 @@ export default function LocaleHomePage() {
 
       {statsError && (
         <p role="alert" className="mb-6 text-sm text-ink-muted">
-          {t("statsTitle")} — unavailable
+          {t("statsTitle")} — {t("unavailable")}
         </p>
       )}
 

@@ -66,7 +66,10 @@
     "activeDistricts": "Cartiere active",
     "beFirst": "Fii primul care trimite o idee în acest cartier!",
     "noIdeas": "Nicio idee încă.",
-    "noIdeasAtAll": "Nu există idei încă. Fii primul care propune o îmbunătățire pentru Cluj-Napoca!"
+    "noIdeasAtAll": "Nu există idei încă. Fii primul care propune o îmbunătățire pentru Cluj-Napoca!",
+    "votingOpen": "Deschisă",
+    "votingClosed": "Închisă",
+    "unavailable": "indisponibil"
   },
   "Ideas": {
     "title": "Idei",
@@ -109,7 +112,8 @@
     "success": "Ideea a fost trimisă cu succes!",
     "viewIdea": "Vezi ideea",
     "required": "Obligatoriu",
-    "notifyLabel": "Notifică-mă pe email când statusul ideii se schimbă."
+    "notifyLabel": "Notifică-mă pe email când statusul ideii se schimbă.",
+    "submissionError": "A apărut o eroare la trimiterea ideii."
   },
   "ImageUpload": {
     "label": "Fotografii (opțional)",
@@ -171,7 +175,8 @@
     "votingDays": "zile",
     "votingHours": "ore",
     "votingMinutes": "minute",
-    "progressUpdatesHeading": "Actualizări de progres"
+    "progressUpdatesHeading": "Actualizări de progres",
+    "commentError": "A apărut o eroare la adăugarea comentariului."
   },
   "Map": {
     "title": "Hartă",
@@ -181,7 +186,8 @@
     "filterStatus": "Status",
     "allCategories": "Toate",
     "allStatuses": "Toate",
-    "noIdeasOnMap": "Nicio idee nu corespunde filtrelor selectate."
+    "noIdeasOnMap": "Nicio idee nu corespunde filtrelor selectate.",
+    "support": "susținere"
   },
   "Admin": {
     "title": "Administrare",
@@ -382,7 +388,12 @@
   },
   "Stalled": {
     "label": "Blocată",
-    "waitingDays": "{days} zile fără actualizare"
+    "waitingDays": "{days} zile fără actualizare",
+    "waitingForDepartmentReview": "Revizuire de direcție",
+    "waitingForEligibility": "Evaluarea eligibilității",
+    "waitingForVotingPeriod": "Perioada de votare publică",
+    "waitingForSelection": "Selecție pentru implementare",
+    "waitingForImplementation": "Implementare în curs"
   },
   "MiniPipeline": {
     "submitted": "Trimisă",

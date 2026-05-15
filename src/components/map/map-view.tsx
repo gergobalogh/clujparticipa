@@ -107,7 +107,7 @@ export default function MapView({ ideas, compact = false, defaultCenter = CLUJ_C
                 </Badge>
               </div>
               <span className="block text-xs text-ink-muted">
-                {idea.supportCount} support
+                {idea.supportCount} {t("support")}
               </span>
               <Link
                 href={`/ideas/${idea.id}`}

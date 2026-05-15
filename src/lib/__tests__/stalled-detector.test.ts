@@ -16,7 +16,7 @@ describe("detectStalledIdea", () => {
       const result = detectStalledIdea("UNDER_REVIEW", daysAgo(35, now), now);
       expect(result.isStalled).toBe(true);
       expect(result.daysSinceLastChange).toBe(35);
-      expect(result.waitingForLabel).toBe("City department review");
+      expect(result.waitingForLabel).toBe("waitingForDepartmentReview");
     });
 
     it("UNDER_REVIEW at 15 days is not stalled", () => {
@@ -31,7 +31,7 @@ describe("detectStalledIdea", () => {
 
     it("ELIGIBLE at 40 days has waitingForLabel 'Eligibility assessment'", () => {
       const result = detectStalledIdea("ELIGIBLE", daysAgo(40, now), now);
-      expect(result.waitingForLabel).toBe("Eligibility assessment");
+      expect(result.waitingForLabel).toBe("waitingForEligibility");
     });
   });
 
@@ -77,11 +77,11 @@ describe("detectStalledIdea", () => {
 
   describe("waiting labels per upstream-issues.md", () => {
     const expectedLabels: [Status, string][] = [
-      ["UNDER_REVIEW", "City department review"],
-      ["ELIGIBLE", "Eligibility assessment"],
-      ["IN_VOTING", "Public voting period"],
-      ["SELECTED", "Selection for implementation"],
-      ["IN_PROGRESS", "Implementation in progress"],
+      ["UNDER_REVIEW", "waitingForDepartmentReview"],
+      ["ELIGIBLE", "waitingForEligibility"],
+      ["IN_VOTING", "waitingForVotingPeriod"],
+      ["SELECTED", "waitingForSelection"],
+      ["IN_PROGRESS", "waitingForImplementation"],
     ];
 
     it("maps each stall-eligible status to its correct label", () => {

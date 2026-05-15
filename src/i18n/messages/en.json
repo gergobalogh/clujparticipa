@@ -75,7 +75,10 @@
     "activeDistricts": "Active districts",
     "beFirst": "Be the first to submit an idea in this district!",
     "noIdeas": "No ideas yet.",
-    "noIdeasAtAll": "No ideas yet. Be the first to propose an improvement for Cluj-Napoca!"
+    "noIdeasAtAll": "No ideas yet. Be the first to propose an improvement for Cluj-Napoca!",
+    "votingOpen": "Open",
+    "votingClosed": "Closed",
+    "unavailable": "unavailable"
   },
   "Ideas": {
     "title": "Ideas",
@@ -118,7 +121,8 @@
     "success": "Idea submitted successfully!",
     "viewIdea": "View idea",
     "required": "Required",
-    "notifyLabel": "Notify me by email when the idea's status changes."
+    "notifyLabel": "Notify me by email when the idea's status changes.",
+    "submissionError": "An error occurred while submitting the idea."
   },
   "ImageUpload": {
     "label": "Photos (optional)",
@@ -180,7 +184,8 @@
     "votingDays": "days",
     "votingHours": "hours",
     "votingMinutes": "minutes",
-    "progressUpdatesHeading": "Progress Updates"
+    "progressUpdatesHeading": "Progress Updates",
+    "commentError": "An error occurred while adding the comment."
   },
   "Map": {
     "title": "Map",
@@ -190,7 +195,8 @@
     "filterStatus": "Status",
     "allCategories": "All",
     "allStatuses": "All",
-    "noIdeasOnMap": "No ideas match the selected filters."
+    "noIdeasOnMap": "No ideas match the selected filters.",
+    "support": "support"
   },
   "Admin": {
     "title": "Administration",
@@ -391,7 +397,12 @@
   },
   "Stalled": {
     "label": "Stalled",
-    "waitingDays": "{days} days without update"
+    "waitingDays": "{days} days without update",
+    "waitingForDepartmentReview": "City department review",
+    "waitingForEligibility": "Eligibility assessment",
+    "waitingForVotingPeriod": "Public voting period",
+    "waitingForSelection": "Selection for implementation",
+    "waitingForImplementation": "Implementation in progress"
   },
   "MiniPipeline": {
     "submitted": "Submitted",

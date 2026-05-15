@@ -9,6 +9,7 @@ import { StatusChangeTimeline, TimelineEntry } from "../status-change-timeline";
 vi.mock("next-intl", () => ({
   useTranslations: (namespace: string) => (key: string) =>
     `${namespace}.${key}`,
+  useLocale: () => "en",
 }));
 
 const sampleEntries: TimelineEntry[] = [

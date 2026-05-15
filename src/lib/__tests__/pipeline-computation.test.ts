@@ -26,40 +26,14 @@ type IdeaData = {
   statusChanges: StatusChange[];
 };
 
-/** The function under test -- will be implemented in pipeline-computation.ts */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let computePipelineStages: (idea: IdeaData) => PipelineStage[];
-
-/** Detect exception state from idea status -- will be co-located or imported */
-let getExceptionState: (status: Status) => "REJECTED" | "MERGED" | "RETURNED" | "STALLED" | undefined;
-
-/** Resolve exception type from status + most recent rejection status change note */
-let resolveExceptionType: (status: Status, statusChanges: StatusChange[]) => "REJECTED" | "MERGED" | "RETURNED" | undefined;
-
-/** Find the most recent StatusChange where toStatus === "REJECTED" */
-let findRejectionChange: (statusChanges: StatusChange[]) => StatusChange | null;
-
-/** Extract parent idea ID from a MERGED note (e.g. "[MERGED] idea #abc123" -> "abc123") */
-let parseMergeNote: (note: string) => { parentIdeaId: string | null; parentIdeaTitle: string | null };
-
-/** Extract admin feedback text from a RETURNED note (e.g. "[RETURNED] Please add details" -> "Please add details") */
-let parseReturnNote: (note: string) => string;
-
-/**
- * These imports will be activated once the implementation module exists.
- * For now, the tests serve as the RED-phase contract.
- */
-try {
-  const mod = await import("../pipeline-computation");
-  computePipelineStages = mod.computePipelineStages;
-  getExceptionState = mod.getExceptionState;
-  resolveExceptionType = mod.resolveExceptionType;
-  findRejectionChange = mod.findRejectionChange;
-  parseMergeNote = mod.parseMergeNote;
-  parseReturnNote = mod.parseReturnNote;
-} catch {
-  // Module does not exist yet -- RED phase. Tests must fail.
-}
+import {
+  computePipelineStages,
+  getExceptionState,
+  resolveExceptionType,
+  findRejectionChange,
+  parseMergeNote,
+  parseReturnNote,
+} from "../pipeline-computation";
 
 describe("computePipelineStages", () => {
   describe("happy path: SUBMITTED idea with no status changes", () => {

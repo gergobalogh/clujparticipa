@@ -66,7 +66,10 @@
     "activeDistricts": "Aktív körzetek",
     "beFirst": "Legyél te az első, aki ötletet küld be ebben a városrészben!",
     "noIdeas": "Még nincsenek ötletek.",
-    "noIdeasAtAll": "Még nincsenek ötletek. Legyél te az első, aki javaslatot tesz Kolozsvár számára!"
+    "noIdeasAtAll": "Még nincsenek ötletek. Legyél te az első, aki javaslatot tesz Kolozsvár számára!",
+    "votingOpen": "Nyitva",
+    "votingClosed": "Zárva",
+    "unavailable": "nem elérhető"
   },
   "Ideas": {
     "title": "Ötletek",
@@ -109,7 +112,8 @@
     "success": "Az ötlet sikeresen beküldve!",
     "viewIdea": "Ötlet megtekintése",
     "required": "Kötelező",
-    "notifyLabel": "Értesíts e-mailben, ha az ötlet státusza megváltozik."
+    "notifyLabel": "Értesíts e-mailben, ha az ötlet státusza megváltozik.",
+    "submissionError": "Hiba történt az ötlet beküldésekor."
   },
   "ImageUpload": {
     "label": "Fényképek (nem kötelező)",
@@ -171,7 +175,8 @@
     "votingDays": "nap",
     "votingHours": "óra",
     "votingMinutes": "perc",
-    "progressUpdatesHeading": "Előrehaladási jelentések"
+    "progressUpdatesHeading": "Előrehaladási jelentések",
+    "commentError": "Hiba történt a hozzászólás hozzáadásakor."
   },
   "Map": {
     "title": "Térkép",
@@ -181,7 +186,8 @@
     "filterStatus": "Státusz",
     "allCategories": "Mind",
     "allStatuses": "Mind",
-    "noIdeasOnMap": "Nincs olyan ötlet, amely megfelel a kiválasztott szűrőknek."
+    "noIdeasOnMap": "Nincs olyan ötlet, amely megfelel a kiválasztott szűrőknek.",
+    "support": "támogatás"
   },
   "Admin": {
     "title": "Adminisztráció",
@@ -382,7 +388,12 @@
   },
   "Stalled": {
     "label": "Akadályozva",
-    "waitingDays": "{days} nap frissítés nélkül"
+    "waitingDays": "{days} nap frissítés nélkül",
+    "waitingForDepartmentReview": "Hivatali felülvizsgálat",
+    "waitingForEligibility": "Jogosultsági értékelés",
+    "waitingForVotingPeriod": "Nyilvános szavazási időszak",
+    "waitingForSelection": "Kiválasztás megvalósításra",
+    "waitingForImplementation": "Megvalósítás folyamatban"
   },
   "MiniPipeline": {
     "submitted": "Beküldve",

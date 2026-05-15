@@ -14,19 +14,19 @@ vi.mock("next-intl", () => ({
 describe("StalledIndicator", () => {
   it("shows 'Waiting for' label with provided label text and Pipeline namespace", () => {
     const { container } = render(
-      <StalledIndicator label="City department review" daysAgo={35} />
+      <StalledIndicator label="waitingForDepartmentReview" daysAgo={35} />
     );
 
     expect(container.textContent).toContain("Pipeline.waitingFor");
-    expect(container.textContent).toContain("City department review");
+    expect(container.textContent).toContain("Stalled.waitingForDepartmentReview");
     expect(container.querySelector(".text-amber-500")).toBeInTheDocument();
   });
 
   it("shows days ago count with locale key for various values", () => {
     const cases = [
-      { daysAgo: 0, label: "Eligibility assessment" },
-      { daysAgo: 35, label: "City department review" },
-      { daysAgo: 365, label: "Implementation in progress" },
+      { daysAgo: 0, label: "waitingForEligibility" },
+      { daysAgo: 35, label: "waitingForDepartmentReview" },
+      { daysAgo: 365, label: "waitingForImplementation" },
     ];
 
     for (const { daysAgo, label } of cases) {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { JSX } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export type TimelineEntry = {
   id: string;
@@ -19,8 +19,8 @@ export type StatusChangeTimelineProps = {
   viewHistoryLabel: string;
 };
 
-const formatDate = (isoDate: string): string =>
-  new Intl.DateTimeFormat("ro-RO", {
+const formatDate = (isoDate: string, locale: string | undefined): string =>
+  new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -29,11 +29,13 @@ const formatDate = (isoDate: string): string =>
 function TimelineEntryRow({
   entry,
   translateStatus,
+  locale,
 }: {
   entry: TimelineEntry;
   translateStatus: (key: string) => string;
+  locale: string | undefined;
 }): JSX.Element {
-  const formattedDate = formatDate(entry.date);
+  const formattedDate = formatDate(entry.date, locale);
 
   return (
     <div className="relative pl-6 pb-4 border-l border-gray-200 last:border-l-0">
@@ -67,6 +69,7 @@ export function StatusChangeTimeline({
 }: StatusChangeTimelineProps): JSX.Element {
   const [expanded, setExpanded] = useState(false);
   const ts = useTranslations("Statuses");
+  const locale = useLocale();
 
   if (entries.length === 0) {
     return <p className="text-sm text-gray-500">{noUpdatesLabel}</p>;
@@ -90,6 +93,7 @@ export function StatusChangeTimeline({
             <TimelineEntryRow
               key={entry.id}
               entry={entry}
+              locale={locale}
               translateStatus={(key) => ts(key as Parameters<typeof ts>[0])}
             />
           ))}

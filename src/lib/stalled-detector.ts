@@ -9,11 +9,11 @@ export type StalledInfo = {
 
 const STALLED_WAITING_LABELS: Record<Status, string> = {
   SUBMITTED: "",
-  UNDER_REVIEW: "City department review",
-  ELIGIBLE: "Eligibility assessment",
-  IN_VOTING: "Public voting period",
-  SELECTED: "Selection for implementation",
-  IN_PROGRESS: "Implementation in progress",
+  UNDER_REVIEW: "waitingForDepartmentReview",
+  ELIGIBLE: "waitingForEligibility",
+  IN_VOTING: "waitingForVotingPeriod",
+  SELECTED: "waitingForSelection",
+  IN_PROGRESS: "waitingForImplementation",
   COMPLETED: "",
   REJECTED: "",
 };

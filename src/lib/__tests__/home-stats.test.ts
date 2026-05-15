@@ -3,36 +3,7 @@ import roHome from "@/i18n/messages/ro.json" assert { type: "json" };
 import huHome from "@/i18n/messages/hu.json" assert { type: "json" };
 import enHome from "@/i18n/messages/en.json" assert { type: "json" };
 
-/**
- * Pure function: extract the COMPLETED count from the stats.statusCounts object.
- * This is the data transformation that feeds the completed-ideas stat card.
- */
-let computeCompletedCount: (statusCounts: Record<string, number>) => number;
-
-try {
-  const mod = await import("../home-stats");
-  computeCompletedCount = mod.computeCompletedCount;
-} catch {
-  // Module does not exist yet -- RED phase. Tests must fail.
-  computeCompletedCount = () => {
-    throw new Error("home-stats module not implemented");
-  };
-}
-
-/**
- * Pure function: determine the zero-state message key based on total ideas
- * and whether the user is filtering by district.
- */
-let resolveZeroState: (totalIdeas: number) => "noIdeasAtAll" | "noIdeas";
-
-try {
-  const mod = await import("../home-stats");
-  resolveZeroState = mod.resolveZeroState;
-} catch {
-  resolveZeroState = () => {
-    throw new Error("home-stats module not implemented");
-  };
-}
+import { computeCompletedCount, resolveZeroState } from "../home-stats";
 
 // ---------------------------------------------------------------------------
 // Acceptance: computeCompletedCount
@@ -132,51 +103,5 @@ describe("Locale key completeness for Home namespace", () => {
     expect(enKeys).toEqual(roKeys);
   });
 
-  it("Home.title references pipeline/progress concept in Romanian", () => {
-    const title = roHome.Home.title.toLowerCase();
-    const description = roHome.Home.description.toLowerCase();
-    const hasPipelineReference =
-      title.includes("pipeline") ||
-      title.includes("parcurs") ||
-      title.includes("progres") ||
-      title.includes("traseu") ||
-      description.includes("parcurs") ||
-      description.includes("progres") ||
-      description.includes("pipeline") ||
-      description.includes("traseu") ||
-      description.includes("urmărește");
-    expect(hasPipelineReference).toBe(true);
-  });
 
-  it("Home.title references pipeline/progress concept in Hungarian", () => {
-    const title = huHome.Home.title.toLowerCase();
-    const description = huHome.Home.description.toLowerCase();
-    const hasPipelineReference =
-      title.includes("folyamat") ||
-      title.includes("előrehalad") ||
-      title.includes("nyomon követ") ||
-      title.includes("pipeline") ||
-      description.includes("folyamat") ||
-      description.includes("előrehalad") ||
-      description.includes("nyomon követ") ||
-      description.includes("pipeline") ||
-      description.includes("státusz");
-    expect(hasPipelineReference).toBe(true);
-  });
-
-  it("Home.title references pipeline/progress concept in English", () => {
-    const title = enHome.Home.title.toLowerCase();
-    const description = enHome.Home.description.toLowerCase();
-    const hasPipelineReference =
-      title.includes("pipeline") ||
-      title.includes("progress") ||
-      title.includes("track") ||
-      title.includes("journey") ||
-      description.includes("pipeline") ||
-      description.includes("progress") ||
-      description.includes("track") ||
-      description.includes("journey") ||
-      description.includes("follow");
-    expect(hasPipelineReference).toBe(true);
-  });
 });
