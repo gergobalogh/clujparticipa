@@ -397,5 +397,9 @@
     "submitted": "Submitted",
     "inVoting": "In Voting",
     "completed": "Completed"
+  },
+  "Timeline": {
+    "viewFullHistory": "View full history",
+    "noUpdatesYet": "No updates yet"
   }
 }

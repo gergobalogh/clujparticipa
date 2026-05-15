@@ -388,5 +388,9 @@
     "submitted": "Beküldve",
     "inVoting": "Szavazás alatt",
     "completed": "Befejezett"
+  },
+  "Timeline": {
+    "viewFullHistory": "Teljes előzmények megtekintése",
+    "noUpdatesYet": "Még nincs frissítés"
   }
 }

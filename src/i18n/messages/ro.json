@@ -388,5 +388,9 @@
     "submitted": "Trimisă",
     "inVoting": "În votare",
     "completed": "Finalizată"
+  },
+  "Timeline": {
+    "viewFullHistory": "Vezi istoricul complet",
+    "noUpdatesYet": "Nicio actualizare încă"
   }
 }
