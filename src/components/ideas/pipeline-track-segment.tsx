@@ -9,6 +9,8 @@ export type PipelineTrackSegmentProps = {
   stage: PipelineStage;
   exceptionState?: "REJECTED" | "MERGED" | "RETURNED" | "STALLED";
   index: number;
+  isVertical?: boolean;
+  labelPosition?: "before" | "after";
 };
 
 const STAGE_MARKER_COLORS: Record<string, string> = {
@@ -29,6 +31,8 @@ export function PipelineTrackSegment({
   stage,
   exceptionState,
   index,
+  isVertical = false,
+  labelPosition = "after",
 }: PipelineTrackSegmentProps): JSX.Element {
   const t = useTranslations("Statuses");
   const isRejected = exceptionState === "REJECTED";
@@ -70,7 +74,12 @@ export function PipelineTrackSegment({
       </motion.div>
 
       <span
-        className={`mt-2 text-sm ${
+        data-testid="stage-label"
+        className={`text-sm ${
+          labelPosition === "before" ? "order-before" : "order-after"
+        } ${
+          isVertical ? "ml-2" : labelPosition === "before" ? "mb-2" : "mt-2"
+        } ${
           isCurrent
             ? "font-semibold text-ink"
             : isRejected
