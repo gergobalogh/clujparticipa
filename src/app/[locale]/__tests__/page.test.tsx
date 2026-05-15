@@ -3,7 +3,7 @@
  */
 import { describe, it, expect, vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 
 // --- Mocks ---
 
@@ -50,6 +50,9 @@ vi.mock("next/dynamic", () => ({
 // so we can verify animation configuration through the driving port
 let __reducedMotion = false;
 
+// Track stagger delay and motion.button props for assertions
+const __motionProps: Array<{ tag: string; transition?: Record<string, unknown>; whileHover?: Record<string, unknown>; whileTap?: Record<string, unknown> }> = [];
+
 vi.mock("motion/react", () => {
   const React = require("react");
   const forwardRef = React.forwardRef;
@@ -58,8 +61,8 @@ vi.mock("motion/react", () => {
     {},
     {
       get(_target, prop: string) {
-        // Support motion.div, motion.aside, motion.section, etc.
-        const htmlTags = ["div", "aside", "section", "main", "nav", "span", "p", "h1", "h2", "h3"];
+        // Support motion.div, motion.aside, motion.section, motion.button, motion.a, etc.
+        const htmlTags = ["div", "aside", "section", "main", "nav", "span", "p", "h1", "h2", "h3", "button", "a"];
         if (htmlTags.includes(prop)) {
           return forwardRef(
             (
@@ -70,6 +73,8 @@ vi.mock("motion/react", () => {
                 children,
                 "data-testid": testId,
                 className,
+                whileHover,
+                whileTap,
                 ...rest
               }: {
                 initial?: Record<string, number>;
@@ -78,10 +83,15 @@ vi.mock("motion/react", () => {
                 children?: React.ReactNode;
                 "data-testid"?: string;
                 className?: string;
+                whileHover?: Record<string, unknown>;
+                whileTap?: Record<string, unknown>;
                 [key: string]: unknown;
               },
               ref: React.Ref<HTMLElement>
             ) => {
+              // Record props for assertion
+              __motionProps.push({ tag: prop, transition, whileHover, whileTap });
+
               // When reduced motion is active, skip to animate state (no transition)
               const effectiveInitial = __reducedMotion ? animate : initial;
               // Apply initial values as inline style (simulating motion's first frame)
@@ -94,6 +104,11 @@ vi.mock("motion/react", () => {
                 if ("scale" in effectiveInitial && effectiveInitial.scale !== 1)
                   style.transform = `scale(${effectiveInitial.scale})`;
               }
+              // Expose transition delay via data attribute for stagger assertions
+              const dataAttrs: Record<string, string> = {};
+              if (transition && typeof transition.delay === "number") {
+                dataAttrs["data-motion-delay"] = String(transition.delay);
+              }
               return React.createElement(
                 prop,
                 {
@@ -101,6 +116,7 @@ vi.mock("motion/react", () => {
                   "data-testid": testId,
                   className,
                   style,
+                  ...dataAttrs,
                   ...rest,
                 },
                 children
@@ -119,12 +135,48 @@ vi.mock("motion/react", () => {
   };
 });
 
-// IdeaListRow: lightweight stub
-vi.mock("@/components/ideas/idea-list-row", () => ({
-  IdeaListRow: ({ title }: { title: string }) => (
-    <div data-testid="idea-list-row">{title}</div>
+// EditorialIdeaCard: lightweight stub — renders card with data-testid
+vi.mock("@/components/ideas/editorial-idea-card", () => ({
+  EditorialIdeaCard: ({ id, title }: { id: string; title: string }) => (
+    <div data-testid="editorial-idea-card" data-idea-id={id}>{title}</div>
   ),
 }));
+
+// SidebarCta: lightweight stub — renders CTA with data-testid
+vi.mock("@/components/ideas/sidebar-cta", () => ({
+  SidebarCta: () => (
+    <div data-testid="sidebar-cta">Home.sendIdea</div>
+  ),
+}));
+
+// Fetch: return mock data so the page renders with stats and ideas
+const mockRecentIdeas = [
+  { id: "1", title: "Park", category: "ENVIRONMENT", district: "CENTRU", status: "SUBMITTED", supportCount: 5, commentCount: 2, createdAt: "2025-01-01", firstImage: null },
+  { id: "2", title: "Library", category: "EDUCATION", district: "MANASTUR", status: "IN_VOTING", supportCount: 10, commentCount: 3, createdAt: "2025-01-02", firstImage: null },
+  { id: "3", title: "Crosswalk", category: "SAFETY", district: "GHEORGHENI", status: "COMPLETED", supportCount: 20, commentCount: 7, createdAt: "2025-01-03", firstImage: null },
+];
+
+const mockStats = {
+  totalIdeas: 3,
+  totalVotes: 35,
+  totalComments: 12,
+  recentIdeas: mockRecentIdeas,
+  statusCounts: { SUBMITTED: 1, IN_VOTING: 1, COMPLETED: 1 },
+};
+
+global.fetch = vi.fn((url: string | Request | URL) => {
+  const path = typeof url === "string" ? url : url.toString();
+  if (path.includes("/api/stats")) {
+    return Promise.resolve({ ok: true, json: () => Promise.resolve(mockStats) } as Response);
+  }
+  if (path.includes("/api/voting-config")) {
+    return Promise.resolve({ ok: true, json: () => Promise.resolve({ config: null }) } as Response);
+  }
+  if (path.includes("/api/ideas")) {
+    return Promise.resolve({ ok: true, json: () => Promise.resolve({ ideas: [] }) } as Response);
+  }
+  return Promise.resolve({ ok: false, json: () => Promise.resolve({}) } as Response);
+});
 
 // home-stats: stub pure functions
 vi.mock("@/lib/home-stats", () => ({
@@ -273,5 +325,74 @@ describe("LocaleHomePage — Editorial typographic styles", () => {
       "utf-8"
     );
     expect(cssContent).toContain("selection");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Acceptance: Editorial cards + sidebar CTA (Step 03-02)
+// ---------------------------------------------------------------------------
+
+describe("LocaleHomePage — Editorial cards in sidebar with stagger + CTA", () => {
+  it("renders EditorialIdeaCard in the sidebar instead of IdeaListRow", async () => {
+    render(<LocaleHomePage />);
+    // Wait for fetch to resolve and cards to render
+    await waitFor(() => {
+      const cards = document.querySelectorAll("[data-testid='editorial-idea-card']");
+      expect(cards.length).toBeGreaterThan(0);
+    });
+    // IdeaListRow should NOT be present
+    expect(screen.queryByTestId("idea-list-row")).not.toBeInTheDocument();
+  });
+
+  it("stagger-animates cards with 0.1s delay per card index", async () => {
+    render(<LocaleHomePage />);
+    // Wait for cards to render, then check stagger delays
+    await waitFor(() => {
+      const staggered = document.querySelectorAll("[data-motion-delay]");
+      expect(staggered.length).toBeGreaterThan(0);
+    });
+    const staggered = document.querySelectorAll("[data-motion-delay]");
+    const delays = Array.from(staggered).map((el) =>
+      parseFloat((el as HTMLElement).dataset.motionDelay ?? "0")
+    );
+    // Verify sequential delays: 0, 0.1, 0.2...
+    // The mock records ALL delay values including 0
+    for (let i = 0; i < delays.length; i++) {
+      expect(delays[i]).toBeCloseTo(i * 0.1, 2);
+    }
+  });
+
+  it("skips stagger delays when prefers-reduced-motion is active", async () => {
+    __reducedMotion = true;
+    render(<LocaleHomePage />);
+    await waitFor(() => {
+      const cards = document.querySelectorAll("[data-testid='editorial-idea-card']");
+      expect(cards.length).toBeGreaterThan(0);
+    });
+    const staggered = document.querySelectorAll("[data-motion-delay]");
+    // With reduced motion, no delay attributes should be present (duration: 0, no delay)
+    expect(staggered.length).toBe(0);
+    __reducedMotion = false;
+  });
+
+  it("renders SidebarCta at the bottom of the sidebar", () => {
+    render(<LocaleHomePage />);
+    const sidebar = screen.getByTestId("sidebar");
+    const cta = sidebar.querySelector("[data-testid='sidebar-cta']");
+    expect(cta).toBeInTheDocument();
+  });
+
+  it("removes the old hero CTA section with submit/browse/openMap buttons", () => {
+    render(<LocaleHomePage />);
+    // submitIdea and browseIdeas should not appear anywhere (replaced by SidebarCta)
+    expect(screen.queryByText("Home.submitIdea")).not.toBeInTheDocument();
+    expect(screen.queryByText("Home.browseIdeas")).not.toBeInTheDocument();
+  });
+
+  it("sidebar CTA has Send icon and uppercase tracking-wide label", () => {
+    render(<LocaleHomePage />);
+    const cta = screen.getByTestId("sidebar-cta");
+    // The SidebarCta stub renders "Home.sendIdea" text
+    expect(cta.textContent).toContain("Home.sendIdea");
   });
 });

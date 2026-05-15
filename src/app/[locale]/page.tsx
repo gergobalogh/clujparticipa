@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { IdeaListRow } from "@/components/ideas/idea-list-row";
+import { EditorialIdeaCard } from "@/components/ideas/editorial-idea-card";
+import { SidebarCta } from "@/components/ideas/sidebar-cta";
 import { HomeMapPreview } from "@/components/map/home-map-preview";
 import { computeCompletedCount, resolveZeroState } from "@/lib/home-stats";
 import type { IdeaMapData } from "@/components/map/map-view";
@@ -95,7 +96,7 @@ export default function LocaleHomePage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
-      {/* Header with brand + action */}
+      {/* Header with brand */}
       <section className="mb-6">
         <h1 className="font-serif text-3xl font-bold text-ink sm:text-4xl tracking-tight">
           {t("title")}
@@ -103,26 +104,6 @@ export default function LocaleHomePage() {
         <p className="mt-2 max-w-2xl text-sm text-ink-muted leading-relaxed">
           {t("description")}
         </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Link
-            href="/ideas/new"
-            className="inline-flex items-center rounded-sm bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:bg-ink/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-ink"
-          >
-            {t("submitIdea")}
-          </Link>
-          <Link
-            href="/ideas"
-            className="inline-flex items-center rounded-sm border border-ink/15 bg-paper px-4 py-2 text-sm font-medium text-ink transition hover:bg-paper-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-ink/40"
-          >
-            {t("browseIdeas")}
-          </Link>
-          <Link
-            href="/map"
-            className="inline-flex items-center rounded-sm border border-ink/15 bg-paper px-4 py-2 text-sm font-medium text-ink transition hover:bg-paper-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-ink/40"
-          >
-            {t("openMap")}
-          </Link>
-        </div>
       </section>
 
       {/* Civic status strip (Task 6) */}
@@ -197,18 +178,24 @@ export default function LocaleHomePage() {
 
           {stats && stats.recentIdeas.length > 0 ? (
             <div className="mt-0">
-              {stats.recentIdeas.map((idea) => (
-                <IdeaListRow
+              {stats.recentIdeas.map((idea, index) => (
+                <motion.div
                   key={idea.id}
-                  id={idea.id}
-                  title={idea.title}
-                  category={idea.category}
-                  district={idea.district}
-                  status={idea.status}
-                  supportCount={idea.supportCount}
-                  commentCount={idea.commentCount}
-                  firstImage={idea.firstImage}
-                />
+                  initial={prefersReducedMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.1, ease: "easeOut" }}
+                  className="border-b border-ink/8 last:border-b-0"
+                >
+                  <EditorialIdeaCard
+                    id={idea.id}
+                    title={idea.title}
+                    category={idea.category}
+                    district={idea.district}
+                    status={idea.status}
+                    supportCount={idea.supportCount}
+                    commentCount={idea.commentCount}
+                  />
+                </motion.div>
               ))}
             </div>
           ) : stats ? (
@@ -224,6 +211,7 @@ export default function LocaleHomePage() {
               ))}
             </div>
           )}
+          <SidebarCta />
         </motion.aside>
 
         {/* Map area */}
