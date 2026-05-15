@@ -11,7 +11,11 @@ const MapView = dynamic(() => import("./map-view"), {
   ),
 });
 
-export function HomeMapPreview() {
+type HomeMapPreviewProps = {
+  hero?: boolean;
+};
+
+export function HomeMapPreview({ hero = false }: HomeMapPreviewProps) {
   const [ideas, setIdeas] = useState<IdeaMapData[]>([]);
 
   useEffect(() => {
@@ -44,5 +48,5 @@ export function HomeMapPreview() {
       .catch(() => setIdeas([]));
   }, []);
 
-  return <MapView ideas={ideas} compact />;
+  return <MapView ideas={ideas} compact={!hero} />;
 }
