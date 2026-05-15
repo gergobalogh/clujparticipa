@@ -14,7 +14,8 @@ import { StatusChangeTimeline } from "@/components/ideas/status-change-timeline"
 import { VotingCountdown } from "@/components/ideas/voting-countdown";
 import { mapStatusChangesToTimelineEntries } from "@/lib/timeline-mapping";
 import { getOrCreateParticipantToken } from "@/lib/client-participant";
-import { computePipelineStages, getExceptionState } from "@/lib/pipeline-computation";
+import { computePipelineStages, resolveExceptionType, findRejectionChange, parseMergeNote, parseReturnNote } from "@/lib/pipeline-computation";
+import { ExceptionState } from "@/components/ideas/exception-state";
 import { detectStalledIdea } from "@/lib/stalled-detector";
 import type { Status } from "@prisma/client";
 import Image from "next/image";
@@ -265,7 +266,9 @@ export default function IdeaDetailPage() {
     createdAt: idea.createdAt,
     statusChanges: idea.statusChanges,
   });
-  const exceptionState = getExceptionState(ideaStatus);
+  const exceptionType = resolveExceptionType(ideaStatus, idea.statusChanges);
+  const rejectionChange = exceptionType ? findRejectionChange(idea.statusChanges) : null;
+  const exceptionState = exceptionType ?? undefined;
   const lastStatusChangeDate = idea.statusChanges.length > 0
     ? new Date(idea.statusChanges[idea.statusChanges.length - 1].createdAt)
     : new Date(idea.createdAt);
@@ -279,6 +282,35 @@ export default function IdeaDetailPage() {
   const stalledDays = stalledInfo.isStalled
     ? stalledInfo.daysSinceLastChange
     : undefined;
+
+  // Compute ExceptionState component props from the detected exception type
+  const exceptionStateProps = exceptionType && rejectionChange ? (() => {
+    if (exceptionType === "MERGED") {
+      const { parentIdeaId, parentIdeaTitle } = parseMergeNote(rejectionChange.note);
+      return {
+        exceptionType: "MERGED" as const,
+        reason: rejectionChange.note,
+        parentIdeaId,
+        parentIdeaTitle,
+      };
+    }
+    if (exceptionType === "RETURNED") {
+      const feedback = parseReturnNote(rejectionChange.note);
+      return {
+        exceptionType: "RETURNED" as const,
+        reason: feedback || null,
+        resubmitUrl: `/ideas/new?from=${idea.id}`,
+      };
+    }
+    // Default REJECTED
+    return {
+      exceptionType: "REJECTED" as const,
+      reason: rejectionChange.note || null,
+      resubmitUrl: `/ideas/new?from=${idea.id}`,
+      similarIdeasUrl: `/ideas?category=${idea.category}`,
+      hasSimilarIdeas: true,
+    };
+  })() : null;
 
   const timelineEntries = mapStatusChangesToTimelineEntries(idea.statusChanges);
 
@@ -444,18 +476,12 @@ export default function IdeaDetailPage() {
 
           <p className="mt-4 whitespace-pre-line text-ink leading-relaxed">{idea.description}</p>
 
-          {/* Rejection note */}
-          {idea.status === "REJECTED" && (() => {
-            const rejectionChange = [...idea.statusChanges]
-              .reverse()
-              .find((sc) => sc.toStatus === "REJECTED");
-            return rejectionChange ? (
-              <div className="mt-4 rounded-sm border border-red-200 bg-red-50 px-4 py-3">
-                <p className="text-sm font-medium text-red-800">{t("notEligible")}</p>
-                <p className="mt-1 text-sm text-red-700">{t("rejectionNote")}: {rejectionChange.note}</p>
-              </div>
-            ) : null;
-          })()}
+          {/* Exception state: MERGED / RETURNED / REJECTED */}
+          {exceptionStateProps && (
+            <div className="mt-4">
+              <ExceptionState {...exceptionStateProps} />
+            </div>
+          )}
 
           {/* Feasibility note */}
           {idea.feasibilityNote && (

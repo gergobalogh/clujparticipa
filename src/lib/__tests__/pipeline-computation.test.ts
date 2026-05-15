@@ -33,6 +33,18 @@ let computePipelineStages: (idea: IdeaData) => PipelineStage[];
 /** Detect exception state from idea status -- will be co-located or imported */
 let getExceptionState: (status: Status) => "REJECTED" | "MERGED" | "RETURNED" | "STALLED" | undefined;
 
+/** Resolve exception type from status + most recent rejection status change note */
+let resolveExceptionType: (status: Status, statusChanges: StatusChange[]) => "REJECTED" | "MERGED" | "RETURNED" | undefined;
+
+/** Find the most recent StatusChange where toStatus === "REJECTED" */
+let findRejectionChange: (statusChanges: StatusChange[]) => StatusChange | null;
+
+/** Extract parent idea ID from a MERGED note (e.g. "[MERGED] idea #abc123" -> "abc123") */
+let parseMergeNote: (note: string) => { parentIdeaId: string | null; parentIdeaTitle: string | null };
+
+/** Extract admin feedback text from a RETURNED note (e.g. "[RETURNED] Please add details" -> "Please add details") */
+let parseReturnNote: (note: string) => string;
+
 /**
  * These imports will be activated once the implementation module exists.
  * For now, the tests serve as the RED-phase contract.
@@ -41,6 +53,10 @@ try {
   const mod = await import("../pipeline-computation");
   computePipelineStages = mod.computePipelineStages;
   getExceptionState = mod.getExceptionState;
+  resolveExceptionType = mod.resolveExceptionType;
+  findRejectionChange = mod.findRejectionChange;
+  parseMergeNote = mod.parseMergeNote;
+  parseReturnNote = mod.parseReturnNote;
 } catch {
   // Module does not exist yet -- RED phase. Tests must fail.
 }
@@ -482,5 +498,268 @@ describe("getExceptionState", () => {
 
   it("returns undefined for unexpected/unknown status value", () => {
     expect(getExceptionState("UNKNOWN_STATUS" as Status)).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveExceptionType: MERGED/RETURNED detection from status + note prefix
+// ---------------------------------------------------------------------------
+describe("resolveExceptionType", () => {
+  it("returns MERGED when status is REJECTED and note starts with [MERGED]", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "UNDER_REVIEW",
+        toStatus: "REJECTED",
+        note: "[MERGED] merged with idea #cm5x8k2q",
+        changedBy: "admin",
+        createdAt: "2025-01-10T00:00:00Z",
+      },
+    ];
+    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("MERGED");
+  });
+
+  it("returns RETURNED when status is REJECTED and note starts with [RETURNED]", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "UNDER_REVIEW",
+        toStatus: "REJECTED",
+        note: "[RETURNED] Please add more specific location details",
+        changedBy: "admin",
+        createdAt: "2025-01-10T00:00:00Z",
+      },
+    ];
+    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("RETURNED");
+  });
+
+  it("returns REJECTED when status is REJECTED and note has no prefix", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "UNDER_REVIEW",
+        toStatus: "REJECTED",
+        note: "Outside city jurisdiction",
+        changedBy: "admin",
+        createdAt: "2025-01-10T00:00:00Z",
+      },
+    ];
+    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("REJECTED");
+  });
+
+  it("returns undefined when status is not REJECTED (reopened idea)", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "SUBMITTED",
+        toStatus: "REJECTED",
+        note: "[MERGED] merged with idea #abc",
+        changedBy: "admin",
+        createdAt: "2025-01-05T00:00:00Z",
+      },
+      {
+        id: "sc2",
+        fromStatus: "REJECTED",
+        toStatus: "UNDER_REVIEW",
+        note: "Reopened for review",
+        changedBy: "admin",
+        createdAt: "2025-01-15T00:00:00Z",
+      },
+    ];
+    expect(resolveExceptionType("UNDER_REVIEW", statusChanges)).toBeUndefined();
+  });
+
+  it("returns undefined when status is REJECTED but no rejection status change exists", () => {
+    const statusChanges: StatusChange[] = [];
+    expect(resolveExceptionType("REJECTED", statusChanges)).toBeUndefined();
+  });
+
+  it("uses the most recent rejection change when multiple exist", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "SUBMITTED",
+        toStatus: "REJECTED",
+        note: "Not feasible",
+        changedBy: "admin",
+        createdAt: "2025-01-05T00:00:00Z",
+      },
+      {
+        id: "sc2",
+        fromStatus: "UNDER_REVIEW",
+        toStatus: "REJECTED",
+        note: "[MERGED] merged with idea #xyz",
+        changedBy: "admin",
+        createdAt: "2025-01-20T00:00:00Z",
+      },
+    ];
+    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("MERGED");
+  });
+
+  it("detects [MERGED] with mixed case as MERGED", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "UNDER_REVIEW",
+        toStatus: "REJECTED",
+        note: "[merged] Combined with another idea",
+        changedBy: "admin",
+        createdAt: "2025-01-10T00:00:00Z",
+      },
+    ];
+    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("MERGED");
+  });
+
+  it("detects [RETURNED] with mixed case as RETURNED", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "UNDER_REVIEW",
+        toStatus: "REJECTED",
+        note: "[Returned] Needs revision",
+        changedBy: "admin",
+        createdAt: "2025-01-10T00:00:00Z",
+      },
+    ];
+    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("RETURNED");
+  });
+
+  it("returns REJECTED when note contains 'merged' but not as bracketed prefix", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "UNDER_REVIEW",
+        toStatus: "REJECTED",
+        note: "This idea was merged with another",
+        changedBy: "admin",
+        createdAt: "2025-01-10T00:00:00Z",
+      },
+    ];
+    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("REJECTED");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// findRejectionChange: find most recent StatusChange with toStatus=REJECTED
+// ---------------------------------------------------------------------------
+describe("findRejectionChange", () => {
+  it("returns the most recent rejection status change", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "SUBMITTED",
+        toStatus: "UNDER_REVIEW",
+        note: "",
+        changedBy: "admin",
+        createdAt: "2025-01-02T00:00:00Z",
+      },
+      {
+        id: "sc2",
+        fromStatus: "UNDER_REVIEW",
+        toStatus: "REJECTED",
+        note: "Not feasible",
+        changedBy: "admin",
+        createdAt: "2025-01-05T00:00:00Z",
+      },
+    ];
+    const result = findRejectionChange(statusChanges);
+    expect(result).not.toBeNull();
+    expect(result!.id).toBe("sc2");
+    expect(result!.note).toBe("Not feasible");
+  });
+
+  it.each([
+    [["SUBMITTED", "UNDER_REVIEW"] as const, "no rejection change"],
+    [[] as const, "empty statusChanges"],
+  ])("returns null for %s", (statusFlow, description) => {
+    const statusChanges: StatusChange[] = statusFlow.map((status, i) => ({
+      id: `sc${i}`,
+      fromStatus: i === 0 ? null : "SUBMITTED",
+      toStatus: status,
+      note: "",
+      changedBy: "admin",
+      createdAt: `2025-01-0${i + 1}T00:00:00Z`,
+    }));
+    expect(findRejectionChange(statusChanges)).toBeNull();
+  });
+
+  it("picks the last rejection when multiple rejections exist", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "SUBMITTED",
+        toStatus: "REJECTED",
+        note: "First rejection",
+        changedBy: "admin",
+        createdAt: "2025-01-05T00:00:00Z",
+      },
+      {
+        id: "sc2",
+        fromStatus: "REJECTED",
+        toStatus: "UNDER_REVIEW",
+        note: "Reopened",
+        changedBy: "admin",
+        createdAt: "2025-01-10T00:00:00Z",
+      },
+      {
+        id: "sc3",
+        fromStatus: "UNDER_REVIEW",
+        toStatus: "REJECTED",
+        note: "Second rejection",
+        changedBy: "admin",
+        createdAt: "2025-01-15T00:00:00Z",
+      },
+    ];
+    const result = findRejectionChange(statusChanges);
+    expect(result!.id).toBe("sc3");
+    expect(result!.note).toBe("Second rejection");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseMergeNote: extract parent idea ID from [MERGED] prefix
+// ---------------------------------------------------------------------------
+describe("parseMergeNote", () => {
+  it.each([
+    ["[MERGED] merged with idea #cm5x8k2q", "cm5x8k2q"],
+    ["[MERGED] idea cm5x8k2q", "cm5x8k2q"],
+    ["[MERGED] merged into cm5x8k2q", "cm5x8k2q"],
+    ["[MERGED] #abc123", "abc123"],
+  ])("extracts parent idea ID from '%s'", (input, expectedId) => {
+    const result = parseMergeNote(input);
+    expect(result.parentIdeaId).toBe(expectedId);
+  });
+
+  it.each([
+    ["[MERGED]"],
+    ["[MERGED]   "],
+  ])("returns null parentIdeaId for '%s'", (input) => {
+    expect(parseMergeNote(input).parentIdeaId).toBeNull();
+  });
+
+  it("extracts title when present after ID with dash separator", () => {
+    const result = parseMergeNote("[MERGED] merged with idea #abc123 - Better sidewalks");
+    expect(result.parentIdeaId).toBe("abc123");
+    expect(result.parentIdeaTitle).toBe("Better sidewalks");
+  });
+
+  it("returns null parentIdeaTitle when no title after ID", () => {
+    const result = parseMergeNote("[MERGED] #abc123");
+    expect(result.parentIdeaId).toBe("abc123");
+    expect(result.parentIdeaTitle).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseReturnNote: extract feedback text from [RETURNED] prefix
+// ---------------------------------------------------------------------------
+describe("parseReturnNote", () => {
+  it.each([
+    ["[RETURNED] Please add more details", "Please add more details"],
+    ["[RETURNED]   Trim this space", "Trim this space"],
+    ["[RETURNED]", ""],
+    ["[RETURNED]   ", ""],
+  ])("parses '%s' -> '%s'", (input, expected) => {
+    expect(parseReturnNote(input)).toBe(expected);
   });
 });
