@@ -59,7 +59,7 @@
   "Home": {
     "eyebrow": "Participatory Budgeting",
     "title": "ClujParticipa",
-    "description": "Civic participation prototype for Cluj-Napoca. Submit neighborhood ideas, discover them on the map, add support, comment, and follow public status updates.",
+    "description": "Civic participation prototype for Cluj-Napoca. Submit neighborhood ideas, discover them on the map, add support, comment, and follow each idea's progress through the pipeline to completion.",
     "submitIdea": "Submit an idea",
     "browseIdeas": "Browse ideas",
     "openMap": "Open map",
@@ -67,12 +67,15 @@
     "totalIdeas": "Ideas submitted",
     "totalVotes": "Support votes",
     "totalComments": "Comments",
+    "completedIdeas": "Ideas completed",
     "recentIdeas": "Recent ideas",
     "viewAll": "View all ideas",
     "civicStatus": "Civic status",
     "votingPhase": "Voting phase",
     "activeDistricts": "Active districts",
-    "noIdeas": "No ideas yet."
+    "beFirst": "Be the first to submit an idea in this district!",
+    "noIdeas": "No ideas yet.",
+    "noIdeasAtAll": "No ideas yet. Be the first to propose an improvement for Cluj-Napoca!"
   },
   "Ideas": {
     "title": "Ideas",

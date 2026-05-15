@@ -50,7 +50,7 @@
   "Home": {
     "eyebrow": "ClujParticipa",
     "title": "ClujParticipa",
-    "description": "Részvételi prototípus Kolozsvár számára. Küldjön be környéki ötleteket, fedezze fel őket a térképen, támogassa, szóljon hozzá és kövesse a nyilvános státuszfrissítéseket.",
+    "description": "Részvételi prototípus Kolozsvár számára. Küldjön be környéki ötleteket, fedezze fel őket a térképen, támogassa, szóljon hozzá és kövesse nyomon az ötletek státuszának előrehaladását a befejezésig.",
     "submitIdea": "Ötlet beküldése",
     "browseIdeas": "Ötletek böngészése",
     "openMap": "Térkép megnyitása",
@@ -58,12 +58,15 @@
     "totalIdeas": "Beküldött ötletek",
     "totalVotes": "Támogató szavazatok",
     "totalComments": "Hozzászólások",
+    "completedIdeas": "Befejezett ötletek",
     "recentIdeas": "Legújabb ötletek",
     "viewAll": "Összes ötlet megtekintése",
     "civicStatus": "Polgári státusz",
     "votingPhase": "Szavazási fázis",
     "activeDistricts": "Aktív körzetek",
-    "noIdeas": "Még nincsenek ötletek."
+    "beFirst": "Legyél te az első, aki ötletet küld be ebben a városrészben!",
+    "noIdeas": "Még nincsenek ötletek.",
+    "noIdeasAtAll": "Még nincsenek ötletek. Legyél te az első, aki javaslatot tesz Kolozsvár számára!"
   },
   "Ideas": {
     "title": "Ötletek",

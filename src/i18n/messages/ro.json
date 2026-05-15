@@ -50,7 +50,7 @@
   "Home": {
     "eyebrow": "ClujParticipa",
     "title": "ClujParticipa",
-    "description": "Prototip de participare civică pentru Cluj-Napoca. Trimite propuneri de cartier, descoperă-le pe hartă, susține, comentează și urmărește actualizările publice de status.",
+    "description": "Prototip de participare civică pentru Cluj-Napoca. Trimite propuneri de cartier, descoperă-le pe hartă, susține, comentează și urmărește parcursul fiecărei idei spre finalizare.",
     "submitIdea": "Trimite o idee",
     "browseIdeas": "Caută idei",
     "openMap": "Deschide harta",
@@ -58,12 +58,15 @@
     "totalIdeas": "Idei trimise",
     "totalVotes": "Voturi de susținere",
     "totalComments": "Comentarii",
+    "completedIdeas": "Idei finalizate",
     "recentIdeas": "Idei recente",
     "viewAll": "Vezi toate ideile",
     "civicStatus": "Status civic",
     "votingPhase": "Faza de votare",
     "activeDistricts": "Cartiere active",
-    "noIdeas": "Nicio idee încă."
+    "beFirst": "Fii primul care trimite o idee în acest cartier!",
+    "noIdeas": "Nicio idee încă.",
+    "noIdeasAtAll": "Nu există idei încă. Fii primul care propune o îmbunătățire pentru Cluj-Napoca!"
   },
   "Ideas": {
     "title": "Idei",

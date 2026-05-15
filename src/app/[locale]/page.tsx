@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { IdeaListRow } from "@/components/ideas/idea-list-row";
 import { HomeMapPreview } from "@/components/map/home-map-preview";
+import { computeCompletedCount, resolveZeroState } from "@/lib/home-stats";
 
 interface RecentIdea {
   id: string;
@@ -108,6 +109,10 @@ export default function LocaleHomePage() {
             <span className="text-xs font-semibold text-ink">{stats.totalComments}</span>
             <span className="text-xs text-ink-muted">{t("totalComments")}</span>
           </div>
+          <div className="flex items-center gap-2 rounded-sm border border-ink/8 bg-paper px-3 py-2">
+            <span className="text-xs font-semibold text-ink">{computeCompletedCount(stats.statusCounts)}</span>
+            <span className="text-xs text-ink-muted">{t("completedIdeas")}</span>
+          </div>
           {votingConfig && (
             <div className="flex items-center gap-2 rounded-sm border border-ink/8 bg-paper px-3 py-2">
               <span className={`h-2 w-2 rounded-full ${votingConfig.isOpen ? "bg-civic-teal" : "bg-ink-muted"}`} aria-hidden="true" />
@@ -169,7 +174,7 @@ export default function LocaleHomePage() {
               ))}
             </div>
           ) : stats ? (
-            <p className="mt-4 text-sm text-ink-muted">{t("noIdeas")}</p>
+            <p className="mt-4 text-sm text-ink-muted">{t(resolveZeroState(stats.totalIdeas))}</p>
           ) : (
             <div className="mt-4 space-y-3" aria-busy="true">
               {[1, 2, 3].map((i) => (
