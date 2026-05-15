@@ -71,6 +71,76 @@
       "status": "EXECUTED",
       "data": "PASS",
       "timestamp": "2026-05-15T07:41:00Z"
+    },
+    {
+      "step_id": "01-02",
+      "phase": "PREPARE",
+      "status": "EXECUTED",
+      "data": "PASS",
+      "timestamp": "2026-05-15T08:00:44.864016+00:00"
+    },
+    {
+      "step_id": "01-02",
+      "phase": "RED_ACCEPTANCE",
+      "status": "EXECUTED",
+      "data": "PASS: 3 acceptance tests written for entrance animations (sidebar slide, map fade+scale, prefers-reduced-motion)",
+      "timestamp": "2026-05-15T08:00:44.864016+00:00"
+    },
+    {
+      "step_id": "01-02",
+      "phase": "RED_UNIT",
+      "status": "SKIPPED",
+      "data": "NOT_APPLICABLE: acceptance tests cover all 3 distinct behaviors through driving port; unit tests would test internal structure",
+      "timestamp": "2026-05-15T08:00:44.864016+00:00"
+    },
+    {
+      "step_id": "01-02",
+      "phase": "GREEN",
+      "status": "EXECUTED",
+      "data": "PASS: motion.aside and motion.section with entrance animations + useReducedMotion, 10 page tests pass, tsc clean, next build clean",
+      "timestamp": "2026-05-15T08:00:44.864016+00:00"
+    },
+    {
+      "step_id": "01-02",
+      "phase": "COMMIT",
+      "status": "EXECUTED",
+      "data": "PASS",
+      "timestamp": "2026-05-15T08:00:44.864016+00:00"
+    },
+    {
+      "step_id": "02-01",
+      "phase": "PREPARE",
+      "status": "EXECUTED",
+      "data": "PASS",
+      "timestamp": "2026-05-15T08:18:00Z"
+    },
+    {
+      "step_id": "02-01",
+      "phase": "RED_ACCEPTANCE",
+      "status": "EXECUTED",
+      "data": "PASS: 11 acceptance tests written for font wiring (7 layout font registration + 4 CSS variable wiring in globals.css)",
+      "timestamp": "2026-05-15T08:19:00Z"
+    },
+    {
+      "step_id": "02-01",
+      "phase": "RED_UNIT",
+      "status": "SKIPPED",
+      "data": "NOT_APPLICABLE: acceptance tests cover all 6 distinct behaviors through driving port (font registration + CSS variable wiring); unit tests would be redundant",
+      "timestamp": "2026-05-15T08:19:30Z"
+    },
+    {
+      "step_id": "02-01",
+      "phase": "GREEN",
+      "status": "EXECUTED",
+      "data": "PASS: Playfair_Display and Inter fonts added via next/font/google, Geist and Source_Serif_4 removed, CSS variables rewired, 11 layout tests pass, tsc clean, next build clean",
+      "timestamp": "2026-05-15T08:22:00Z"
+    },
+    {
+      "step_id": "02-01",
+      "phase": "COMMIT",
+      "status": "EXECUTED",
+      "data": "PASS",
+      "timestamp": "2026-05-15T08:23:00Z"
     }
   ]
 }
