@@ -68,8 +68,49 @@ describe("LocaleHomePage", () => {
     expect(screen.getByTestId("home-map-preview")).toBeInTheDocument();
   });
 
-  it("renders the ideas feed section", () => {
+  it("renders the ideas feed section heading", () => {
+    render(<LocaleHomePage />);
+    expect(screen.getByText("Home.recentIdeas")).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Acceptance: Flex split layout (Step 01-01)
+// ---------------------------------------------------------------------------
+
+describe("LocaleHomePage — Flex split layout", () => {
+  it("renders sidebar with w-[400px] on desktop", () => {
     const { container } = render(<LocaleHomePage />);
-    expect(container.querySelector("[class*='lg:grid-cols']")).toBeInTheDocument();
+    const sidebar = container.querySelector("[data-testid='sidebar']");
+    expect(sidebar).toBeInTheDocument();
+    expect(sidebar?.className).toContain("w-[400px]");
+  });
+
+  it("renders map area with flex-1 on desktop", () => {
+    const { container } = render(<LocaleHomePage />);
+    const mapArea = container.querySelector("[data-testid='map-area']");
+    expect(mapArea).toBeInTheDocument();
+    expect(mapArea?.className).toContain("flex-1");
+  });
+
+  it("uses flex layout (not grid) for the main content split", () => {
+    const { container } = render(<LocaleHomePage />);
+    const splitLayout = container.querySelector("[data-testid='split-layout']");
+    expect(splitLayout).toBeInTheDocument();
+    expect(splitLayout?.className).toContain("flex");
+    expect(splitLayout?.className).not.toContain("grid");
+  });
+
+  it("stacks sidebar above map on mobile (flex-col below md)", () => {
+    const { container } = render(<LocaleHomePage />);
+    const splitLayout = container.querySelector("[data-testid='split-layout']");
+    expect(splitLayout?.className).toContain("flex-col");
+    expect(splitLayout?.className).toContain("md:flex-row");
+  });
+
+  it("sidebar idea list scrolls independently", () => {
+    const { container } = render(<LocaleHomePage />);
+    const sidebar = container.querySelector("[data-testid='sidebar']");
+    expect(sidebar?.className).toContain("overflow-y-auto");
   });
 });

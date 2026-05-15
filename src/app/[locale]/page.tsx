@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { IdeaListRow } from "@/components/ideas/idea-list-row";
 import { HomeMapPreview } from "@/components/map/home-map-preview";
 import { computeCompletedCount, resolveZeroState } from "@/lib/home-stats";
+import type { IdeaMapData } from "@/components/map/map-view";
 
 interface RecentIdea {
   id: string;
@@ -45,6 +46,7 @@ export default function LocaleHomePage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [statsError, setStatsError] = useState(false);
   const [votingConfig, setVotingConfig] = useState<VotingConfigData | null>(null);
+  const [mapIdeas, setMapIdeas] = useState<IdeaMapData[]>([]);
 
   useEffect(() => {
     fetch("/api/stats")
@@ -59,6 +61,34 @@ export default function LocaleHomePage() {
       .then((r) => (r.ok ? r.json() : { config: null }))
       .then((data) => setVotingConfig(data.config ?? null))
       .catch(() => {});
+
+    fetch("/api/ideas?limit=50")
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
+      .then((data) => {
+        const filtered = (data.ideas ?? [])
+          .filter(
+            (i: { latitude: number; longitude: number }) =>
+              Number.isFinite(i.latitude) &&
+              Number.isFinite(i.longitude) &&
+              i.latitude !== 0 &&
+              i.longitude !== 0
+          )
+          .map((i: { id: string; title: string; status: string; district: string; category: string; supportCount: number; latitude: number; longitude: number }) => ({
+            id: i.id,
+            title: i.title,
+            status: i.status,
+            district: i.district,
+            category: i.category,
+            supportCount: i.supportCount,
+            latitude: i.latitude,
+            longitude: i.longitude,
+          }));
+        setMapIdeas(filtered);
+      })
+      .catch(() => setMapIdeas([]));
   }, []);
 
   return (
@@ -139,10 +169,10 @@ export default function LocaleHomePage() {
         </p>
       )}
 
-      {/* Main content: ideas feed + map preview */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_400px]">
-        {/* Recent ideas feed */}
-        <section>
+      {/* Main content: flex split layout — sidebar + map */}
+      <div data-testid="split-layout" className="flex flex-col md:flex-row gap-6">
+        {/* Sidebar: idea list */}
+        <aside data-testid="sidebar" className="w-full md:w-[400px] shrink-0 flex flex-col overflow-y-auto max-h-[80vh]">
           <div className="flex items-center justify-between border-b border-ink/10 pb-2">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-ink">
               {t("recentIdeas")}
@@ -186,18 +216,18 @@ export default function LocaleHomePage() {
               ))}
             </div>
           )}
-        </section>
+        </aside>
 
-        {/* Map preview */}
-        <section className="hidden lg:block">
+        {/* Map area */}
+        <section data-testid="map-area" className="flex-1 min-h-0">
           <div className="border-b border-ink/10 pb-2">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-ink">
               {t("openMap")}
             </h2>
           </div>
-          <div className="mt-2">
-            <Link href="/map" className="block group">
-              <HomeMapPreview />
+          <div className="mt-2 h-[360px] md:h-full">
+            <Link href="/map" className="block group h-full">
+              <HomeMapPreview ideas={mapIdeas} />
             </Link>
           </div>
         </section>
