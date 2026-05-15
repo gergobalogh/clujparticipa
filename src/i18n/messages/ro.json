@@ -392,5 +392,13 @@
   "Timeline": {
     "viewFullHistory": "Vezi istoricul complet",
     "noUpdatesYet": "Nicio actualizare încă"
+  },
+  "Exception": {
+    "contactUs": "Contactează-ne pentru mai multe informații",
+    "supportSimilar": "Susține idei similare",
+    "reviseAndResubmit": "Revizuiește și retrimite",
+    "noSimilarIdeas": "Nu există idei similare în această categorie",
+    "mergedWith": "Această idee a fost contopită cu altă idee",
+    "parentUnavailable": "Ideea părinte nu mai este disponibilă"
   }
 }

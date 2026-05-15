@@ -392,5 +392,13 @@
   "Timeline": {
     "viewFullHistory": "Teljes előzmények megtekintése",
     "noUpdatesYet": "Még nincs frissítés"
+  },
+  "Exception": {
+    "contactUs": "Vegye fel velünk a kapcsolatot további információért",
+    "supportSimilar": "Hasonló ötletek támogatása",
+    "reviseAndResubmit": "Átdolgozás és újraküldés",
+    "noSimilarIdeas": "Nincsenek hasonló ötletek ebben a kategóriában",
+    "mergedWith": "Ez az ötlet összevonásra került egy másik ötlettel",
+    "parentUnavailable": "A szülőötlet már nem elérhető"
   }
 }

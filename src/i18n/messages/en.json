@@ -401,5 +401,13 @@
   "Timeline": {
     "viewFullHistory": "View full history",
     "noUpdatesYet": "No updates yet"
+  },
+  "Exception": {
+    "contactUs": "Contact us for more information",
+    "supportSimilar": "Support similar ideas",
+    "reviseAndResubmit": "Revise and resubmit",
+    "noSimilarIdeas": "No similar ideas in this category",
+    "mergedWith": "This idea has been merged with another idea",
+    "parentUnavailable": "Parent idea is no longer available"
   }
 }
