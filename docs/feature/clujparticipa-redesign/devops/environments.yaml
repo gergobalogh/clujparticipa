@@ -1,0 +1,36 @@
+target_environments:
+  - name: clean
+    description: "Fresh VPS with Docker and Docker Compose installed"
+    platform: [linux]
+    preconditions: ["docker >= 24", "docker compose >= 2.20"]
+
+  - name: with-existing-containers
+    description: "VPS with running clujparticipa containers from prior deploy"
+    platform: [linux]
+    preconditions: ["docker >= 24", "docker compose >= 2.20", "clujparticipa-app container running"]
+
+  - name: with-stale-env
+    description: "VPS with .env from prior version, possibly missing new variables"
+    platform: [linux]
+    preconditions: ["docker >= 24", "docker compose >= 2.20", "stale .env file present"]
+
+coexistence_matrix:
+  - tool: docker
+    must_not_break: true
+  - tool: docker-compose
+    must_not_break: true
+  - tool: pgbouncer
+    must_not_break: true
+  - tool: postgresql
+    must_not_break: true
+
+platform_coverage:
+  Linux: [Ubuntu 22.04, Ubuntu 24.04]
+  CI: [GitHub Actions ubuntu-latest]
+
+deployment_assumptions:
+  - "Deployment MUST be idempotent (safe to run docker compose up -d --build repeatedly)"
+  - "Database migrations MUST run automatically before app start"
+  - "Rollback MUST be possible by re-deploying the previous image"
+  - "Secrets MUST come from .env file, never committed to repo"
+  - "Port 3030 is the app port, 6543 is the pgbouncer port"

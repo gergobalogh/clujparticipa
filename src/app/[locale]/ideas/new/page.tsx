@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useSession } from "next-auth/react";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { MapPickerLoader } from "@/components/map/map-picker-loader";
 import { DISTRICT_CENTERS } from "@/lib/district-centers";
@@ -23,6 +23,14 @@ const DISTRICTS = [
 ];
 
 export default function NewIdeaPage() {
+  return (
+    <Suspense>
+      <NewIdeaForm />
+    </Suspense>
+  );
+}
+
+function NewIdeaForm() {
   const t = useTranslations("NewIdea");
   const tn = useTranslations("Notification");
   const tc = useTranslations("Categories");

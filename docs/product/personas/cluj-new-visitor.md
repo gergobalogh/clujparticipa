@@ -1,0 +1,26 @@
+schema_version: "1.0"
+id: "ion-curious"
+name: "Ion"
+archetype: "Curious Newcomer"
+district: "Gheorgheni"
+age_range: "30-45"
+tech_comfort: "low-moderate"
+description: "Heard about the platform from a neighbor, visits to see what it is, unsure if it's legitimate or just another complaint site"
+vocabulary:
+  - term: "idea"
+    their_word: "suggestion"
+  - term: "status"
+    their_word: "is anything happening"
+  - term: "vote"
+    their_word: "support"
+mental_model: "Treats the platform like a petition site — skeptical, wants proof of impact before participating. Won't submit unless they see that others' ideas got results."
+goals:
+  - "Understand what this platform does in 30 seconds"
+  - "See evidence that it works (completed projects)"
+  - "Find ideas from their district"
+frustrations:
+  - "Doesn't trust online civic tools — usually just politics or performance"
+  - "Doesn't want to register for anything"
+  - "Doesn't read Romanian well — prefers Hungarian"
+jobs:
+  - "JOB-001"

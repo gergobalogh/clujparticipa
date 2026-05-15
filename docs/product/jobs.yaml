@@ -1,0 +1,54 @@
+schema_version: "1.0"
+jobs:
+  - id: "JOB-001"
+    statement: "When I see a problem in my neighborhood, I want to submit my idea and track whether it gets acted on, so I can decide whether engaging with the city is worth my time."
+    abstraction_level: "physical"
+    type: "functional"
+    context: "Romanian civic participation prototype for Cluj-Napoca; district-first, low institutional trust, trilingual"
+    emotional_job: "When I submit an idea for my neighborhood, I want to feel that my contribution matters and is taken seriously, so I don't regret investing my time and hope."
+    social_job: "When I participate in civic improvements, I want to be seen as someone who cares about my community, so I can build credibility as an engaged resident rather than a complainer."
+    outcomes:
+      - id: "O1"
+        statement: "Minimize the time it takes to see whether a submitted idea has progressed toward implementation"
+        type: "speed"
+        importance: 9
+        satisfaction: 3
+        score: 15
+        status: "under-served"
+      - id: "O2"
+        statement: "Minimize the likelihood of a resident believing their engagement is ignored because status changes are invisible"
+        type: "likelihood_of_result"
+        importance: 9
+        satisfaction: 2
+        score: 16
+        status: "under-served"
+      - id: "O3"
+        statement: "Minimize the time it takes for a new visitor to understand what this platform does and whether it is legitimate"
+        type: "speed"
+        importance: 8
+        satisfaction: 3
+        score: 13
+        status: "under-served"
+      - id: "O4"
+        statement: "Minimize the effort required to find ideas relevant to one's own neighborhood"
+        type: "ease"
+        importance: 7
+        satisfaction: 5
+        score: 9
+        status: "appropriately_served"
+      - id: "O5"
+        statement: "Minimize the likelihood of a resident abandoning participation because the experience feels untrustworthy or amateur"
+        type: "likelihood_of_result"
+        importance: 8
+        satisfaction: 4
+        score: 12
+        status: "appropriately_served"
+    features:
+      - "clujparticipa-redesign"
+
+changelog:
+  - date: "2026-05-14"
+    action: "created"
+    job_id: "JOB-001"
+    feature_id: "clujparticipa-redesign"
+    source: "DIVERGE wave — JTBD analysis from CONCEPT.md"

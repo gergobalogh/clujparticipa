@@ -93,13 +93,6 @@ export default function LocaleHomePage() {
         </div>
       </section>
 
-      {/* Map hero — full-width, above the fold, visible on all screen sizes */}
-      <section data-map-hero className="mb-6">
-        <Link href="/map" className="block group">
-          <HomeMapPreview hero />
-        </Link>
-      </section>
-
       {/* Civic status strip (Task 6) */}
       {stats && (
         <section className="mb-6 flex flex-wrap gap-3" aria-label={t("civicStatus")}>
@@ -146,52 +139,69 @@ export default function LocaleHomePage() {
         </p>
       )}
 
-      {/* Recent ideas feed — single column below the map */}
-      <section data-ideas-feed>
-        <div className="flex items-center justify-between border-b border-ink/10 pb-2">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-ink">
-            {t("recentIdeas")}
-          </h2>
-          {stats && stats.recentIdeas.length > 0 && (
-            <Link
-              href="/ideas"
-              className="text-xs font-medium text-civic-blue hover:text-ink transition"
-            >
-              {t("viewAll")} &rarr;
-            </Link>
-          )}
-        </div>
+      {/* Main content: ideas feed + map preview */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_400px]">
+        {/* Recent ideas feed */}
+        <section>
+          <div className="flex items-center justify-between border-b border-ink/10 pb-2">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-ink">
+              {t("recentIdeas")}
+            </h2>
+            {stats && stats.recentIdeas.length > 0 && (
+              <Link
+                href="/ideas"
+                className="text-xs font-medium text-civic-blue hover:text-ink transition"
+              >
+                {t("viewAll")} &rarr;
+              </Link>
+            )}
+          </div>
 
-        {stats && stats.recentIdeas.length > 0 ? (
-          <div className="mt-0">
-            {stats.recentIdeas.map((idea) => (
-              <IdeaListRow
-                key={idea.id}
-                id={idea.id}
-                title={idea.title}
-                category={idea.category}
-                district={idea.district}
-                status={idea.status}
-                supportCount={idea.supportCount}
-                commentCount={idea.commentCount}
-                firstImage={idea.firstImage}
-              />
-            ))}
+          {stats && stats.recentIdeas.length > 0 ? (
+            <div className="mt-0">
+              {stats.recentIdeas.map((idea) => (
+                <IdeaListRow
+                  key={idea.id}
+                  id={idea.id}
+                  title={idea.title}
+                  category={idea.category}
+                  district={idea.district}
+                  status={idea.status}
+                  supportCount={idea.supportCount}
+                  commentCount={idea.commentCount}
+                  firstImage={idea.firstImage}
+                />
+              ))}
+            </div>
+          ) : stats ? (
+            <p className="mt-4 text-sm text-ink-muted">{t(resolveZeroState(stats.totalIdeas))}</p>
+          ) : (
+            <div className="mt-4 space-y-3" aria-busy="true">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse border-b border-ink/5 py-3">
+                  <div className="h-3 w-24 rounded bg-paper-muted" />
+                  <div className="mt-2 h-5 w-3/4 rounded bg-paper-muted" />
+                  <div className="mt-2 h-3 w-32 rounded bg-paper-muted" />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Map preview */}
+        <section className="hidden lg:block">
+          <div className="border-b border-ink/10 pb-2">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-ink">
+              {t("openMap")}
+            </h2>
           </div>
-        ) : stats ? (
-          <p className="mt-4 text-sm text-ink-muted">{t(resolveZeroState(stats.totalIdeas))}</p>
-        ) : (
-          <div className="mt-4 space-y-3" aria-busy="true">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="animate-pulse border-b border-ink/5 py-3">
-                <div className="h-3 w-24 rounded bg-paper-muted" />
-                <div className="mt-2 h-5 w-3/4 rounded bg-paper-muted" />
-                <div className="mt-2 h-3 w-32 rounded bg-paper-muted" />
-              </div>
-            ))}
+          <div className="mt-2">
+            <Link href="/map" className="block group">
+              <HomeMapPreview />
+            </Link>
           </div>
-        )}
-      </section>
+        </section>
+      </div>
     </main>
   );
 }

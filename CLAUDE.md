@@ -34,6 +34,10 @@
 - Rate-limit create, vote, and comment endpoints
 - Label all voting UI as non-binding prototype support
 
+## Mutation Testing Strategy
+
+This project uses **per-feature** mutation testing. Runs after refactoring during each delivery, scoped to modified files. Kill rate gate: >= 80%.
+
 ## What this is
 
 A prototype and coalition-building tool, not a production voting system. Keep scope tight. Do not add features beyond the MVP plan without updating `PROJECT_BOARD.md` first.

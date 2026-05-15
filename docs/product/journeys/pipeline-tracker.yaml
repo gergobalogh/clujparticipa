@@ -1,0 +1,58 @@
+schema_version: "1.0"
+id: "pipeline-tracker"
+name: "Submit and Track an Idea"
+persona_id: "maria-manasur"
+job_id: "JOB-001"
+steps:
+  - id: "s1"
+    name: "Land on homepage"
+    action: "Visit clujparticipa.ro"
+    expected_output: "See district map, pipeline concept on idea cards, trust signals"
+    emotional_state: "curious_skeptical"
+    artifacts_produced: []
+    artifacts_consumed: ["${district}"]
+  - id: "s2"
+    name: "Submit idea"
+    action: "Tap map pin or click Propose button"
+    expected_output: "Simple form with location pre-filled, 3 required fields, no account needed"
+    emotional_state: "motivated"
+    artifacts_produced: ["${ideaId}", "${participantToken}"]
+    artifacts_consumed: ["${district}"]
+  - id: "s3"
+    name: "See pipeline"
+    action: "View idea detail page after submission"
+    expected_output: "Visual pipeline with current stage highlighted, past stages timestamped, future stages outlined"
+    emotional_state: "reassured"
+    artifacts_produced: []
+    artifacts_consumed: ["${ideaId}", "${currentStage}", "${stageTimestamps}", "${pipelineStages}"]
+  - id: "s4"
+    name: "Check back later"
+    action: "Return to idea detail page"
+    expected_output: "Pipeline shows any new stages with timestamps; stalled ideas show waiting-for labels"
+    emotional_state: "checking_hopeful"
+    artifacts_produced: []
+    artifacts_consumed: ["${ideaId}", "${currentStage}", "${stageTimestamps}", "${stageActor}"]
+  - id: "s5"
+    name: "Receive notification"
+    action: "Browser/email notification arrives"
+    expected_output: "Idea title + new stage name; tap deep-links to idea detail"
+    emotional_state: "delighted"
+    artifacts_produced: []
+    artifacts_consumed: ["${ideaId}", "${currentStage}"]
+error_paths:
+  - id: "e1"
+    name: "Pipeline stalled"
+    trigger: "Current stage timestamp >30 days ago"
+    recovery: "Show 'Waiting for: [party]' label with last action date"
+  - id: "e2"
+    name: "Idea rejected"
+    trigger: "Status = REJECTED"
+    recovery: "Red pipeline marker + reason text + resubmit/support-similar CTA"
+  - id: "e3"
+    name: "Idea merged"
+    trigger: "Status change note contains 'merged'"
+    recovery: "Merge point on pipeline + link to parent idea"
+  - id: "e4"
+    name: "No ideas in district"
+    trigger: "District filter returns 0"
+    recovery: "Be-the-first CTA + other district stats as social proof"
