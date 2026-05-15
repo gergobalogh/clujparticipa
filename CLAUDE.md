@@ -38,6 +38,15 @@
 
 This project uses **per-feature** mutation testing. Runs after refactoring during each delivery, scoped to modified files. Kill rate gate: >= 80%.
 
+## Build & Deploy
+
+```bash
+# Build the Docker image, restart the container, and prune dangling images + stale build cache
+./scripts/build-and-deploy.sh
+```
+
+Do **not** run `docker compose build app` directly — it leaves dangling `<none>` images that accumulate ~400MB each. Always use the script, which prunes them after each build.
+
 ## What this is
 
 A prototype and coalition-building tool, not a production voting system. Keep scope tight. Do not add features beyond the MVP plan without updating `PROJECT_BOARD.md` first.

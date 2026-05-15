@@ -1,0 +1,25 @@
+id: first-time-visitor
+name: First-time Visitor
+description: Curious citizen, no account, lands on homepage via direct link or search
+
+goals:
+  - Understand what civic ideas exist in their city
+  - See where ideas are concentrated geographically
+  - Feel the platform is active and credible
+  - Find a clear way to participate
+
+frustrations:
+  - Static pages that feel abandoned
+  - Having to navigate to a separate map page
+  - Generic web app UI that doesn't inspire trust
+
+mental_model:
+  - "This is where I can see what ideas people have for my city"
+  - "I expect to see a map because the project name includes 'Cluj'"
+  - "I should be able to browse ideas without creating an account"
+
+vocabulary:
+  - ideas
+  - votes / support
+  - neighborhoods / districts
+  - status (În Analiză, Implementare, etc.)
