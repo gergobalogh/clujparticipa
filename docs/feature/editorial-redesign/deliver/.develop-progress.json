@@ -1,0 +1,17 @@
+{
+  "project_id": "editorial-redesign",
+  "total_steps": 4,
+  "completed_steps": 1,
+  "completed_step_ids": [
+    "01-01"
+  ],
+  "pending_step_ids": [
+    "01-02",
+    "01-03",
+    "01-04"
+  ],
+  "all_steps_done": false,
+  "phases_completed": {
+    "01-01": ["PREPARE", "RED_ACCEPTANCE", "RED_UNIT", "GREEN", "COMMIT"]
+  }
+}

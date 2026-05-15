@@ -1,0 +1,39 @@
+{
+  "feature_id": "editorial-redesign",
+  "steps": {
+    "01-01": {
+      "phases": [
+        {
+          "phase": "PREPARE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:00:22Z",
+          "data": "PASS"
+        },
+        {
+          "phase": "RED_ACCEPTANCE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:02:00Z",
+          "data": "FAIL: component module not found — business logic reason"
+        },
+        {
+          "phase": "RED_UNIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:04:00Z",
+          "data": "8 tests written covering 5 behaviors: reached, current, future, rejected, reduced-motion. Budget: 5x2=10, used 8."
+        },
+        {
+          "phase": "GREEN",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:06:00Z",
+          "data": "PASS: all 11 tests pass (8 written + 3 parametrized variants), TypeScript compiles, full component suite green (132/132)"
+        },
+        {
+          "phase": "COMMIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:08:00Z",
+          "data": "PASS: commit d9fc96b on redesign. 2 files: pipeline-track-segment.tsx, pipeline-track-segment.test.tsx. Test budget 8/10."
+        }
+      ]
+    }
+  }
+}
