@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { IdeaListRow } from "@/components/ideas/idea-list-row";
 import { HomeMapPreview } from "@/components/map/home-map-preview";
 import { computeCompletedCount, resolveZeroState } from "@/lib/home-stats";
@@ -42,6 +43,7 @@ interface VotingConfigData {
 
 export default function LocaleHomePage() {
   const t = useTranslations("Home");
+  const prefersReducedMotion = useReducedMotion();
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [statsError, setStatsError] = useState(false);
@@ -172,7 +174,13 @@ export default function LocaleHomePage() {
       {/* Main content: flex split layout — sidebar + map */}
       <div data-testid="split-layout" className="flex flex-col md:flex-row gap-6">
         {/* Sidebar: idea list */}
-        <aside data-testid="sidebar" className="w-full md:w-[400px] shrink-0 flex flex-col overflow-y-auto max-h-[80vh]">
+        <motion.aside
+          data-testid="sidebar"
+          className="w-full md:w-[400px] shrink-0 flex flex-col overflow-y-auto max-h-[80vh]"
+          initial={prefersReducedMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
           <div className="flex items-center justify-between border-b border-ink/10 pb-2">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-ink">
               {t("recentIdeas")}
@@ -216,10 +224,16 @@ export default function LocaleHomePage() {
               ))}
             </div>
           )}
-        </aside>
+        </motion.aside>
 
         {/* Map area */}
-        <section data-testid="map-area" className="flex-1 min-h-0">
+        <motion.section
+          data-testid="map-area"
+          className="flex-1 min-h-0"
+          initial={prefersReducedMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
           <div className="border-b border-ink/10 pb-2">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-ink">
               {t("openMap")}
@@ -230,7 +244,7 @@ export default function LocaleHomePage() {
               <HomeMapPreview ideas={mapIdeas} />
             </Link>
           </div>
-        </section>
+        </motion.section>
       </div>
     </main>
   );
