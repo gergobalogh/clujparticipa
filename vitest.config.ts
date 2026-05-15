@@ -10,13 +10,13 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["./src/test/setup.ts"],
     pool: "forks",
     testTimeout: 15_000,
     coverage: {
       provider: "v8",
-      include: ["src/lib/**/*.ts", "src/app/api/**/*.ts"],
+      include: ["src/lib/**/*.ts", "src/app/api/**/*.ts", "src/components/**/*.tsx"],
       exclude: ["src/lib/prisma.ts", "src/lib/client-participant.ts"],
     },
   },

@@ -1,0 +1,621 @@
+{
+  "roadmap": {
+    "project_id": "clujparticipa-redesign",
+    "created_at": "2026-05-14T23:18:43Z",
+    "total_steps": 24,
+    "phases": 7
+  },
+  "phases": [
+    {
+      "id": "01",
+      "name": "Pipeline Domain Logic (WS + M1)",
+      "description": "Implement pure-function domain logic: pipeline stage ordering from transitions.ts, stalled idea detection (>30 days), and actor role resolution. These are leaf dependencies with no UI, testable via unit tests alone.",
+      "steps": [
+        {
+          "id": "01-01",
+          "name": "Implement pipeline-stages pure functions",
+          "criteria": "getStageIndex returns correct 0-based index for all 7 forward stages; isStageReached returns true for stages at or before current status; isCurrentStage returns true only when stage equals current status; PIPELINE_STAGES constant excludes REJECTED and matches ALL_STATUSES order from transitions.ts",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/integration-checkpoints.feature",
+          "scenario_name": "Pipeline component reuses stage logic from transitions.ts",
+          "description": "Replace RED scaffold with working implementations of getStageIndex, isStageReached, isCurrentStage. PIPELINE_STAGES already filters REJECTED correctly in scaffold; verify and implement the three functions.",
+          "acceptance_criteria": [
+            "getStageIndex('SUBMITTED') === 0, getStageIndex('COMPLETED') === 6",
+            "isStageReached('SUBMITTED', 'ELIGIBLE') === true",
+            "isStageReached('IN_VOTING', 'ELIGIBLE') === false",
+            "isCurrentStage('ELIGIBLE', 'ELIGIBLE') === true",
+            "isCurrentStage('SUBMITTED', 'ELIGIBLE') === false"
+          ],
+          "files_to_modify": [
+            "src/lib/pipeline-stages.ts",
+            "src/lib/__tests__/pipeline-stages.test.ts"
+          ],
+          "dependencies": ["transitions.ts (ALL_STATUSES)"],
+          "estimated_hours": 2,
+          "deliverables": ["Working pipeline-stages.ts with pure functions", "Unit tests covering all 7 stages and boundary cases"],
+          "quality_gates": ["All unit tests pass", "TypeScript compiles without errors", "Mutation kill rate >= 80% on pipeline-stages.ts"],
+          "implementation_notes": "Functional composition -- pure functions, no classes. Derive from ALL_STATUSES in transitions.ts, filter out REJECTED. Do not duplicate stage ordering; import from transitions.ts. TRACEABILITY: Unit-level ACs here correspond to user-observable behavior in step 02-03 (IdeaPipeline renders 7 stages in correct order) and integration-checkpoints.feature scenario 'Pipeline component reuses stage logic from transitions.ts'.",
+          "scenario_tags": ["@real-io", "@adapter-integration"]
+        },
+        {
+          "id": "01-02",
+          "name": "Implement stalled-detector pure function",
+          "criteria": "detectStalledIdea returns isStalled=true when daysSinceLastChange >= 30 for non-COMPLETED, non-SUBMITTED statuses; returns isStalled=false for COMPLETED regardless of days; returns isStalled=false when days < 30; waitingForLabel is derived from STALLED_WAITING_LABELS map with correct stage-to-label mappings",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/milestone-1-pipeline.feature",
+          "scenario_name": "Stalled idea shows \"Waiting for\" label with days count",
+          "description": "Replace RED scaffold with working detectStalledIdea. Fix STALLED_WAITING_LABELS per upstream-issues.md: ELIGIBLE should map to 'Eligibility assessment' (not 'Voting period'), IN_VOTING to 'Public voting period', SELECTED to 'Selection for implementation'. Add SUBMITTED and COMPLETED with empty labels (never stalled).",
+          "acceptance_criteria": [
+            "detectStalledIdea('UNDER_REVIEW', date35DaysAgo).isStalled === true",
+            "detectStalledIdea('UNDER_REVIEW', date35DaysAgo).daysSinceLastChange === 35",
+            "detectStalledIdea('UNDER_REVIEW', date35DaysAgo).waitingForLabel === 'City department review'",
+            "detectStalledIdea('UNDER_REVIEW', date15DaysAgo).isStalled === false",
+            "detectStalledIdea('COMPLETED', date60DaysAgo).isStalled === false",
+            "detectStalledIdea('ELIGIBLE', date40DaysAgo).waitingForLabel === 'Eligibility assessment'"
+          ],
+          "files_to_modify": [
+            "src/lib/stalled-detector.ts",
+            "src/lib/__tests__/stalled-detector.test.ts"
+          ],
+          "dependencies": [],
+          "estimated_hours": 2,
+          "deliverables": ["Working stalled-detector.ts with corrected label mappings", "Unit tests covering stalled/not-stalled/completed/edge cases"],
+          "quality_gates": ["All unit tests pass", "TypeScript compiles", "Mutation kill rate >= 80%"],
+          "implementation_notes": "Fix STALLED_WAITING_LABELS per upstream-issues.md item 3. Full mapping: SUBMITTED->'Submission received', UNDER_REVIEW->'City department review', ELIGIBLE->'Eligibility assessment', IN_VOTING->'Public voting period', SELECTED->'Selection for implementation', IN_PROGRESS->'Implementation in progress'. SUBMITTED and COMPLETED never show stalled indicator. TRACEABILITY: Unit-level ACs here correspond to user-observable behavior in step 02-02 (StalledIndicator renders 'Waiting for: {label}' and '{N} days ago').",
+          "scenario_tags": ["@real-io", "@US-02"]
+        },
+        {
+          "id": "01-03",
+          "name": "Implement actor-role-resolver pure function",
+          "criteria": "resolveActorRole returns 'Admin' for changedBy matching known admin patterns (admin@, moderator@); returns 'System' for changedBy equal to 'system'; returns 'Department' for any unknown changedBy value; gracefully handles empty or malformed input",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/milestone-3-timeline.feature",
+          "scenario_name": "Actor role derived from changedBy field",
+          "description": "Replace RED scaffold with working resolveActorRole. KNOWN_ADMIN_PATTERNS already defined in scaffold. Add 'system' exact match for System role. Unknown patterns fall through to 'Department'.",
+          "acceptance_criteria": [
+            "resolveActorRole('admin@cluj.ro') === 'Admin'",
+            "resolveActorRole('moderator@city.cluj.ro') === 'Admin'",
+            "resolveActorRole('system') === 'System'",
+            "resolveActorRole('unknown-user@example.com') === 'Department'",
+            "resolveActorRole('') === 'Department'"
+          ],
+          "files_to_modify": [
+            "src/lib/actor-role-resolver.ts",
+            "src/lib/__tests__/actor-role-resolver.test.ts"
+          ],
+          "dependencies": [],
+          "estimated_hours": 1,
+          "deliverables": ["Working actor-role-resolver.ts", "Unit tests covering all three roles and fallback"],
+          "quality_gates": ["All unit tests pass", "TypeScript compiles", "Mutation kill rate >= 80%"],
+          "implementation_notes": "Functional composition -- pure function. Check KNOWN_ADMIN_PATTERNS first (substring match), then exact 'system' match, then default to 'Department'. This is used by StatusChangeTimeline but is a leaf dependency with no UI coupling. TRACEABILITY: Unit-level ACs here correspond to user-observable behavior in step 04-01 (StatusChangeTimeline shows actor role as 'Admin'/'System'/'Department').",
+          "scenario_tags": ["@real-io", "@US-04"]
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Pipeline UI Components (WS + M1)",
+      "description": "Implement pipeline visualization components: IdeaPipelineStage (individual stage rendering), StalledIndicator (waiting label), and IdeaPipeline (composite 7-stage pipeline). Integrate pipeline + timeline replacement into IdeaDetailPage. Covers walking skeleton scenarios and M1 error paths.",
+      "steps": [
+        {
+          "id": "02-01",
+          "name": "Implement IdeaPipelineStage component",
+          "criteria": "IdeaPipelineStage renders a filled circle with date for reached stages, a pulsing indicator for the current stage, an outlined gray circle for future stages, and a red marker for REJECTED exception states; stage label is displayed below each circle; all visible strings come from locale keys",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/walking-skeleton.feature",
+          "scenario_name": "Pipeline renders all stages on idea detail page",
+          "description": "Replace RED scaffold. Render individual stage as: filled circle + date text (reached), filled circle + pulsing ring (current), outlined gray circle (future), red circle (REJECTED exception). Use locale keys for stage labels via Statuses namespace.",
+          "acceptance_criteria": [
+            "Reached stage shows filled circle with timestamp",
+            "Current stage shows filled circle with pulsing indicator",
+            "Future stages show outlined gray circles with no dates",
+            "REJECTED exception state renders red marker",
+            "Stage label text comes from next-intl translation"
+          ],
+          "files_to_modify": [
+            "src/components/ideas/idea-pipeline-stage.tsx",
+            "src/components/ideas/__tests__/idea-pipeline-stage.test.tsx",
+            "src/i18n/messages/ro.json",
+            "src/i18n/messages/hu.json",
+            "src/i18n/messages/en.json"
+          ],
+          "dependencies": ["01-01 (pipeline-stages)"],
+          "estimated_hours": 3,
+          "deliverables": ["Working IdeaPipelineStage component", "Component tests with React Testing Library", "Pipeline locale keys in all 3 locale files"],
+          "quality_gates": ["Component renders without crashing", "All 4 visual states tested", "No hardcoded strings", "TypeScript compiles"],
+          "implementation_notes": "Client component (needs responsive breakpoint). Use Tailwind for styling. Pulsing indicator via Tailwind animate-pulse. Status labels from existing Statuses i18n namespace. Add Pipeline namespace for pipeline-specific labels (filledStage, currentStage, futureStage).",
+          "scenario_tags": ["@walking_skeleton", "@real-io", "@US-01"]
+        },
+        {
+          "id": "02-02",
+          "name": "Implement StalledIndicator component",
+          "criteria": "StalledIndicator renders 'Waiting for: {label}' text and '{N} days ago' count; label and days come from props; all visible strings from locale keys; component is hidden when not applicable",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/milestone-1-pipeline.feature",
+          "scenario_name": "Stalled idea shows \"Waiting for\" label with days count",
+          "description": "Replace RED scaffold. Render a compact label below the stalled pipeline stage showing the waiting-for text and days count. Label text comes from stalled-detector output (passed via props). Locale keys for 'Waiting for' prefix and 'days ago' suffix.",
+          "acceptance_criteria": [
+            "Shows 'Waiting for: {label}' when label is non-empty",
+            "Shows '{N} days ago' count",
+            "All text from locale keys",
+            "Renders nothing when label is empty (SUBMITTED/COMPLETED)"
+          ],
+          "files_to_modify": [
+            "src/components/ideas/stalled-indicator.tsx",
+            "src/components/ideas/__tests__/stalled-indicator.test.tsx",
+            "src/i18n/messages/ro.json",
+            "src/i18n/messages/hu.json",
+            "src/i18n/messages/en.json"
+          ],
+          "dependencies": ["01-02 (stalled-detector)"],
+          "estimated_hours": 1.5,
+          "deliverables": ["Working StalledIndicator component", "Component tests", "Locale keys added"],
+          "quality_gates": ["Component renders correctly", "No hardcoded strings", "TypeScript compiles"],
+          "implementation_notes": "Simple display component. Props already defined in scaffold (label, daysAgo). Add Pipeline.waitingFor and Pipeline.daysAgo locale keys.",
+          "scenario_tags": ["@real-io", "@US-02"]
+        },
+        {
+          "id": "02-03",
+          "name": "Implement IdeaPipeline composite component",
+          "criteria": "IdeaPipeline renders all 7 forward stages horizontally on desktop and vertically on mobile (<640px); uses IdeaPipelineStage for each stage; shows StalledIndicator when stalled data provided; handles empty status changes gracefully (only SUBMITTED filled with idea creation date); handles unexpected status values without crashing; connected stages with horizontal/vertical connector lines",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/walking-skeleton.feature",
+          "scenario_name": "Pipeline renders all stages on idea detail page",
+          "description": "Replace RED scaffold. Compose IdeaPipelineStage components into a 7-stage pipeline. Accept stages array (computed from pipeline-stages.ts + status changes data). Switch layout based on viewport width (useMediaQuery or CSS responsive). Wire StalledIndicator when exceptionState is STALLED.",
+          "acceptance_criteria": [
+            "Renders 7 stages in correct order on desktop (horizontal)",
+            "Renders 7 stages vertically on mobile viewport (<640px)",
+            "SUBMITTED stage filled with creation date when no status changes exist",
+            "Current stage has pulsing indicator",
+            "Future stages are outlined and gray",
+            "StalledIndicator shown when exceptionState=STALLED and stalledLabel provided",
+            "Pipeline renders without crashing for unexpected status values"
+          ],
+          "files_to_modify": [
+            "src/components/ideas/idea-pipeline.tsx",
+            "src/components/ideas/__tests__/idea-pipeline.test.tsx"
+          ],
+          "dependencies": ["02-01 (IdeaPipelineStage)", "02-02 (StalledIndicator)", "01-01 (pipeline-stages)"],
+          "estimated_hours": 4,
+          "deliverables": ["Working IdeaPipeline component with responsive layout", "Component tests for horizontal/vertical/stalled/empty-data scenarios"],
+          "quality_gates": ["Pipeline renders all 7 stages", "Mobile layout switches at 640px", "Empty data handled gracefully", "TypeScript compiles"],
+          "implementation_notes": "Use CSS media queries for responsive switch (Tailwind sm: breakpoint = 640px). Horizontal: flex row with connector lines. Vertical: flex column with connector lines. Props already defined: stages array, exceptionState, stalledLabel, stalledDays, isMobile. Compute stages array in parent (IdeaDetailPage) from pipeline-stages.ts + API data.",
+          "scenario_tags": ["@walking_skeleton", "@real-io", "@US-01"]
+        },
+        {
+          "id": "02-04",
+          "name": "Integrate pipeline into IdeaDetailPage and add locale keys",
+          "criteria": "IdeaDetailPage shows IdeaPipeline component below the header/status badge section; pipeline data is computed from idea.status and idea.statusChanges using pipeline-stages.ts and stalled-detector.ts; existing inline status timeline replaced by StatusChangeTimeline (placeholder for now -- just pipeline integration in this step); not-found state shown for nonexistent ideas; all new locale keys added to RO/HU/EN",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/walking-skeleton.feature",
+          "scenario_name": "Idea detail page renders via driving port",
+          "description": "Extend IdeaDetailPage to import and render IdeaPipeline. Compute PipelineStage[] array from idea.status + idea.statusChanges. Compute stalled info from stalled-detector. Pass to IdeaPipeline. Add Pipeline, Stalled namespace locale keys to all 3 locale files. Handle not-found gracefully (already exists in page, verify it prevents pipeline render).",
+          "acceptance_criteria": [
+            "Pipeline component visible on idea detail page below status badge",
+            "Pipeline data computed from idea.status and statusChanges array",
+            "Not-found state prevents pipeline rendering",
+            "All pipeline locale keys added to ro.json, hu.json, en.json",
+            "Existing page functionality (voting, comments) still works"
+          ],
+          "files_to_modify": [
+            "src/app/[locale]/ideas/[id]/page.tsx",
+            "src/i18n/messages/ro.json",
+            "src/i18n/messages/hu.json",
+            "src/i18n/messages/en.json"
+          ],
+          "dependencies": ["02-03 (IdeaPipeline)", "01-01 (pipeline-stages)", "01-02 (stalled-detector)"],
+          "estimated_hours": 3,
+          "deliverables": ["IdeaDetailPage with integrated pipeline", "Complete Pipeline/Stalled locale keys in all 3 languages"],
+          "quality_gates": ["Pipeline renders on idea detail page", "Not-found page works", "All existing tests still pass", "No hardcoded strings", "TypeScript compiles"],
+          "implementation_notes": "Add IdeaPipeline import and render below the header section (after Badge, before description). Compute stages using pipeline-stages functions: map each of PIPELINE_STAGES to PipelineStage with reached/current/date flags. Use idea.createdAt for SUBMITTED date when no status changes. Detect stalled via stalled-detector. The inline timeline (lines 477-501 in current page.tsx) will be replaced in Phase 04 by StatusChangeTimeline component.",
+          "scenario_tags": ["@walking_skeleton", "@real-io", "@driving_port"]
+        },
+        {
+          "id": "02-05",
+          "name": "Implement pipeline error-path scenarios",
+          "criteria": "Pipeline renders without crashing when status changes API returns 404; pipeline renders without crashing when status changes array is empty; pipeline renders without crashing for unexpected status values; pipeline renders without crashing when status changes contain malformed records (missing fields); idea not found shows not-found message with no pipeline",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/milestone-1-pipeline.feature",
+          "scenario_name": "Pipeline handles unexpected status value gracefully",
+          "description": "Add error-path handling and tests for: empty status changes (only SUBMITTED filled with createdAt), 404 API response, unexpected status values, malformed records, not-found ideas. Most error handling is in the page's fetch + pipeline computation logic. Verify all M1 error scenarios.",
+          "acceptance_criteria": [
+            "Empty status changes array: pipeline renders with only SUBMITTED filled",
+            "404 API response: not-found message shown, no pipeline",
+            "Unexpected status: pipeline renders, shows raw status label",
+            "Malformed records: incomplete records skipped, pipeline renders",
+            "Idea not found: not-found message, no pipeline component",
+            "Vote endpoint returns 403 for IN_PROGRESS idea (existing behavior, verify no regression)",
+            "Vote endpoint returns 401 for invalid participant token (existing behavior, verify no regression)",
+            "Vote endpoint returns 429 when rate limit exceeded (existing behavior, verify no regression)"
+          ],
+          "files_to_modify": [
+            "src/app/[locale]/ideas/[id]/page.tsx",
+            "src/lib/pipeline-stages.ts",
+            "src/lib/__tests__/pipeline-stages.test.ts",
+            "src/components/ideas/__tests__/idea-pipeline.test.tsx",
+            "src/app/api/ideas/[id]/vote/route.test.ts"
+          ],
+          "dependencies": ["02-04 (IdeaDetailPage integration)"],
+          "estimated_hours": 3,
+          "deliverables": ["Error-path handling in page and pipeline-stages", "Tests covering all M1 error scenarios (#26, #27, #33, #34, #40)", "Vote endpoint regression tests (#28, #36, #39)"],
+          "quality_gates": ["All error-path tests pass", "No crashes on malformed data", "Vote endpoint tests pass (no regression)", "Mutation kill rate >= 80%"],
+          "implementation_notes": "Scenarios covered: #26 (404), #27 (empty array), #33 (idea not found), #34 (unexpected status), #40 (malformed data), #28 (vote 403), #36 (vote 401), #39 (vote 429). The vote endpoint scenarios verify existing behavior is not broken by the redesign. Vote endpoint tests already exist in src/app/api/ideas/[id]/vote/route.test.ts — extend or verify them. Add defensive checks in pipeline-stages: getStageIndex returns -1 or last index for unknown status, isStageReached returns false for unknown status. In IdeaDetailPage, filter out malformed status change records before computing pipeline data.",
+          "scenario_tags": ["@error", "@real-io", "@driving_port"]
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "name": "Homepage Integration (M2)",
+      "description": "Implement MiniPipeline component for idea cards, update hero section to reference pipeline concept, add completed-idea stats, and extend IdeaCard and IdeaListRow with mini-pipeline indicators. Covers M2 scenarios.",
+      "steps": [
+        {
+          "id": "03-01",
+          "name": "Implement MiniPipeline component",
+          "criteria": "MiniPipeline renders a compact 3-stage indicator: Submitted (start), current status (middle), Completed (end); the reached milestone is filled, current is highlighted, future is outlined; derives stage grouping from pipeline-stages.ts logic; all visible strings from locale keys",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/milestone-2-homepage.feature",
+          "scenario_name": "Mini-pipeline on idea list cards",
+          "description": "Replace RED scaffold. Render 3 dots/bar segments: Submitted (always first), current status in the middle, Completed (always last). Map 7 forward stages to 3 milestones: Submitted / In Voting / Completed per DDD-6. Fill reached milestones, highlight current, outline future.",
+          "acceptance_criteria": [
+            "Renders 3-stage indicator: Submitted / {current} / Completed",
+            "Submitted milestone filled when idea status >= SUBMITTED",
+            "In Voting milestone filled when idea status >= IN_VOTING",
+            "Completed milestone filled when idea status === COMPLETED",
+            "Current milestone has highlight indicator",
+            "Future milestones outlined and gray",
+            "Labels from locale keys"
+          ],
+          "files_to_modify": [
+            "src/components/ideas/mini-pipeline.tsx",
+            "src/components/ideas/__tests__/mini-pipeline.test.tsx",
+            "src/i18n/messages/ro.json",
+            "src/i18n/messages/hu.json",
+            "src/i18n/messages/en.json"
+          ],
+          "dependencies": ["01-01 (pipeline-stages)"],
+          "estimated_hours": 2.5,
+          "deliverables": ["Working MiniPipeline component", "Component tests", "MiniPipeline locale keys in all 3 languages"],
+          "quality_gates": ["Renders 3 milestones correctly for all statuses", "No hardcoded strings", "TypeScript compiles"],
+          "implementation_notes": "Milestone grouping per DDD-6: Submitted (SUBMITTED, UNDER_REVIEW, ELIGIBLE), In Voting (IN_VOTING, SELECTED), Completed (IN_PROGRESS, COMPLETED). Use pipeline-stages.ts getStageIndex for milestone determination. Props: currentStatus only (simple). Compact design: 3 dots with connector lines, fitting within idea card height.",
+          "scenario_tags": ["@real-io", "@US-03"]
+        },
+        {
+          "id": "03-02",
+          "name": "Extend IdeaCard and IdeaListRow with MiniPipeline",
+          "criteria": "IdeaCard shows MiniPipeline indicator in compact and full modes; IdeaListRow shows MiniPipeline indicator in the meta line; MiniPipeline replaces or supplements existing Badge status indicator; existing card/row functionality preserved",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/integration-checkpoints.feature",
+          "scenario_name": "Mini-pipeline reuses Pipeline component stage logic",
+          "description": "Extend IdeaCard to render MiniPipeline component alongside existing Badge. Extend IdeaListRow to render MiniPipeline in the meta line area. Keep existing structure intact; MiniPipeline is additive.",
+          "acceptance_criteria": [
+            "IdeaCard (full mode) shows MiniPipeline below or beside status badge",
+            "IdeaCard (compact mode) shows MiniPipeline in the status area",
+            "IdeaListRow shows MiniPipeline in meta line",
+            "MiniPipeline derives from same pipeline-stages logic as full pipeline",
+            "Existing card/row click navigation and layout preserved"
+          ],
+          "files_to_modify": [
+            "src/components/ideas/idea-card.tsx",
+            "src/components/ideas/idea-list-row.tsx",
+            "src/components/ideas/__tests__/idea-card.test.tsx",
+            "src/components/ideas/__tests__/idea-list-row.test.tsx"
+          ],
+          "dependencies": ["03-01 (MiniPipeline)"],
+          "estimated_hours": 2,
+          "deliverables": ["IdeaCard with MiniPipeline", "IdeaListRow with MiniPipeline", "Component tests for both"],
+          "quality_gates": ["MiniPipeline visible on cards and rows", "Existing card/row tests still pass", "TypeScript compiles"],
+          "implementation_notes": "Import MiniPipeline into IdeaCard and IdeaListRow. Pass idea.status as currentStatus prop. Place MiniPipeline after Badge in the meta/status area. Keep existing Badge -- MiniPipeline supplements it, not replaces it. Compact mode: MiniPipeline replaces the dual-badge layout for REJECTED ideas.",
+          "scenario_tags": ["@real-io", "@adapter-integration"]
+        },
+        {
+          "id": "03-03",
+          "name": "Update homepage hero text and stats to reference pipeline concept",
+          "criteria": "Homepage hero section contains text referencing the pipeline/progress-tracking concept; hero text is displayed in the current locale language; stats section shows COMPLETED idea count prominently; district filter shows 'be the first' CTA when zero ideas; homepage handles zero ideas gracefully with welcoming message",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/milestone-2-homepage.feature",
+          "scenario_name": "Homepage hero references pipeline concept",
+          "description": "Update LocaleHomePage hero text (Home.title, Home.description) to reference pipeline progress tracking. Add completed idea count to stats strip. Handle zero-ideas and zero-completed states gracefully. Ensure language switcher visible and functional (already exists in header -- verify).",
+          "acceptance_criteria": [
+            "Hero text references pipeline/progress concept",
+            "Hero text changes with language switch",
+            "Stats section shows COMPLETED idea count",
+            "Zero completed ideas: stats shows 0 without misleading content",
+            "Zero ideas in district: 'be the first' CTA visible",
+            "Zero ideas total: welcoming message shown",
+            "Language switcher visible in header (verify existing Navigation component renders switcher)",
+            "Switching language to Hungarian changes ALL visible text on homepage to Hungarian (hero, stats, idea cards, CTAs, navigation)"
+          ],
+          "files_to_modify": [
+            "src/app/[locale]/page.tsx",
+            "src/i18n/messages/ro.json",
+            "src/i18n/messages/hu.json",
+            "src/i18n/messages/en.json"
+          ],
+          "dependencies": ["03-02 (IdeaCard/IdeaListRow with MiniPipeline)"],
+          "estimated_hours": 2,
+          "deliverables": ["Updated hero text referencing pipeline", "Completed idea stats", "Zero-state handling", "Updated locale keys"],
+          "quality_gates": ["Hero text references pipeline concept in all 3 languages", "Completed count shown in stats", "Zero states handled gracefully", "TypeScript compiles"],
+          "implementation_notes": "Update Home.title and Home.description locale strings to reference pipeline tracking. Add Home.completedIdeas and Home.pipelineHero locale keys. Add completed ideas count to the stats strip using statusCounts.COMPLETED from /api/stats. Add Home.beFirst and Home.noIdeasAtAll locale keys for zero states. Language switcher is already in header (Navigation namespace) -- verify it renders and that switching locale (RO->HU->EN) changes ALL visible text on the page including new pipeline hero text, stats, and MiniPipeline labels. Covers DISTILL scenarios #12 (language switcher visible) and #53 (switching language changes all visible text).",
+          "scenario_tags": ["@real-io", "@US-03", "@US-07"]
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "name": "Status Change Timeline (M3)",
+      "description": "Implement expandable StatusChangeTimeline component and integrate into IdeaDetailPage, replacing the existing inline timeline. Covers M3 scenarios.",
+      "steps": [
+        {
+          "id": "04-01",
+          "name": "Implement StatusChangeTimeline component",
+          "criteria": "StatusChangeTimeline renders collapsed by default with 'View full history' label; expands to show all entries when clicked; each entry shows date, from-to status, actor role (from actor-role-resolver), and note text; shows 'No updates yet' for ideas with only initial submission; handles unknown actor roles gracefully; remains performant with 20+ entries",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/milestone-3-timeline.feature",
+          "scenario_name": "Timeline is collapsed by default on idea detail page",
+          "description": "Replace RED scaffold. Implement expandable timeline: collapsed by default with toggle, expanded shows chronological entries. Each entry renders date, from-to status, actor role, and note. Use resolveActorRole for actor display. Handle empty timeline with 'No updates yet'.",
+          "acceptance_criteria": [
+            "Timeline section is collapsed by default",
+            "'View full history' label is visible when collapsed",
+            "Clicking 'View full history' expands the timeline",
+            "Each entry shows date, from-to status, actor role, and note",
+            "Actor role derived from resolveActorRole function",
+            "'No updates yet' shown for single-status ideas",
+            "Unknown actor displayed as 'Department'",
+            "Timeline with 20 entries renders without performance issues"
+          ],
+          "files_to_modify": [
+            "src/components/ideas/status-change-timeline.tsx",
+            "src/components/ideas/__tests__/status-change-timeline.test.tsx",
+            "src/i18n/messages/ro.json",
+            "src/i18n/messages/hu.json",
+            "src/i18n/messages/en.json"
+          ],
+          "dependencies": ["01-03 (actor-role-resolver)"],
+          "estimated_hours": 3,
+          "deliverables": ["Working StatusChangeTimeline component with collapse/expand", "Component tests", "Timeline locale keys in all 3 languages"],
+          "quality_gates": ["Collapsed by default", "Expand/collapse works", "Actor roles correct", "No hardcoded strings", "TypeScript compiles"],
+          "implementation_notes": "Client component (needs click handler). Use React useState for expand/collapse toggle. Entries prop is TimelineEntry[] from scaffold type. Add Timeline namespace locale keys: viewFullHistory, noUpdatesYet, actorPrefix, dateLabel. Each entry: date formatted via Intl.DateTimeFormat, from-to status from Statuses namespace, actor from resolveActorRole, note text. Use existing border-l timeline styling pattern from progress updates section.",
+          "scenario_tags": ["@real-io", "@US-04"]
+        },
+        {
+          "id": "04-02",
+          "name": "Integrate StatusChangeTimeline into IdeaDetailPage, replace inline timeline",
+          "criteria": "IdeaDetailPage shows StatusChangeTimeline component below the pipeline; StatusChangeTimeline replaces the existing inline status timeline (ol element); timeline data is mapped from idea.statusChanges to TimelineEntry[]; both pipeline and timeline show consistent data; concurrent status changes handled correctly (most recent = current, all shown in timeline chronologically)",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/integration-checkpoints.feature",
+          "scenario_name": "Timeline consumes same StatusChange data as pipeline",
+          "description": "Remove the existing inline timeline (lines 477-501 in current page.tsx) and replace with StatusChangeTimeline component. Map idea.statusChanges to TimelineEntry[] using resolveActorRole. Ensure data consistency between pipeline and timeline.",
+          "acceptance_criteria": [
+            "Inline status timeline removed from IdeaDetailPage",
+            "StatusChangeTimeline renders below pipeline section",
+            "Timeline entries mapped from idea.statusChanges with actor roles",
+            "Pipeline and timeline show consistent dates and statuses",
+            "Concurrent status changes: pipeline shows most recent as current, timeline shows all chronologically"
+          ],
+          "files_to_modify": [
+            "src/app/[locale]/ideas/[id]/page.tsx",
+            "src/components/ideas/__tests__/status-change-timeline.test.tsx"
+          ],
+          "dependencies": ["04-01 (StatusChangeTimeline)", "02-04 (IdeaDetailPage with pipeline)"],
+          "estimated_hours": 2,
+          "deliverables": ["IdeaDetailPage with StatusChangeTimeline replacing inline timeline", "Integration tests for pipeline-timeline data consistency"],
+          "quality_gates": ["Inline timeline fully replaced", "StatusChangeTimeline renders correctly", "Data consistency between pipeline and timeline", "All existing tests still pass"],
+          "implementation_notes": "Remove the existing inline timeline block (the ol with statusChanges.map). Map each StatusChange to TimelineEntry: id=sc.id, date=sc.createdAt, fromStatus=sc.fromStatus, toStatus=sc.toStatus, actorRole=resolveActorRole(sc.changedBy), note=sc.note. Pass noUpdatesLabel and viewHistoryLabel from locale keys. Place StatusChangeTimeline below IdeaPipeline, above the comments section.",
+          "scenario_tags": ["@real-io", "@adapter-integration"]
+        }
+      ]
+    },
+    {
+      "id": "05",
+      "name": "Exception States (M4)",
+      "description": "Implement ExceptionState component for REJECTED/MERGED/RETURNED ideas with recovery CTAs. Detect MERGED/RETURNED patterns from StatusChange.note prefixes. Covers M4 scenarios.",
+      "steps": [
+        {
+          "id": "05-01",
+          "name": "Implement ExceptionState component with recovery CTAs",
+          "criteria": "ExceptionState renders for REJECTED ideas: red marker, rejection reason text, 'Support a similar idea' CTA, 'Revise and resubmit' CTA; for MERGED ideas: merged indicator (not red), parent idea link with title, 'Your idea was combined with' text; for RETURNED ideas: return indicator, admin feedback text, 'Revise and resubmit' CTA; handles missing parent idea link gracefully; handles missing rejection reason with generic 'Contact us' message; hides 'Support similar' CTA when no similar ideas exist",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/milestone-4-exceptions.feature",
+          "scenario_name": "REJECTED idea shows red marker and reason and recovery CTAs",
+          "description": "Replace RED scaffold. Implement three exception state renders: REJECTED (red marker + reason + both CTAs), MERGED (merge indicator + parent link), RETURNED (return indicator + feedback + resubmit CTA). Handle edge cases: missing parent idea, missing reason, no similar ideas.",
+          "acceptance_criteria": [
+            "REJECTED: red marker, reason text, 'Support similar' CTA, 'Revise and resubmit' CTA",
+            "MERGED: merge indicator, parent idea link, combined-with text",
+            "RETURNED: return indicator, admin feedback text, 'Revise and resubmit' CTA",
+            "Missing parent idea: link shown but marked unavailable",
+            "Missing rejection reason: generic 'Contact us' message",
+            "No similar ideas in category: 'Support similar' CTA hidden or shows 'No similar ideas' message",
+            "'Support similar' CTA links to filtered ideas list by same category",
+            "'Revise and resubmit' CTA links to pre-filled submission form"
+          ],
+          "files_to_modify": [
+            "src/components/ideas/exception-state.tsx",
+            "src/components/ideas/__tests__/exception-state.test.tsx",
+            "src/i18n/messages/ro.json",
+            "src/i18n/messages/hu.json",
+            "src/i18n/messages/en.json"
+          ],
+          "dependencies": [],
+          "estimated_hours": 3.5,
+          "deliverables": ["Working ExceptionState component with 3 renders", "Component tests for all exception types and edge cases", "Exception locale keys in all 3 languages"],
+          "quality_gates": ["All 3 exception states render correctly", "Edge cases handled", "No hardcoded strings", "TypeScript compiles"],
+          "implementation_notes": "Add Exception namespace locale keys: rejectedReason, supportSimilar, reviseAndResubmit, mergedWith, ideaUnavailable, contactForDetails, noSimilarIdeas, returnedFeedback. Props already defined in scaffold: exceptionType, reason, parentIdeaId, parentIdeaTitle, rejectionStage, resubmitUrl, similarIdeasUrl. CTAs are Link components: similarIdeasUrl=/ideas?category={idea.category}, resubmitUrl=/ideas/new?from={idea.id}.",
+          "scenario_tags": ["@real-io", "@US-05"]
+        },
+        {
+          "id": "05-02",
+          "name": "Detect MERGED/RETURNED from StatusChange.note and integrate ExceptionState into IdeaDetailPage",
+          "criteria": "IdeaDetailPage detects MERGED pattern (most recent StatusChange.note contains '[MERGED]') and passes exceptionType='MERGED' to ExceptionState; detects RETURNED pattern (most recent StatusChange.note contains '[RETURNED]' or 'returned'/'revision required') and passes exceptionType='RETURNED'; defaults to 'REJECTED' when no merge/return pattern detected; ExceptionState renders below pipeline for REJECTED-status ideas; pipeline shows red marker at rejection stage for REJECTED, merge indicator for MERGED, return indicator for RETURNED",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/milestone-4-exceptions.feature",
+          "scenario_name": "Merged idea shows merge point and parent idea link",
+          "description": "Add MERGED/RETURNED detection logic to IdeaDetailPage. Parse the most recent rejection StatusChange.note for '[MERGED]' or '[RETURNED]' prefixes per DDD-5/ADR-002. Pass the detected exception type to both IdeaPipeline (exceptionState prop) and ExceptionState component. Extract parent idea ID/title from merge note. Extract admin feedback from return note.",
+          "acceptance_criteria": [
+            "REJECTED idea with '[MERGED]' in note: pipeline shows merged indicator, ExceptionState shows parent link",
+            "REJECTED idea with '[RETURNED]' in note: pipeline shows return indicator, ExceptionState shows feedback + CTA",
+            "REJECTED idea with plain note: pipeline shows red marker, ExceptionState shows reason + CTAs",
+            "Reopened idea (REJECTED->UNDER_REVIEW): pipeline shows UNDER_REVIEW as current, no exception state",
+            "MERGED with missing parent: merged indicator shown, link marked unavailable",
+            "Rejection without reason: generic 'Contact us' message"
+          ],
+          "files_to_modify": [
+            "src/app/[locale]/ideas/[id]/page.tsx",
+            "src/components/ideas/__tests__/exception-state.test.tsx"
+          ],
+          "dependencies": ["05-01 (ExceptionState component)", "02-04 (IdeaDetailPage with pipeline)"],
+          "estimated_hours": 3,
+          "deliverables": ["IdeaDetailPage with exception state detection and rendering", "Integration tests for MERGED/RETURNED/REJECTED flows", "Edge case tests for missing parent and missing reason"],
+          "quality_gates": ["MERGED detected from [MERGED] prefix", "RETURNED detected from [RETURNED] prefix", "Plain rejection defaults to REJECTED", "Reopened idea shows no exception", "All M4 scenarios pass"],
+          "implementation_notes": "Detection logic per DWD-08/ADR-002: (1) MERGED: idea.status is REJECTED and most recent StatusChange.toStatus=REJECTED and note starts with '[MERGED]'. Parse parent idea reference from note after prefix. (2) RETURNED: same but note starts with '[RETURNED]' or contains 'returned'/'revision required'. (3) Default REJECTED: no prefix match. Add detection as pure functions in IdeaDetailPage or extract to a small helper. Replace existing inline rejection handling (lines 397-407) with ExceptionState component.",
+          "scenario_tags": ["@real-io", "@US-05"]
+        }
+      ]
+    },
+    {
+      "id": "06",
+      "name": "Map-First Homepage (M5)",
+      "description": "Restructure LocaleHomePage to promote HomeMapPreview from sidebar to hero position. Add tap-to-submit functionality to map. Ensure map is visible on mobile. Covers M5 scenarios.",
+      "steps": [
+        {
+          "id": "06-01",
+          "name": "Restructure LocaleHomePage to map-first layout",
+          "criteria": "Map component is the first interactive element below the header; map is above the fold and full-width on desktop and mobile; existing map functionality preserved (pins, clustering, popups); map is visible on mobile (remove hidden lg:block guard); idea feed moves below the map section",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/milestone-5-map-first.feature",
+          "scenario_name": "Map is homepage hero element",
+          "description": "Restructure LocaleHomePage layout: move HomeMapPreview from the 2-column sidebar to the hero position (full-width, above the fold). Remove the section className='hidden lg:block' that hides the map on mobile. Move the ideas feed section below the map. Keep existing components (stats strip, ideas feed, CTAs).",
+          "acceptance_criteria": [
+            "Map is first interactive element below header",
+            "Map is full-width and above the fold",
+            "Map visible on mobile (no hidden class)",
+            "Idea pins, clustering, and popups still work",
+            "Ideas feed section moved below map",
+            "Stats strip and hero CTAs preserved above map"
+          ],
+          "files_to_modify": [
+            "src/app/[locale]/page.tsx"
+          ],
+          "dependencies": [],
+          "estimated_hours": 2,
+          "deliverables": ["LocaleHomePage with map-first layout", "Map visible on mobile"],
+          "quality_gates": ["Map is first interactive element", "Map visible on mobile", "Existing map functionality preserved", "TypeScript compiles"],
+          "implementation_notes": "In current page.tsx, the map is in a 2-column grid (line 138: grid-cols-[1fr_400px]) with the map in a section className='hidden lg:block'. Restructure: (1) Move HomeMapPreview above the grid, full-width, as a hero section. (2) Remove hidden lg:block guard. (3) Increase map height for hero role (update HomeMapPreview height). (4) Keep the ideas feed in a single-column layout below. (5) Stats strip and CTAs remain above the map. Map section should use Link to /map for full-screen view.",
+          "scenario_tags": ["@real-io", "@US-06"]
+        },
+        {
+          "id": "06-02",
+          "name": "Add tap-to-submit functionality to HomeMapPreview",
+          "criteria": "Tapping a point on the map opens the idea submission form with latitude and longitude pre-filled from the tapped coordinates; map renders centered on Cluj-Napoca default coordinates when location services are unavailable; district filter is available for manual selection when location services fail",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/milestone-5-map-first.feature",
+          "scenario_name": "Tapping the map opens submission form with coordinates",
+          "description": "Extend HomeMapPreview with tap-to-submit: add onClick handler to MapView that navigates to /ideas/new?lat={lat}&lng={lng}. Handle location services unavailable gracefully (map renders at default Cluj-Napoca center). Ensure existing functionality (pins, clustering, popups) coexists with tap-to-submit.",
+          "acceptance_criteria": [
+            "Tapping map point opens /ideas/new with lat/lng params",
+            "Latitude and longitude pre-filled in submission form",
+            "Map renders at Cluj-Napoca default when location unavailable",
+            "District filter available when location services fail",
+            "Existing pin click behavior preserved (pin click opens popup, not submission)",
+            "Map is interactive on mobile"
+          ],
+          "files_to_modify": [
+            "src/components/map/home-map-preview.tsx",
+            "src/components/map/__tests__/home-map-preview.test.tsx"
+          ],
+          "dependencies": ["06-01 (map-first layout)"],
+          "estimated_hours": 2.5,
+          "deliverables": ["HomeMapPreview with tap-to-submit", "Component tests", "Cluj-Napoca default coordinates fallback"],
+          "quality_gates": ["Tap navigates to submission form with coordinates", "Default center when location unavailable", "Pin clicks still work", "TypeScript compiles"],
+          "implementation_notes": "Add onMapTap prop to MapView (or handle in HomeMapPreview). Distinguish between pin click (existing popup behavior) and empty map tap (submission navigation). Use router.push or Link with lat/lng query params. Default center: Cluj-Napoca coordinates (46.7700, 23.5943). The ideas/new page will need to read lat/lng from URL search params and pre-fill the location fields (minor extension to existing form).",
+          "scenario_tags": ["@real-io", "@US-06"]
+        }
+      ]
+    },
+    {
+      "id": "07",
+      "name": "Notification Opt-In (M6)",
+      "description": "Implement useNotificationOptIn hook for browser notification opt-in, with in-app fallback when permission is denied. Integrate into idea submission flow. Covers M6 scenarios.",
+      "steps": [
+        {
+          "id": "07-01",
+          "name": "Implement useNotificationOptIn hook",
+          "criteria": "useNotificationOptIn returns current permission state ('default'/'granted'/'denied'); requestPermission() triggers browser notification permission prompt; when permission is granted, hook enables notification firing; when permission is denied, showInAppFallback is true; hook handles Notification API unavailability gracefully (SSR, older browsers); no errors shown when notification fails to fire",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/milestone-6-notifications.feature",
+          "scenario_name": "Notification opt-in prompt after first idea submission",
+          "description": "Replace RED scaffold. Implement browser notification permission request flow. Check window.Notification availability at mount (runtime probe per DWD-04). Return permission state and requestPermission function. When denied, set showInAppFallback=true. Handle SSR (no window object).",
+          "acceptance_criteria": [
+            "Returns permission state: 'default', 'granted', or 'denied'",
+            "requestPermission() triggers browser permission prompt",
+            "When granted: notifications can be sent",
+            "When denied: showInAppFallback === true",
+            "When Notification API unavailable: behaves as denied with fallback",
+            "No errors thrown when notification fails to fire",
+            "Works in SSR environment (no window crash)"
+          ],
+          "files_to_modify": [
+            "src/hooks/use-notification-opt-in.ts",
+            "src/hooks/__tests__/use-notification-opt-in.test.ts"
+          ],
+          "dependencies": [],
+          "estimated_hours": 2,
+          "deliverables": ["Working useNotificationOptIn hook", "Hook tests with mocked Notification API", "SSR safety"],
+          "quality_gates": ["Permission flow works", "Fallback when denied", "No SSR crash", "Mutation kill rate >= 80%"],
+          "implementation_notes": "Client-only hook. Check typeof window !== 'undefined' && 'Notification' in window at mount. Use useState for permission. requestPermission calls Notification.requestPermission() and updates state. If Notification API missing (SSR, old browser), set permission='denied' and showInAppFallback=true. Per DWD-04: runtime probe at mount, fallback to in-app toast. Contract smoke test only for Notification API (no real browser in Vitest).",
+          "scenario_tags": ["@real-io", "@US-08"]
+        },
+        {
+          "id": "07-02",
+          "name": "Integrate notification opt-in into idea submission and status change flow",
+          "criteria": "After first idea submission, notification opt-in prompt appears; when status changes and user has granted permission, browser notification fires with idea title and new stage name; tapping notification navigates to idea detail page; when permission denied, in-app fallback indicator shows status change; multiple status changes between visits show latest only in fallback; notification failure does not cause user-visible errors",
+          "test_file": "docs/feature/clujparticipa-redesign/distill/milestone-6-notifications.feature",
+          "scenario_name": "Notification fires on status change with idea details",
+          "description": "Integrate useNotificationOptIn into the idea submission page. After successful submission, show opt-in prompt. For status change notifications: fire browser notification with title/body when permission granted. Add in-app fallback indicator when permission denied. Handle notification click to navigate to idea detail.",
+          "acceptance_criteria": [
+            "Opt-in prompt appears after first idea submission",
+            "Browser notification fires on status change with idea title and stage",
+            "Notification text: 'Your idea {title} moved to {stage}'",
+            "Tapping notification navigates to /ideas/{id}",
+            "Permission denied: in-app fallback shows status change indicator",
+            "Multiple changes between visits: fallback shows latest only",
+            "Notification failure: no user-visible error, status still reflected on detail page"
+          ],
+          "files_to_modify": [
+            "src/app/[locale]/ideas/new/page.tsx",
+            "src/app/[locale]/ideas/[id]/page.tsx",
+            "src/hooks/__tests__/use-notification-opt-in.test.ts",
+            "src/i18n/messages/ro.json",
+            "src/i18n/messages/hu.json",
+            "src/i18n/messages/en.json"
+          ],
+          "dependencies": ["07-01 (useNotificationOptIn hook)"],
+          "estimated_hours": 3,
+          "deliverables": ["Notification opt-in in submission flow", "In-app fallback indicator on idea detail page", "Notification locale keys in all 3 languages"],
+          "quality_gates": ["Opt-in prompt works after submission", "Notification fires on status change", "Fallback works when denied", "No errors on notification failure", "TypeScript compiles"],
+          "implementation_notes": "In ideas/new/page.tsx: after successful submission, show opt-in prompt (modal or toast) using useNotificationOptIn.requestPermission(). In IdeaDetailPage: detect if user's idea status changed since last visit (localStorage flag), show in-app toast if showInAppFallback=true. Add Notification namespace locale keys: optInPrompt, optInDescription, ideaMovedTo, viewIdea. Browser notification: new Notification(title, { body, tag: `idea-${id}-status`, data: { url } }). onClick: window.focus() + navigate to idea. Per D5: browser-only, no email.",
+          "scenario_tags": ["@real-io", "@US-08"]
+        }
+      ]
+    }
+  ],
+  "implementation_scope": {
+    "source_directories": [
+      "src/lib/",
+      "src/components/ideas/",
+      "src/components/map/",
+      "src/hooks/",
+      "src/app/[locale]/ideas/",
+      "src/app/[locale]/page.tsx",
+      "src/i18n/messages/"
+    ],
+    "test_directories": [
+      "src/lib/__tests__/",
+      "src/components/ideas/__tests__/",
+      "src/components/map/__tests__/",
+      "src/hooks/__tests__/"
+    ],
+    "excluded_patterns": [
+      "**/*.d.ts",
+      "**/node_modules/**"
+    ]
+  },
+  "validation": {
+    "status": "approved",
+    "reviewer": "nw-acceptance-designer-reviewer",
+    "approved_at": "2026-05-14T23:30:00Z",
+    "review_notes": "Initial FAIL for 5 orphan scenarios and missing AC traceability. Fixed: vote endpoint scenarios (#28,#36,#39) added to step 02-05, i18n scenarios (#12,#53) added as explicit ACs to step 03-03, Phase 01 traceability notes added to steps 01-01/01-02/01-03.",
+    "quality_gates_checked": {
+      "decomposition_ratio": 2.17,
+      "decomposition_ratio_pass": true,
+      "comment": "24 steps / ~11 primary files = 2.17 (gate: <= 2.5)",
+      "all_steps_have_files": true,
+      "all_steps_have_test_linkage": true,
+      "no_duplicate_ac_structure": true,
+      "step_ids_match_pattern": true,
+      "ac_no_private_methods": true
+    }
+  }
+}
