@@ -9,6 +9,7 @@ import { MapPickerLoader } from "@/components/map/map-picker-loader";
 import { DISTRICT_CENTERS } from "@/lib/district-centers";
 import { getOrCreateParticipantToken } from "@/lib/client-participant";
 import { ImageUpload, ImageUploadHandle, ImageUploadResult } from "@/components/ideas/image-upload";
+import { useNotificationOptIn } from "@/hooks/use-notification-opt-in";
 
 const CATEGORIES = [
   "INFRASTRUCTURE", "EDUCATION", "ENVIRONMENT", "CULTURE",
@@ -23,10 +24,12 @@ const DISTRICTS = [
 
 export default function NewIdeaPage() {
   const t = useTranslations("NewIdea");
+  const tn = useTranslations("Notification");
   const tc = useTranslations("Categories");
   const td = useTranslations("Districts");
   const { data: session } = useSession();
   const searchParams = useSearchParams();
+  const { permission, requestPermission } = useNotificationOptIn();
 
   const urlLat = searchParams.get("lat");
   const urlLng = searchParams.get("lng");
@@ -105,6 +108,9 @@ export default function NewIdeaPage() {
 
       const data = await res.json();
       setCreatedId(data.id);
+
+      // Prompt for notification permission after successful submission
+      requestPermission();
     } catch {
       setError("Error");
     } finally {
@@ -116,6 +122,25 @@ export default function NewIdeaPage() {
     return (
       <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
         <p className="text-lg font-medium text-civic-teal">{t("success")}</p>
+        {permission === "default" && (
+          <div className="mt-4 rounded-sm border border-ink/10 bg-paper px-4 py-3">
+            <p className="text-sm font-semibold text-ink">{tn("optInTitle")}</p>
+            <p className="mt-1 text-sm text-ink-muted">{tn("optInDescription")}</p>
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => requestPermission()}
+                className="inline-flex items-center rounded-sm bg-ink px-3 py-1.5 text-sm font-medium text-paper transition hover:bg-ink/90"
+              >
+                {tn("optInAllow")}
+              </button>
+              <button
+                className="text-sm text-ink-muted hover:text-ink transition"
+              >
+                {tn("optInDismiss")}
+              </button>
+            </div>
+          </div>
+        )}
         <Link
           href={`/ideas/${createdId}`}
           className="mt-4 inline-flex items-center rounded-sm bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:bg-ink/90"

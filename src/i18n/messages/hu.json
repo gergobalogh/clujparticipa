@@ -400,5 +400,12 @@
     "noSimilarIdeas": "Nincsenek hasonló ötletek ebben a kategóriában",
     "mergedWith": "Ez az ötlet összevonásra került egy másik ötlettel",
     "parentUnavailable": "A szülőötlet már nem elérhető"
+  },
+  "Notification": {
+    "optInTitle": "Engedélyezi az értesítéseket?",
+    "optInDescription": "Értesítést kap, ha az ötlete státusza megváltozik.",
+    "optInAllow": "Értesítések engedélyezése",
+    "optInDismiss": "Most nem",
+    "statusChangedBanner": "Ez az ötlet a következő státuszba került: {stage}"
   }
 }

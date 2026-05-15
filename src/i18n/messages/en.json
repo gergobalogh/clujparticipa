@@ -409,5 +409,12 @@
     "noSimilarIdeas": "No similar ideas in this category",
     "mergedWith": "This idea has been merged with another idea",
     "parentUnavailable": "Parent idea is no longer available"
+  },
+  "Notification": {
+    "optInTitle": "Enable notifications?",
+    "optInDescription": "Get notified when your idea's status changes.",
+    "optInAllow": "Allow notifications",
+    "optInDismiss": "Not now",
+    "statusChangedBanner": "This idea moved to {stage}"
   }
 }

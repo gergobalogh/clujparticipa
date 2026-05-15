@@ -17,6 +17,7 @@ import { getOrCreateParticipantToken } from "@/lib/client-participant";
 import { computePipelineStages, resolveExceptionType, findRejectionChange, parseMergeNote, parseReturnNote } from "@/lib/pipeline-computation";
 import { ExceptionState } from "@/components/ideas/exception-state";
 import { detectStalledIdea } from "@/lib/stalled-detector";
+import { useNotificationOptIn } from "@/hooks/use-notification-opt-in";
 import type { Status } from "@prisma/client";
 import Image from "next/image";
 
@@ -89,8 +90,10 @@ export default function IdeaDetailPage() {
   const ta = useTranslations("Auth");
   const tp = useTranslations("Pipeline");
   const ttl = useTranslations("Timeline");
+  const tn = useTranslations("Notification");
   const { data: session } = useSession();
   const { id } = useParams<{ id: string }>();
+  const { showInAppFallback } = useNotificationOptIn();
 
   const [idea, setIdea] = useState<Idea | null>(null);
   const [loading, setLoading] = useState(true);
@@ -106,6 +109,7 @@ export default function IdeaDetailPage() {
   const [commentError, setCommentError] = useState("");
   const [notifyOnVote, setNotifyOnVote] = useState(false);
   const [votingConfig, setVotingConfig] = useState<VotingConfigData | null>(null);
+  const [lastSeenStatus, setLastSeenStatus] = useState<string | null>(null);
 
   const refreshComments = async () => {
     try {
@@ -152,6 +156,19 @@ export default function IdeaDetailPage() {
 
     return () => { cancelled = true; };
   }, [id]);
+
+  // Read last-seen status from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(`${id}:lastSeenStatus`);
+    if (stored) setLastSeenStatus(stored);
+  }, [id]);
+
+  // Update last-seen status in localStorage when idea loads
+  useEffect(() => {
+    if (idea?.status) {
+      localStorage.setItem(`${id}:lastSeenStatus`, idea.status);
+    }
+  }, [id, idea?.status]);
 
   const handleVote = async () => {
     if (!session?.user) {
@@ -259,6 +276,13 @@ export default function IdeaDetailPage() {
   }
 
   const showVoteSection = VOTE_ELIGIBLE_STATUSES.includes(idea.status as typeof VOTE_ELIGIBLE_STATUSES[number]);
+
+  // In-app notification fallback: show status change indicator when
+  // browser notifications are denied and status changed since last visit
+  const statusChangedSinceLastVisit =
+    lastSeenStatus !== null && idea.status !== lastSeenStatus;
+  const showStatusChangeFallback =
+    showInAppFallback && statusChangedSinceLastVisit;
 
   const ideaStatus = idea.status as Status;
   const pipelineStages = computePipelineStages({
@@ -402,6 +426,17 @@ export default function IdeaDetailPage() {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+      {/* In-app notification fallback when browser notifications are denied */}
+      {showStatusChangeFallback && (
+        <div
+          data-testid="notification-fallback"
+          className="mb-4 rounded-sm border-l-4 border-civic-teal bg-civic-teal-light/30 px-4 py-3"
+        >
+          <p className="text-sm font-medium text-ink">
+            {tn("statusChangedBanner", { stage: ts(idea.status as Parameters<typeof ts>[0]) })}
+          </p>
+        </div>
+      )}
       {/* Mobile: vote section near top */}
       <div className="lg:hidden">
         <div className="flex items-start justify-between gap-3">

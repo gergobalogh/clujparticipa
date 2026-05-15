@@ -400,5 +400,12 @@
     "noSimilarIdeas": "Nu există idei similare în această categorie",
     "mergedWith": "Această idee a fost contopită cu altă idee",
     "parentUnavailable": "Ideea părinte nu mai este disponibilă"
+  },
+  "Notification": {
+    "optInTitle": "Activezi notificările?",
+    "optInDescription": "Primești notificări când statusul ideii tale se schimbă.",
+    "optInAllow": "Permite notificările",
+    "optInDismiss": "Nu acum",
+    "statusChangedBanner": "Această idee a trecut la {stage}"
   }
 }
