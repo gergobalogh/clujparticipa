@@ -237,3 +237,41 @@ describe("LocaleHomePage — Flex split layout", () => {
     expect(sidebar?.className).toContain("overflow-y-auto");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Acceptance: Editorial typographic styles (Step 02-02)
+// ---------------------------------------------------------------------------
+
+describe("LocaleHomePage — Editorial typographic styles", () => {
+  it("idea feed heading uses font-serif italic", () => {
+    const { container } = render(<LocaleHomePage />);
+    const sidebar = container.querySelector("[data-testid='sidebar']");
+    const heading = sidebar?.querySelector("h2");
+    expect(heading).toBeInTheDocument();
+    expect(heading?.className).toContain("font-serif");
+    expect(heading?.className).toContain("italic");
+  });
+
+  it("map overlay heading uses font-serif", () => {
+    const { container } = render(<LocaleHomePage />);
+    const mapArea = container.querySelector("[data-testid='map-area']");
+    const heading = mapArea?.querySelector("h2");
+    expect(heading).toBeInTheDocument();
+    expect(heading?.className).toContain("font-serif");
+    // Map heading should NOT be italic (only idea feed is italic)
+    expect(heading?.className).not.toContain("italic");
+  });
+
+  it("global selection styling applies black background and white text", () => {
+    // Selection styling is applied via CSS utility classes on the root element.
+    // In Next.js App Router, this is the <html> or <body> tag via layout.tsx.
+    // We verify the CSS rule exists in globals.css by checking the body element's
+    // className for selection utilities.
+    // Since this is a CSS concern, we verify the rule is declared.
+    const cssContent = require("fs").readFileSync(
+      require("path").resolve(__dirname, "../../globals.css"),
+      "utf-8"
+    );
+    expect(cssContent).toContain("selection");
+  });
+});

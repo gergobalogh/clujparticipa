@@ -182,7 +182,7 @@ export default function LocaleHomePage() {
           transition={{ duration: 0.4, ease: "easeOut" }}
         >
           <div className="flex items-center justify-between border-b border-ink/10 pb-2">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-ink">
+            <h2 className="font-serif italic text-ink">
               {t("recentIdeas")}
             </h2>
             {stats && stats.recentIdeas.length > 0 && (
@@ -235,7 +235,7 @@ export default function LocaleHomePage() {
           transition={{ duration: 0.4, ease: "easeOut" }}
         >
           <div className="border-b border-ink/10 pb-2">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-ink">
+            <h2 className="font-serif text-ink">
               {t("openMap")}
             </h2>
           </div>

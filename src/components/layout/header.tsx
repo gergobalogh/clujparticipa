@@ -53,14 +53,14 @@ export function Header() {
     <header className="sticky top-0 z-30 border-b border-ink/10 bg-paper">
       <div className="mx-auto grid w-full max-w-5xl grid-cols-[1fr_auto_1fr] items-center px-4 py-3 sm:px-6">
         <Link
-          className="flex items-center"
+          className="flex items-center h-12 overflow-visible"
           href="/"
           locale={locale}
         >
           <img
             src="/logo.png"
             alt="ClujParticipa"
-            className="h-12 w-auto"
+            className="h-32 w-auto -my-10"
           />
         </Link>
 
@@ -76,7 +76,7 @@ export function Header() {
                 locale={locale}
                 aria-current={isActive ? "page" : undefined}
                 className={[
-                  "px-3 py-1.5 text-xs font-semibold uppercase tracking-widest transition border-b-2",
+                  "px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest transition border-b-2",
                   isActive
                     ? "border-ink text-ink"
                     : "border-transparent text-ink-muted hover:text-ink hover:border-ink/30",
@@ -123,7 +123,7 @@ export function Header() {
                 aria-current={isActive ? "page" : undefined}
                 onClick={() => setMenuOpen(false)}
                 className={[
-                  "block px-2 py-2 text-sm font-semibold uppercase tracking-widest transition border-l-2",
+                  "block px-2 py-2 text-sm font-bold uppercase tracking-widest transition border-l-2",
                   isActive
                     ? "border-ink text-ink"
                     : "border-transparent text-ink-muted hover:text-ink hover:border-ink/30",
