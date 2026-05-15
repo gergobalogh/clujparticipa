@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { ReactElement } from "react";
+import type { JSX } from "react";
 
 export type StalledIndicatorProps = {
   label: string;
@@ -11,7 +11,7 @@ export type StalledIndicatorProps = {
 export function StalledIndicator({
   label,
   daysAgo,
-}: StalledIndicatorProps): ReactElement | null {
+}: StalledIndicatorProps): JSX.Element | null {
   const t = useTranslations("Pipeline");
 
   if (!label) {

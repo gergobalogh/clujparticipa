@@ -19,16 +19,8 @@ import { ExceptionState } from "@/components/ideas/exception-state";
 import { detectStalledIdea } from "@/lib/stalled-detector";
 import { useNotificationOptIn } from "@/hooks/use-notification-opt-in";
 import type { Status } from "@prisma/client";
+import type { StatusChange } from "@/lib/types";
 import Image from "next/image";
-
-type StatusChange = {
-  id: string;
-  fromStatus: string | null;
-  toStatus: string;
-  note: string;
-  changedBy: string;
-  createdAt: string;
-};
 
 type Comment = {
   id: string;

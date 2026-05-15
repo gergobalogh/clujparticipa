@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { Fragment, type JSX } from "react";
 import type { Status } from "@prisma/client";
 import { IdeaPipelineStage } from "./idea-pipeline-stage";
 import { StalledIndicator } from "./stalled-indicator";
@@ -51,7 +51,7 @@ export function IdeaPipeline({
   stalledLabel,
   stalledDays,
   isMobile,
-}: IdeaPipelineProps): React.JSX.Element {
+}: IdeaPipelineProps): JSX.Element {
   const layoutDirection = isMobile ? "flex-col" : "sm:flex-row flex-row";
   const stageAlignment = isMobile ? "items-start" : "sm:items-center items-center";
 
@@ -62,12 +62,12 @@ export function IdeaPipeline({
         className={`flex ${layoutDirection} ${stageAlignment} gap-0`}
       >
         {stages.map((stage, index) => (
-          <React.Fragment key={stage.status}>
+          <Fragment key={stage.status}>
             <IdeaPipelineStage stage={stage} exceptionState={exceptionState} />
             {index < stages.length - 1 && (
               <StageConnector isVertical={isMobile ?? false} />
             )}
-          </React.Fragment>
+          </Fragment>
         ))}
       </div>
       <StalledSection

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import type { JSX } from "react";
 import { useTranslations } from "next-intl";
 import type { PipelineStage } from "./idea-pipeline";
 
@@ -9,22 +9,24 @@ export type IdeaPipelineStageProps = {
   exceptionState?: "REJECTED" | "MERGED" | "RETURNED" | "STALLED";
 };
 
-/** Map pipeline status to the marker fill color for reached/current stages. */
+const STAGE_MARKER_COLORS: Record<string, string> = {
+  SUBMITTED: "bg-civic-orange",
+  UNDER_REVIEW: "bg-civic-orange",
+  ELIGIBLE: "bg-civic-blue",
+  IN_VOTING: "bg-purple-700",
+  SELECTED: "bg-civic-teal",
+  IN_PROGRESS: "bg-civic-teal",
+  COMPLETED: "bg-civic-teal",
+};
+
 function markerColor(status: PipelineStage["status"]): string {
-  if (status === "SUBMITTED") return "bg-civic-orange";
-  if (status === "UNDER_REVIEW") return "bg-civic-orange";
-  if (status === "ELIGIBLE") return "bg-civic-blue";
-  if (status === "IN_VOTING") return "bg-purple-700";
-  if (status === "SELECTED") return "bg-civic-teal";
-  if (status === "IN_PROGRESS") return "bg-civic-teal";
-  if (status === "COMPLETED") return "bg-civic-teal";
-  return "bg-gray-400";
+  return STAGE_MARKER_COLORS[status] ?? "bg-gray-400";
 }
 
 export function IdeaPipelineStage({
   stage,
   exceptionState,
-}: IdeaPipelineStageProps): React.JSX.Element {
+}: IdeaPipelineStageProps): JSX.Element {
   const t = useTranslations("Statuses");
 
   const isRejected = exceptionState === "REJECTED";

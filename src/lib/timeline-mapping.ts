@@ -6,15 +6,7 @@
  */
 import { resolveActorRole } from "./actor-role-resolver";
 import type { TimelineEntry } from "@/components/ideas/status-change-timeline";
-
-type StatusChange = {
-  id: string;
-  fromStatus: string | null;
-  toStatus: string;
-  note: string;
-  changedBy: string;
-  createdAt: string;
-};
+import type { StatusChange } from "./types";
 
 /** Map an array of StatusChange records to TimelineEntry objects.
  *

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import React from "react";
+import type { JSX } from "react";
 
 export type ExceptionStateProps = {
   exceptionType: "REJECTED" | "MERGED" | "RETURNED";
@@ -130,7 +130,7 @@ export function ExceptionState({
   resubmitUrl,
   similarIdeasUrl,
   hasSimilarIdeas = true,
-}: ExceptionStateProps): React.JSX.Element {
+}: ExceptionStateProps): JSX.Element {
   const translate = useTranslations("Exception");
 
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 /** Compact 3-stage pipeline indicator for idea cards. */
-import React from "react";
+import type { JSX } from "react";
 import type { Status } from "@prisma/client";
 import { useTranslations } from "next-intl";
 import { getStageIndex } from "@/lib/pipeline-stages";
@@ -68,7 +68,7 @@ function isMilestoneCurrent(milestone: Milestone, stageIndex: number): boolean {
 // Component
 // ---------------------------------------------------------------------------
 
-export function MiniPipeline({ currentStatus }: MiniPipelineProps): React.JSX.Element {
+export function MiniPipeline({ currentStatus }: MiniPipelineProps): JSX.Element {
   const t = useTranslations("MiniPipeline");
   const stageIndex = getStageIndex(currentStatus);
 

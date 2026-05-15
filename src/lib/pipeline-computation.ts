@@ -5,17 +5,9 @@
  * side effects, making them independently testable.
  */
 import type { Status } from "@prisma/client";
-import { PIPELINE_STAGES, getStageIndex, isStageReached, isCurrentStage } from "./pipeline-stages";
+import { PIPELINE_STAGES, getStageIndex, isCurrentStage } from "./pipeline-stages";
 import type { PipelineStage } from "@/components/ideas/idea-pipeline";
-
-type StatusChange = {
-  id: string;
-  fromStatus: string | null;
-  toStatus: string;
-  note: string;
-  changedBy: string;
-  createdAt: string;
-};
+import type { StatusChange } from "./types";
 
 export type IdeaData = {
   status: Status;

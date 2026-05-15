@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { ReactElement } from "react";
+import type { JSX } from "react";
+import { useTranslations } from "next-intl";
 
 export type TimelineEntry = {
   id: string;
@@ -25,10 +26,13 @@ const formatDate = (isoDate: string): string =>
     day: "numeric",
   }).format(new Date(isoDate));
 
-const formatStatusLabel = (status: string): string =>
-  `Statuses.${status}`;
-
-function TimelineEntryRow({ entry }: { entry: TimelineEntry }): ReactElement {
+function TimelineEntryRow({
+  entry,
+  translateStatus,
+}: {
+  entry: TimelineEntry;
+  translateStatus: (key: string) => string;
+}): JSX.Element {
   const formattedDate = formatDate(entry.date);
 
   return (
@@ -38,12 +42,12 @@ function TimelineEntryRow({ entry }: { entry: TimelineEntry }): ReactElement {
       <div className="text-sm font-medium">
         {entry.fromStatus ? (
           <>
-            <span>{formatStatusLabel(entry.fromStatus)}</span>
+            <span>{translateStatus(entry.fromStatus)}</span>
             {" → "}
-            <span>{formatStatusLabel(entry.toStatus)}</span>
+            <span>{translateStatus(entry.toStatus)}</span>
           </>
         ) : (
-          <span>{formatStatusLabel(entry.toStatus)}</span>
+          <span>{translateStatus(entry.toStatus)}</span>
         )}
       </div>
       <div className="text-sm text-gray-600">
@@ -60,8 +64,9 @@ export function StatusChangeTimeline({
   entries,
   noUpdatesLabel,
   viewHistoryLabel,
-}: StatusChangeTimelineProps): ReactElement {
+}: StatusChangeTimelineProps): JSX.Element {
   const [expanded, setExpanded] = useState(false);
+  const ts = useTranslations("Statuses");
 
   if (entries.length === 0) {
     return <p className="text-sm text-gray-500">{noUpdatesLabel}</p>;
@@ -82,7 +87,11 @@ export function StatusChangeTimeline({
       {expanded && (
         <div className="mt-3 space-y-0">
           {entries.map((entry) => (
-            <TimelineEntryRow key={entry.id} entry={entry} />
+            <TimelineEntryRow
+              key={entry.id}
+              entry={entry}
+              translateStatus={(key) => ts(key as Parameters<typeof ts>[0])}
+            />
           ))}
         </div>
       )}

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { MiniPipeline } from "@/components/ideas/mini-pipeline";
 import { statusToBadgeVariant } from "@/lib/status";
+import { resolveCategoryCardColor } from "@/lib/category-colors";
 import type { Status } from "@prisma/client";
 import Image from "next/image";
 
@@ -28,17 +29,6 @@ interface IdeaCardProps {
   compact?: boolean;
 }
 
-const categoryColors: Record<string, string> = {
-  INFRASTRUCTURE: "bg-civic-orange-light text-civic-orange",
-  EDUCATION: "bg-civic-blue-light text-civic-blue",
-  ENVIRONMENT: "bg-civic-teal-light text-civic-teal",
-  CULTURE: "bg-purple-50 text-purple-700",
-  SAFETY: "bg-red-50 text-red-700",
-  TRANSPORT: "bg-cyan-50 text-cyan-700",
-  HEALTH: "bg-pink-50 text-pink-700",
-  OTHER: "bg-paper-muted text-ink-muted",
-};
-
 export function IdeaCard({
   id,
   title,
@@ -58,7 +48,7 @@ export function IdeaCard({
   const ti = useTranslations("Ideas");
 
   const href = `/ideas/${id}`;
-  const catColor = categoryColors[category] || categoryColors.OTHER;
+  const catColor = resolveCategoryCardColor(category);
 
   if (compact) {
     return (

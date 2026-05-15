@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { MiniPipeline } from "@/components/ideas/mini-pipeline";
 import { statusToBadgeVariant } from "@/lib/status";
+import { resolveCategoryListColor } from "@/lib/category-colors";
 import type { Status } from "@prisma/client";
 import Image from "next/image";
 
@@ -24,19 +25,7 @@ interface IdeaListRowProps {
   supportCount: number;
   commentCount: number;
   firstImage?: IdeaListRowFirstImage | null;
-  compact?: boolean;
 }
-
-const categoryColors: Record<string, string> = {
-  INFRASTRUCTURE: "text-civic-orange",
-  EDUCATION: "text-civic-blue",
-  ENVIRONMENT: "text-civic-teal",
-  CULTURE: "text-purple-700",
-  SAFETY: "text-red-700",
-  TRANSPORT: "text-cyan-700",
-  HEALTH: "text-pink-700",
-  OTHER: "text-ink-muted",
-};
 
 export function IdeaListRow({
   id,
@@ -55,7 +44,7 @@ export function IdeaListRow({
   const ti = useTranslations("Ideas");
 
   const href = `/ideas/${id}`;
-  const catColor = categoryColors[category] || categoryColors.OTHER;
+  const catColor = resolveCategoryListColor(category);
 
   return (
     <a

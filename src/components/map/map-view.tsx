@@ -7,7 +7,8 @@ import "leaflet/dist/leaflet.css";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { type AppLocale } from "@/i18n/routing";
-import { Badge, type BadgeVariant } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
+import { statusToBadgeVariant } from "@/lib/status";
 
 export type IdeaMapData = {
   id: string;
@@ -22,17 +23,6 @@ export type IdeaMapData = {
 
 const CLUJ_CENTER: [number, number] = [46.77, 23.59];
 const DEFAULT_ZOOM = 13;
-
-const statusToBadgeVariant: Record<string, BadgeVariant> = {
-  SUBMITTED: "submitted",
-  UNDER_REVIEW: "under_review",
-  IN_PROGRESS: "in_progress",
-  COMPLETED: "completed",
-  REJECTED: "rejected",
-  ELIGIBLE: "default",
-  IN_VOTING: "default",
-  SELECTED: "default",
-};
 
 const statusColors: Record<string, string> = {
   SUBMITTED: "#64748b",
@@ -112,7 +102,7 @@ export default function MapView({ ideas, compact = false, defaultCenter = CLUJ_C
             <div className="min-w-[180px] space-y-1.5">
               <strong className="block text-sm font-serif text-ink">{idea.title}</strong>
               <div className="flex items-center gap-1.5">
-                <Badge variant={statusToBadgeVariant[idea.status] ?? "default"}>
+                <Badge variant={statusToBadgeVariant(idea.status)}>
                   {ts(idea.status as Parameters<typeof ts>[0])}
                 </Badge>
               </div>
