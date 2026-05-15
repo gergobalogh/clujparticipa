@@ -2,7 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
+import { MiniPipeline } from "@/components/ideas/mini-pipeline";
 import { statusToBadgeVariant } from "@/lib/status";
+import type { Status } from "@prisma/client";
 import Image from "next/image";
 
 interface IdeaCardFirstImage {
@@ -92,6 +94,9 @@ export function IdeaCard({
             )}
             <span>{ti("supportCount", { count: supportCount })}</span>
           </div>
+          <div className="mt-1">
+            <MiniPipeline currentStatus={status as Status} />
+          </div>
         </div>
       </a>
     );
@@ -131,6 +136,10 @@ export function IdeaCard({
               <Badge variant="rejected">{ti("notEligible")}</Badge>
             )}
           </div>
+        </div>
+
+        <div className="mt-2">
+          <MiniPipeline currentStatus={status as Status} />
         </div>
 
         <p className="mt-1.5 line-clamp-2 text-sm text-ink-muted">
