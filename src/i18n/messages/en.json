@@ -78,7 +78,9 @@
     "noIdeasAtAll": "No ideas yet. Be the first to propose an improvement for Cluj-Napoca!",
     "votingOpen": "Open",
     "votingClosed": "Closed",
-    "unavailable": "unavailable"
+    "unavailable": "unavailable",
+    "liveBadge": "LIVE",
+    "sendIdea": "Submit an idea"
   },
   "Ideas": {
     "title": "Ideas",

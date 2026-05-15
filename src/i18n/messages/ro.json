@@ -69,7 +69,9 @@
     "noIdeasAtAll": "Nu există idei încă. Fii primul care propune o îmbunătățire pentru Cluj-Napoca!",
     "votingOpen": "Deschisă",
     "votingClosed": "Închisă",
-    "unavailable": "indisponibil"
+    "unavailable": "indisponibil",
+    "liveBadge": "LIVE",
+    "sendIdea": "Trimite o idee"
   },
   "Ideas": {
     "title": "Idei",

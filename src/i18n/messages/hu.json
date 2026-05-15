@@ -69,7 +69,9 @@
     "noIdeasAtAll": "Még nincsenek ötletek. Legyél te az első, aki javaslatot tesz Kolozsvár számára!",
     "votingOpen": "Nyitva",
     "votingClosed": "Zárva",
-    "unavailable": "nem elérhető"
+    "unavailable": "nem elérhető",
+    "liveBadge": "ÉLŐ",
+    "sendIdea": "Ötlet beküldése"
   },
   "Ideas": {
     "title": "Ötletek",
