@@ -1,0 +1,163 @@
+{
+  "roadmap": "Pipeline continuous track — ADR-004 implementation",
+  "phases": [
+    {
+      "id": "01",
+      "name": "Pipeline Track Core",
+      "description": "Replace disconnected dot pipeline with solid continuous track per ADR-004",
+      "steps": [
+        {
+          "id": "01-01",
+          "step_id": "01-01",
+          "name": "Replace IdeaPipelineStage with PipelineTrackSegment",
+          "description": "Replace the disconnected circle+label component with a track-segment+marker+label component. PipelineTrackSegment renders: a colored track bar segment (reached) or gray (future), a circular marker ON the bar (filled for reached, outlined for future, pulsing for current, red for rejected), and a label. STAGE_MARKER_COLORS constant migrates from idea-pipeline-stage.tsx. Framer Motion entrance animation on marker fade-in.",
+          "acceptance_criteria": [
+            "AC-P2: Reached stages show colored track segment and filled colored marker",
+            "AC-P3: Current stage marker shows a pulse ring animation",
+            "AC-P4: Future stages show gray track segment and gray-outlined marker",
+            "AC-P8: REJECTED renders red marker at rejection point, gray beyond",
+            "AC-P7: Animation respects prefers-reduced-motion",
+            "AC-P12: All visible strings from locale files (Statuses.* namespace)"
+          ],
+          "test_file": "src/components/ideas/__tests__/pipeline-track-segment.test.tsx",
+          "scenario_name": "PipelineTrackSegment renders all visual states",
+          "files_to_modify": [
+            "src/components/ideas/pipeline-track-segment.tsx",
+            "src/components/ideas/__tests__/pipeline-track-segment.test.tsx"
+          ],
+          "dependencies": [],
+          "estimated_hours": 2,
+          "deliverables": [
+            "PipelineTrackSegment component",
+            "Component tests for all 4 visual states + animation"
+          ],
+          "quality_gates": [
+            "Component renders without crashing",
+            "All 4 visual states tested (reached, current, future, rejected)",
+            "prefers-reduced-motion handled",
+            "No hardcoded strings",
+            "TypeScript compiles"
+          ],
+          "implementation_notes": "Client component (use client). Uses motion/react for entrance animation on markers. STAGE_MARKER_COLORS copied from idea-pipeline-stage.tsx (with addition of 'future' gray). Stage labels from useTranslations('Statuses'). Track segment is a div with h-2 bg-{color} (reached) or h-2 bg-gray-200 (future). Marker is a span h-4 w-4 rounded-full positioned absolutely ON the track bar."
+        },
+        {
+          "id": "01-02",
+          "step_id": "01-02",
+          "name": "Replace IdeaPipeline with PipelineTrack",
+          "description": "Replace the disconnected dots+connectors component with a single continuous track bar component. PipelineTrack renders: one continuous horizontal bar (gray base), colored overlay segments for reached stages (from PipelineTrackSegment), markers positioned ON the bar. Entrance animation: track fills left-to-right (motion.div scaleX 0->1), markers fade in with stagger delay. Vertical mode on mobile (isMobile prop). StalledIndicator below with fullWidth=true. Consumes PipelineStage[] unchanged.",
+          "acceptance_criteria": [
+            "AC-P1: Track renders as a single continuous bar with 7 stage markers positioned on the bar",
+            "AC-P5: Stage labels alternate above/below on desktop; all one side on vertical mobile",
+            "AC-P6: On mount, track fills left-to-right and markers fade in sequentially",
+            "AC-P9: StalledIndicator renders below the track, spanning full track width",
+            "AC-P11: On mobile (isMobile=true), track renders vertically with markers along a vertical bar",
+            "AC-P13: computePipelineStages() and pipeline-stages.ts remain unchanged"
+          ],
+          "test_file": "src/components/ideas/__tests__/pipeline-track.test.tsx",
+          "scenario_name": "PipelineTrack renders continuous bar with all stages",
+          "files_to_modify": [
+            "src/components/ideas/pipeline-track.tsx",
+            "src/components/ideas/__tests__/pipeline-track.test.tsx",
+            "src/components/ideas/stalled-indicator.tsx"
+          ],
+          "dependencies": [
+            "01-01 (PipelineTrackSegment)"
+          ],
+          "estimated_hours": 3,
+          "deliverables": [
+            "PipelineTrack component with horizontal/vertical layout",
+            "StalledIndicator fullWidth prop",
+            "Component tests for layout/animation/stalled"
+          ],
+          "quality_gates": [
+            "Pipeline renders all 7 stages as continuous bar",
+            "Mobile layout switches to vertical",
+            "Entrance animation works with prefers-reduced-motion fallback",
+            "StalledIndicator fullWidth aligns to track",
+            "TypeScript compiles"
+          ],
+          "implementation_notes": "Client component. Key DOM structure: outer div with relative positioning -> gray base bar (h-2 w-full bg-gray-200) -> colored overlay segments (absolute positioned, h-2, civic colors) -> markers (absolute positioned on bar). For vertical: flex-col, bar rotates to h-full w-2. Entrance: motion.div on the colored overlay with initial={{scaleX:0}} animate={{scaleX:1}} transition={{duration:0.6}} transformOrigin='left'. Markers: motion.div with stagger delay 0.05s per index. StalledIndicator: add fullWidth?: boolean prop, when true set w-full."
+        },
+        {
+          "id": "01-03",
+          "step_id": "01-03",
+          "name": "Replace MiniPipeline with MiniPipelineTrack",
+          "description": "Replace the disconnected 3-dot mini pipeline with a compact solid track with 3 milestone markers. Same visual metaphor as PipelineTrack but thinner (h-1 bar, h-2.5 markers) and always horizontal. Same milestone grouping as ADR-003 (Submitted/In Voting/Completed). REJECTED ideas return null (no mini-pipeline). Horizontal only (used in idea cards).",
+          "acceptance_criteria": [
+            "AC-M1: Renders a thin horizontal bar with 3 circular milestone markers",
+            "AC-M2: Reached milestones show colored marker; current milestone marker pulses",
+            "AC-M3: Future milestones show gray marker with gray-outlined ring",
+            "AC-M4: Milestone labels appear below markers",
+            "AC-M5: REJECTED ideas render no mini-pipeline track (return empty)",
+            "AC-M6: Same 3-milestone grouping as ADR-003",
+            "AC-M7: All visible strings from locale files (MiniPipeline.* namespace)"
+          ],
+          "test_file": "src/components/ideas/__tests__/mini-pipeline-track.test.tsx",
+          "scenario_name": "MiniPipelineTrack renders 3-milestone continuous bar",
+          "files_to_modify": [
+            "src/components/ideas/mini-pipeline-track.tsx",
+            "src/components/ideas/__tests__/mini-pipeline-track.test.tsx"
+          ],
+          "dependencies": [],
+          "estimated_hours": 2,
+          "deliverables": [
+            "MiniPipelineTrack component",
+            "Component tests for all milestone states"
+          ],
+          "quality_gates": [
+            "Renders 3 milestones correctly for all statuses",
+            "REJECTED returns null",
+            "No hardcoded strings",
+            "TypeScript compiles"
+          ],
+          "implementation_notes": "Client component. MILESTONES constant and milestone grouping logic migrate from mini-pipeline.tsx. DOM: gray base bar (h-1 w-full bg-gray-200) + colored segments (h-1, milestone colors) + 3 markers (h-2.5 w-2.5 rounded-full). Labels below markers in text-[10px]. Current milestone gets ring highlight. Uses pipeline-stages.ts getStageIndex(). No entrance animation for mini version (card component, not detail view)."
+        },
+        {
+          "id": "01-04",
+          "step_id": "01-04",
+          "name": "Migrate consumers and delete old components",
+          "description": "Update all import sites from IdeaPipeline/IdeaPipelineStage/MiniPipeline to PipelineTrack/PipelineTrackSegment/MiniPipelineTrack. Delete old component files and their test files. Update idea detail page, idea-card, and idea-list-row. Run full test suite to verify no regressions.",
+          "acceptance_criteria": [
+            "Idea detail page imports and renders PipelineTrack instead of IdeaPipeline",
+            "IdeaCard and IdeaListRow import and render MiniPipelineTrack instead of MiniPipeline",
+            "Old component files deleted: idea-pipeline.tsx, idea-pipeline-stage.tsx, mini-pipeline.tsx",
+            "Old test files deleted: idea-pipeline.test.tsx, idea-pipeline-stage.test.tsx, mini-pipeline.test.tsx",
+            "Full test suite passes",
+            "TypeScript compiles without errors"
+          ],
+          "test_file": "src/components/ideas/__tests__/pipeline-track.test.tsx",
+          "scenario_name": "PipelineTrack renders continuous bar with all stages",
+          "files_to_modify": [
+            "src/app/[locale]/ideas/[id]/page.tsx",
+            "src/components/ideas/idea-card.tsx",
+            "src/components/ideas/idea-list-row.tsx",
+            "DELETE: src/components/ideas/idea-pipeline.tsx",
+            "DELETE: src/components/ideas/idea-pipeline-stage.tsx",
+            "DELETE: src/components/ideas/mini-pipeline.tsx",
+            "DELETE: src/components/ideas/__tests__/idea-pipeline.test.tsx",
+            "DELETE: src/components/ideas/__tests__/idea-pipeline-stage.test.tsx",
+            "DELETE: src/components/ideas/__tests__/mini-pipeline.test.tsx"
+          ],
+          "dependencies": [
+            "01-01 (PipelineTrackSegment)",
+            "01-02 (PipelineTrack)",
+            "01-03 (MiniPipelineTrack)"
+          ],
+          "estimated_hours": 1.5,
+          "deliverables": [
+            "All consumers migrated",
+            "Old components deleted",
+            "Full test suite green"
+          ],
+          "quality_gates": [
+            "No remaining imports of old component names",
+            "Full test suite passes",
+            "TypeScript compiles",
+            "No dead code from old components"
+          ],
+          "implementation_notes": "Search codebase for all imports of IdeaPipeline, IdeaPipelineStage, MiniPipeline. Replace with PipelineTrack, PipelineTrackSegment, MiniPipelineTrack. Props should be compatible (same shape). Verify: grep -r 'idea-pipeline' src/ should only find pipeline-track files (via path), not old imports. After migration, delete old files and their tests."
+        }
+      ]
+    }
+  ]
+}

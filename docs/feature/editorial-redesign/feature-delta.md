@@ -315,3 +315,162 @@ C4Component
   Rel(mapPanel, mapLoader, "Renders")
   Rel(mapLoader, mapView, "Dynamically imports")
 ```
+
+---
+
+## Wave: DESIGN / [REF] Pipeline Redesign DDD List
+
+| D# | Decision | Verdict | Rationale |
+|----|----------|---------|-----------|
+| D11 | Pipeline visual metaphor: disconnected dots vs solid track with markers | Solid track with circular markers (Option A) | Package-tracking mental model: a single horizontal bar anchors the stages, colored for reached and gray for future. Markers are circles ON the bar. Labels above/below. Disconnected dots lose the "journey" continuity |
+| D12 | Animation scope: entrance vs transition | Entrance only | Track fills left-to-right on mount, markers fade in sequentially. No animation on status change between renders. Simpler, fewer edge cases, no flash-of-old-state on rehydration |
+| D13 | Mobile pipeline layout | Vertical (existing behavior preserved) | Desktop: horizontal track. Mobile: vertical track. Same visual metaphor rotated. MiniPipeline on cards stays horizontal with 3 milestones |
+| D14 | Data layer: keep `PipelineStage` and `computePipelineStages()` unchanged | UNCHANGED | Visual redesign only. Data contract is stable. No new domain logic needed |
+| D15 | `IdeaPipelineStage` replacement | REPLACE with `PipelineTrackSegment` | Current stage is a disconnected circle+label. New metaphor requires each stage to render a track segment (bar fill) plus a circular marker ON the bar plus a label. Different DOM structure, not extendable |
+| D16 | `IdeaPipeline` replacement | REPLACE with `PipelineTrack` | Current component renders disconnected dots with connector lines. New component renders a single continuous track bar with markers. Different composition model. `stalledLabel`/`stalledDays` props remain unchanged |
+| D17 | `MiniPipeline` redesign | REPLACE with `MiniPipelineTrack` | Same solid-track metaphor applied to 3-milestone compact view. Current disconnected dots+connectors become a thin colored bar with 3 circular markers. Same milestone grouping logic (ADR-003) |
+| D18 | Stalled indicator placement | Keep below pipeline, widen to full track width | Current `StalledIndicator` sits below the pipeline with `mt-1`. Under the new track metaphor, the amber stalled bar should span the full track width for visual alignment with the track above. No logic change |
+| D19 | Exception state placement | Keep below pipeline (unchanged) | `ExceptionState` component renders below the pipeline on the detail page. The track redesign does not affect its layout or props |
+| D20 | Entrance animation library | `motion` v12 (already in project per D03) | Track fill: `motion.div` with `initial={{ scaleX: 0 }}` `animate={{ scaleX: 1 }}` `transform-origin: left`. Markers: staggered fade. `prefers-reduced-motion` handled by motion's built-in support |
+| D21 | Track color mapping | Reuse existing `STAGE_MARKER_COLORS` mapping | The same civic color tokens (`civic-orange`, `civic-blue`, `purple-700`, `civic-teal`) apply to the track fill segments. No new color tokens |
+| D22 | Rejected-stage track rendering | Red segment at point of rejection, then gray | For REJECTED ideas, the track fills to the last forward stage reached (via `resolveEffectiveStatus`), then renders a red marker at the rejection point. Track beyond rejection point is gray. Same data as current, different visual |
+
+## Wave: DESIGN / [REF] Pipeline Redesign Component Decomposition
+
+| Component | Path | Change | Description |
+|-----------|------|--------|-------------|
+| PipelineTrack | `src/components/ideas/pipeline-track.tsx` | CREATE | Solid horizontal bar with circular markers. Entrance animation (left-to-right fill, staggered marker fade). Consumes `PipelineStage[]` + `exceptionState` + `stalledLabel`/`stalledDays`. Renders vertical on mobile |
+| PipelineTrackSegment | `src/components/ideas/pipeline-track-segment.tsx` | CREATE | Single stage within PipelineTrack: colored track bar segment + circular marker ON the bar + label. Handles reached/current/future/rejected states |
+| MiniPipelineTrack | `src/components/ideas/mini-pipeline-track.tsx` | CREATE | Compact 3-milestone track for idea cards. Same solid-bar metaphor with 3 markers. Same milestone grouping as ADR-003. Horizontal always (used in cards) |
+| IdeaPipeline | `src/components/ideas/idea-pipeline.tsx` | REPLACE | Deleted. PipelineTrack takes over. Props contract preserved (`stages`, `exceptionState`, `stalledLabel`, `stalledDays`, `isMobile`) |
+| IdeaPipelineStage | `src/components/ideas/idea-pipeline-stage.tsx` | REPLACE | Deleted. PipelineTrackSegment takes over. `STAGE_MARKER_COLORS` constant moves to PipelineTrackSegment |
+| MiniPipeline | `src/components/ideas/mini-pipeline.tsx` | REPLACE | Deleted. MiniPipelineTrack takes over. Milestone grouping logic and `MILESTONES` constant move to MiniPipelineTrack |
+| StalledIndicator | `src/components/ideas/stalled-indicator.tsx` | EXTEND | Add `fullWidth` prop (default false). When true, spans track width. Wire from PipelineTrack with `fullWidth=true` |
+| ExceptionState | `src/components/ideas/exception-state.tsx` | UNCHANGED | No changes needed. Placement below pipeline unaffected |
+| Idea detail page | `src/app/[locale]/ideas/[id]/page.tsx` | EXTEND | Replace `IdeaPipeline` import with `PipelineTrack`. Same props. No logic change |
+| IdeaCard | `src/components/ideas/idea-card.tsx` | EXTEND | Replace `MiniPipeline` import with `MiniPipelineTrack`. Same `currentStatus` prop |
+| IdeaListRow | `src/components/ideas/idea-list-row.tsx` | EXTEND | Replace `MiniPipeline` import with `MiniPipelineTrack`. Same `currentStatus` prop |
+| Locale files | `src/i18n/messages/{ro,en,hu}.json` | EXTEND | No new keys needed. Existing `Pipeline.*`, `MiniPipeline.*`, `Stalled.*`, `Exception.*` reused as-is |
+
+## Wave: DESIGN / [REF] Pipeline Redesign Driving Ports
+
+| Port | Type | Consumer | Description |
+|------|------|----------|-------------|
+| `PipelineStage[]` (data) | In-memory (typed array) | PipelineTrack | Consumes `computePipelineStages()` output. No API call. Data contract unchanged |
+| `Status` enum value | In-memory (typed string) | MiniPipelineTrack | Consumes `currentStatus` prop. Same as current MiniPipeline |
+| `exceptionState` (optional) | In-memory (string literal union) | PipelineTrack | "REJECTED" / "MERGED" / "RETURNED" / "STALLED". Same prop as current IdeaPipeline |
+| `stalledLabel` + `stalledDays` | In-memory (string + number) | PipelineTrack -> StalledIndicator | Passed through to StalledIndicator. Same props as current |
+| `isMobile` (boolean) | In-memory | PipelineTrack | Switches between horizontal (desktop) and vertical (mobile) track rendering |
+
+## Wave: DESIGN / [REF] Pipeline Redesign Driven Ports + Adapters
+
+| Port | Adapter | Technology | Description |
+|------|---------|------------|-------------|
+| Stage color lookup | `STAGE_MARKER_COLORS` constant | Hardcoded map in PipelineTrackSegment | Maps `Status` -> Tailwind bg class. Same mapping as current `idea-pipeline-stage.tsx`. No external dependency |
+| Milestone grouping | `MILESTONES` constant + `getStageIndex()` | Pure functions in MiniPipelineTrack | Same logic as current `mini-pipeline.tsx`. Imports `getStageIndex` from `pipeline-stages.ts` |
+| i18n labels | `next-intl` `useTranslations()` | `useTranslations("Statuses")`, `useTranslations("MiniPipeline")`, `useTranslations("Pipeline")` | Same translation namespaces as current. No new keys |
+| Entrance animation | `motion` v12 | `motion/react` `motion.div` | Track fill animation + staggered marker fade. Already in project per D03/ADR-001 |
+
+## Wave: DESIGN / [REF] Pipeline Redesign Technology Choices
+
+| Technology | Version | Rationale |
+|------------|---------|-----------|
+| `motion` | `^12.38.0` (existing, per D03) | Track fill: `motion.div` with `scaleX` transform. Marker stagger: `motion.div` with delay. Already installed. No new dependency |
+| `tailwindcss` | `^4` (existing) | Track bar via `h-2 bg-gray-200` (base) + colored overlay via `h-2` with civic colors. Markers via `h-4 w-4 rounded-full`. No new utilities needed |
+| `next-intl` | existing | `useTranslations("Statuses")`, `useTranslations("MiniPipeline")`, `useTranslations("Pipeline")`. Same namespaces as current |
+| `pipeline-stages.ts` | existing (UNCHANGED) | `PIPELINE_STAGES`, `getStageIndex()`, `isStageReached()`, `isCurrentStage()`. Zero modifications per D14 |
+| `pipeline-computation.ts` | existing (UNCHANGED) | `computePipelineStages()`, `resolveExceptionType()`, `findRejectionChange()`. Zero modifications per D14 |
+
+## Wave: DESIGN / [REF] Pipeline Redesign Decisions Table
+
+| D# | Decision | Verdict | Key Trade-off |
+|----|----------|---------|---------------|
+| D11 | Solid track with circular markers | Option A chosen | +Journey continuity, +Package-tracking match, -More DOM elements per stage vs disconnected dots |
+| D12 | Entrance animation only | No transition animation on status change | +Simpler rehydration, +No flash-of-old-state, -Status change feels "static" between renders (acceptable: page re-fetches data) |
+| D13 | Mobile: vertical track | Preserved existing behavior | +No layout regression, -Vertical track with markers needs different label positioning (above/below flipped) |
+| D14 | Data layer unchanged | `PipelineStage` + `computePipelineStages()` untouched | +Zero risk to domain logic, -New visual code must consume existing data shape exactly |
+| D15 | Replace IdeaPipelineStage | New PipelineTrackSegment | +Clean DOM for track metaphor, -Must migrate `STAGE_MARKER_COLORS` constant |
+| D16 | Replace IdeaPipeline | New PipelineTrack | +Single track bar renders naturally, -Consumer swap (detail page import change) |
+| D17 | Replace MiniPipeline | New MiniPipelineTrack | +Visual consistency with full pipeline, -Must migrate `MILESTONES` constant |
+| D18 | StalledIndicator width | Extend with `fullWidth` prop | +Visual alignment with track, -Minor prop addition to existing component |
+| D19 | ExceptionState placement | Unchanged | +No regression risk, -Does not gain track-style visual (acceptable: exception is a distinct state, not a pipeline stage) |
+| D20 | Motion for entrance | `motion` v12 (existing) | +No new deps, +`prefers-reduced-motion` free, -~1KB added to pipeline bundle |
+| D21 | Track colors | Reuse existing civic tokens | +Consistent with Badge/MapView, +No new design tokens, -None |
+| D22 | Rejected track rendering | Red marker at rejection point, gray beyond | +Shows progress before rejection, +Uses existing `resolveEffectiveStatus`, -Two-color track slightly more complex render |
+
+## Wave: DESIGN / [REF] Pipeline Redesign Reuse Analysis
+
+| Existing Component | Overlap With | Decision | Justification |
+|--------------------|-------------|----------|---------------|
+| `IdeaPipeline` (`idea-pipeline.tsx`) | PipelineTrack | REPLACE | Different DOM structure (disconnected dots vs continuous bar). Same props preserved. Old file deleted |
+| `IdeaPipelineStage` (`idea-pipeline-stage.tsx`) | PipelineTrackSegment | REPLACE | Different DOM structure (circle+label vs track-segment+marker+label). `STAGE_MARKER_COLORS` constant migrates. Old file deleted |
+| `MiniPipeline` (`mini-pipeline.tsx`) | MiniPipelineTrack | REPLACE | Different DOM structure (dots+connectors vs track+markers). `MILESTONES` constant + milestone logic migrates. Old file deleted |
+| `StalledIndicator` (`stalled-indicator.tsx`) | PipelineTrack integration | EXTEND | Add `fullWidth` prop. Core logic unchanged. Same file, minor addition |
+| `ExceptionState` (`exception-state.tsx`) | PipelineTrack integration | REUSE (unchanged) | Placement below pipeline unaffected. No code changes |
+| `pipeline-stages.ts` | Data layer | REUSE (unchanged) | `PIPELINE_STAGES`, `getStageIndex()` consumed by new components. Per D14 |
+| `pipeline-computation.ts` | Data layer | REUSE (unchanged) | `computePipelineStages()` output feeds PipelineTrack. Per D14 |
+| `stalled-detector.ts` | StalledIndicator data | REUSE (unchanged) | Same `StalledInfo` shape. Per D18, only the visual width changes |
+| `status.ts` + `statusToBadgeVariant` | Card badges | REUSE (unchanged) | IdeaCard and IdeaListRow badges unaffected. Only pipeline import changes |
+| `Badge` (`ui/badge.tsx`) | Card badges | REUSE (unchanged) | Unrelated to pipeline track. No changes |
+
+## Wave: DESIGN / [REF] Pipeline Redesign Open Questions
+
+| # | Question | Why Deferred | Resolution Path |
+|---|----------|-------------|-----------------|
+| OQ-7 | Track bar thickness: `h-2` or `h-1.5`? | Visual polish, not architectural | GREEN: `h-2` default, adjust if markers (h-4) look disproportionate |
+| OQ-8 | Vertical track label position: alternate left/right or all one side? | Interaction design detail for mobile | GREEN: all labels on the right of the vertical track (simpler). Evaluate during review |
+| OQ-9 | Track fill animation duration | Animation polish | GREEN: 0.6s for fill, 0.05s stagger between markers. Tune visually |
+| OQ-10 | MiniPipelineTrack marker size on cards | Sizing detail | GREEN: same h-2.5 w-2.5 as current MiniPipeline dots. Track bar h-1 |
+| OQ-11 | Should old test files be deleted alongside old components? | Test maintenance, not architecture | GREEN: delete `idea-pipeline.test.tsx`, `idea-pipeline-stage.test.tsx`, `mini-pipeline.test.tsx`. Write new tests for PipelineTrack, PipelineTrackSegment, MiniPipelineTrack |
+
+## Wave: DESIGN / [REF] C4 Component — Pipeline Subsystem
+
+```mermaid
+C4Component
+  title Component Diagram — Pipeline Visual Subsystem
+  Component(detailPage, "Idea Detail Page", "React Client Component", "Fetches idea data, computes stages, renders PipelineTrack + ExceptionState")
+  Component(pipelineTrack, "PipelineTrack", "React Client Component", "Solid horizontal bar with circular markers. Entrance animation. Consumes PipelineStage[]. Vertical on mobile")
+  Component(trackSegment, "PipelineTrackSegment", "React Client Component", "Single stage: colored track segment + circular marker ON bar + label. Handles reached/current/future/rejected")
+  Component(stalled, "StalledIndicator", "React Presentational", "Amber stalled text. fullWidth prop aligns to track width")
+  Component(exception, "ExceptionState", "React Client Component", "REJECTED/MERGED/RETURNED card. Unchanged")
+  Component(miniTrack, "MiniPipelineTrack", "React Client Component", "Compact 3-milestone track for idea cards. Horizontal always. Same milestone grouping as ADR-003")
+  Component(card, "IdeaCard / IdeaListRow", "React Client Component", "Card components rendering MiniPipelineTrack for status indication")
+  Component(dataLayer, "pipeline-computation.ts", "Pure Functions", "computePipelineStages(), resolveExceptionType(). UNCHANGED")
+  Component(stageOrder, "pipeline-stages.ts", "Pure Functions", "PIPELINE_STAGES, getStageIndex(). UNCHANGED")
+  Rel(detailPage, pipelineTrack, "Renders")
+  Rel(detailPage, exception, "Renders")
+  Rel(pipelineTrack, trackSegment, "Renders list of")
+  Rel(pipelineTrack, stalled, "Renders")
+  Rel(card, miniTrack, "Renders")
+  Rel(pipelineTrack, dataLayer, "Consumes PipelineStage[] from")
+  Rel(pipelineTrack, stageOrder, "Consumes getStageIndex from")
+  Rel(miniTrack, stageOrder, "Consumes getStageIndex from")
+```
+
+## Wave: DESIGN / [REF] Pipeline Redesign AC Mapping
+
+The following acceptance criteria describe WHAT (behavior), never HOW (implementation):
+
+**PipelineTrack (full pipeline)**:
+- AC-P1: Track renders as a single continuous bar with 7 stage markers positioned on the bar
+- AC-P2: Reached stages show colored track segment (civic-orange/blue/purple/teal per status) and filled colored marker
+- AC-P3: Current stage marker shows a pulse ring animation
+- AC-P4: Future stages show gray track segment and gray-outlined marker
+- AC-P5: Stage labels appear above (odd) and below (even) the track on desktop; all on one side on vertical mobile
+- AC-P6: On mount, the track fills left-to-right and markers fade in sequentially
+- AC-P7: Animation respects `prefers-reduced-motion`
+- AC-P8: For REJECTED ideas, track fills to last forward stage reached, then a red marker appears; track beyond is gray
+- AC-P9: StalledIndicator renders below the track, spanning the full track width
+- AC-P10: ExceptionState renders below the stalled indicator (when applicable), unchanged
+- AC-P11: On mobile (`isMobile=true`), track renders vertically with markers along a vertical bar
+- AC-P12: All visible strings from locale files (`Statuses.*` namespace)
+- AC-P13: `computePipelineStages()` and `pipeline-stages.ts` remain unchanged
+
+**MiniPipelineTrack (card pipeline)**:
+- AC-M1: Renders a thin horizontal bar with 3 circular milestone markers
+- AC-M2: Reached milestones show colored marker; current milestone marker pulses
+- AC-M3: Future milestones show gray marker with gray-outlined ring
+- AC-M4: Milestone labels appear below markers
+- AC-M5: REJECTED ideas render no mini-pipeline track (return empty)
+- AC-M6: Same 3-milestone grouping as ADR-003 (Submitted / In Voting / Completed)
+- AC-M7: All visible strings from locale files (`MiniPipeline.*` namespace)

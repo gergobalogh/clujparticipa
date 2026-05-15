@@ -38,8 +38,8 @@ graph TB
             DetailPage[Idea Detail<br/>Server Component]
         end
         subgraph "Client Components"
-            Pipeline[IdeaPipeline<br/>Client Component]
-            MiniPipeline[MiniPipeline<br/>Client Component]
+            Pipeline[PipelineTrack<br/>Client Component]
+            MiniPipeline[MiniPipelineTrack<br/>Client Component]
             Timeline[StatusChangeTimeline<br/>Client Component]
             Map[MapView<br/>Client Component]
         end
@@ -53,6 +53,7 @@ graph TB
         subgraph "Domain Logic"
             Transitions[transitions.ts<br/>Status Machine]
             PipelineStages[pipeline-stages.ts<br/>Stage Ordering]
+            PipelineComputation[pipeline-computation.ts<br/>Stage Transforms]
             StalledDetector[stalled-detector.ts<br/>Stalled Detection]
             ActorResolver[actor-role-resolver.ts<br/>Role Resolution]
         end
@@ -63,7 +64,9 @@ graph TB
     NextJS -->|HTTP| Cloudflare[Cloudflare Images]
     Pipeline -->|fetch| StatusChangesAPI
     Pipeline --> PipelineStages
+    Pipeline --> PipelineComputation
     Pipeline --> StalledDetector
+    MiniPipeline --> PipelineStages
     Timeline --> ActorResolver
 ```
 
@@ -82,10 +85,12 @@ graph TB
 │  Pipeline orchestration, stage rendering logic        │
 │  Exception state detection, stalled detection         │
 │  Actor role resolution, milestone grouping            │
+│  Pipeline visual: track+marker rendering (ADR-004)   │
 ├─────────────────────────────────────────────────────┤
 │                  Domain Layer                         │
 │  transitions.ts — status machine (SSOT)               │
 │  pipeline-stages.ts — stage ordering                  │
+│  pipeline-computation.ts — stage data transforms      │
 │  stalled-detector.ts — stalled detection rules         │
 │  actor-role-resolver.ts — changedBy → role mapping    │
 ├─────────────────────────────────────────────────────┤
@@ -103,7 +108,8 @@ graph TB
 | Boundary | Owns | Imports From |
 |----------|------|-------------|
 | Pipeline domain | Stage ordering, stalled detection, milestone grouping, exception state detection | transitions.ts (domain peer) |
-| UI presentation | IdeaPipeline, MiniPipeline, StatusChangeTimeline, StalledIndicator, ExceptionState | pipeline domain, i18n messages |
+| Pipeline visual | PipelineTrack, PipelineTrackSegment, MiniPipelineTrack, StalledIndicator, ExceptionState | pipeline domain, i18n messages, motion v12 |
+| UI presentation | EditorialIdeaCard, LiveBadge, SidebarCta, StatusChangeTimeline, MapView | pipeline visual, pipeline domain, i18n messages |
 | Data access | Prisma queries, API route handlers | Domain (status types), Prisma schema |
 | Notifications | useNotificationOptIn hook, browser API probe | Browser Notification API (outbound) |
 
@@ -121,23 +127,24 @@ React components are pure renderers of typed props. Side effects isolated in hoo
 
 ### Color System for Pipeline
 
-Pipeline stage colors derive from existing design tokens and Badge variants:
+Pipeline track and marker colors derive from existing design tokens (per ADR-004: solid track with circular markers):
 
-| Stage | Fill Color | CSS Token | Badge Variant |
-|-------|-----------|-----------|---------------|
-| SUBMITTED | civic-orange | `--color-civic-orange` | submitted |
-| UNDER_REVIEW | civic-orange | `--color-civic-orange` | under_review |
-| ELIGIBLE | civic-blue | `--color-civic-blue` | eligible |
-| IN_VOTING | purple-700 | (Tailwind default) | in_voting |
-| SELECTED | civic-teal | `--color-civic-teal` | selected |
-| IN_PROGRESS | civic-teal | `--color-civic-teal` | in_progress |
-| COMPLETED | civic-teal | `--color-civic-teal` | completed |
-| REJECTED (exception) | red-600 | (Tailwind default) | rejected |
-| STALLED indicator | amber-500 | (Tailwind default) | — |
-| MERGED indicator | civic-blue-light | `--color-civic-blue-light` | — |
-| RETURNED indicator | civic-orange-light | `--color-civic-orange-light` | — |
+| Stage | Track Fill Color | Marker Color | CSS Token | Badge Variant |
+|-------|-----------------|-------------|-----------|---------------|
+| SUBMITTED | civic-orange | civic-orange | `--color-civic-orange` | submitted |
+| UNDER_REVIEW | civic-orange | civic-orange | `--color-civic-orange` | under_review |
+| ELIGIBLE | civic-blue | civic-blue | `--color-civic-blue` | eligible |
+| IN_VOTING | purple-700 | purple-700 | (Tailwind default) | in_voting |
+| SELECTED | civic-teal | civic-teal | `--color-civic-teal` | selected |
+| IN_PROGRESS | civic-teal | civic-teal | `--color-civic-teal` | in_progress |
+| COMPLETED | civic-teal | civic-teal | `--color-civic-teal` | completed |
+| REJECTED (exception) | N/A (gray beyond rejection) | red-600 | (Tailwind default) | rejected |
+| Future (not reached) | gray-200 | border gray-300 | (Tailwind default) | — |
+| STALLED indicator | amber-500 | amber-500 | (Tailwind default) | — |
+| MERGED indicator | civic-blue-light | civic-blue-light | `--color-civic-blue-light` | — |
+| RETURNED indicator | civic-orange-light | civic-orange-light | `--color-civic-orange-light` | — |
 
-No new color tokens introduced. Pipeline reuses the same color system as Badge and MapView markers.
+No new color tokens introduced. Pipeline track reuses the same color system as Badge and MapView markers.
 
 ### MERGED/RETURNED Note Convention
 
@@ -151,9 +158,9 @@ Admins must prefix StatusChange.notes with canonical markers:
 
 Parsing rule: if the most recent StatusChange for a REJECTED idea has a note starting with `[MERGED]` or `[RETURNED]`, render the corresponding exception UI instead of the default rejection marker.
 
-### Mini-Pipeline Milestone Mapping
+### Mini-Pipeline Track Milestone Mapping
 
-The 3-dot mini-pipeline groups the 7 forward stages into 3 public-facing milestones:
+The 3-marker mini-pipeline track (per ADR-004: solid track with circular markers) groups the 7 forward stages into 3 public-facing milestones:
 
 | Milestone | Mapped Stages | Visual |
 |-----------|-------------|--------|
@@ -161,7 +168,37 @@ The 3-dot mini-pipeline groups the 7 forward stages into 3 public-facing milesto
 | In Voting | IN_VOTING, SELECTED | Filled dot when either is current |
 | Completed | IN_PROGRESS, COMPLETED | Filled dot when either is current |
 
-REJECTED ideas show no mini-pipeline (status badge alone indicates rejection).
+REJECTED ideas show no mini-pipeline track (status badge alone indicates rejection).
+
+### Pipeline Visual Architecture (ADR-004)
+
+The pipeline visual system uses a **solid continuous track with circular markers** metaphor, replacing the previous disconnected-dot design. See ADR-004 for full rationale.
+
+**Components**:
+
+| Component | Path | Role |
+|-----------|------|------|
+| PipelineTrack | `src/components/ideas/pipeline-track.tsx` | Full 7-stage pipeline on detail page. Horizontal track on desktop, vertical on mobile. Entrance animation (track fill left-to-right, staggered marker fade) |
+| PipelineTrackSegment | `src/components/ideas/pipeline-track-segment.tsx` | Single stage within PipelineTrack: colored track segment + circular marker ON bar + label |
+| MiniPipelineTrack | `src/components/ideas/mini-pipeline-track.tsx` | Compact 3-milestone track for idea cards. Horizontal always. Same milestone grouping as ADR-003 |
+
+**Replaced components** (deleted):
+- `IdeaPipeline` (was `idea-pipeline.tsx`) -- replaced by `PipelineTrack`
+- `IdeaPipelineStage` (was `idea-pipeline-stage.tsx`) -- replaced by `PipelineTrackSegment`
+- `MiniPipeline` (was `mini-pipeline.tsx`) -- replaced by `MiniPipelineTrack`
+
+**Extended components**:
+- `StalledIndicator` -- added `fullWidth` prop to align stalled bar width with track width
+
+**Unchanged components**:
+- `ExceptionState` -- placement below pipeline unaffected
+- `pipeline-computation.ts` -- `computePipelineStages()`, `resolveExceptionType()` unchanged
+- `pipeline-stages.ts` -- `PIPELINE_STAGES`, `getStageIndex()` unchanged
+
+**Animation contract** (entrance only, no transition on status change):
+- Track fill: `motion.div` `scaleX: 0 -> 1`, `transformOrigin: left`, `duration: 0.6s`
+- Marker stagger: `motion.div` `opacity: 0 -> 1`, `delay: index * 0.05s`
+- Reduced motion: handled by `motion` v12 built-in `prefers-reduced-motion` support
 
 ### Homepage Layout Restructure
 
