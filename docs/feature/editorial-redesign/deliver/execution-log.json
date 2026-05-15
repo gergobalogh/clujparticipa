@@ -1,6 +1,40 @@
 {
   "feature_id": "editorial-redesign",
   "steps": {
+    "01-02": {
+      "phases": [
+        {
+          "phase": "PREPARE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:11:40Z",
+          "data": "PASS"
+        },
+        {
+          "phase": "RED_ACCEPTANCE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:12:06Z",
+          "data": "FAIL"
+        },
+        {
+          "phase": "RED_UNIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:12:30Z",
+          "data": "11 tests written covering 6 behaviors. Budget: 6x2=12, used 11."
+        },
+        {
+          "phase": "GREEN",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:13:02Z",
+          "data": "PASS"
+        },
+        {
+          "phase": "COMMIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-15T12:13:56Z",
+          "data": "PASS: commit bbd2d13"
+        }
+      ]
+    },
     "01-01": {
       "phases": [
         {
