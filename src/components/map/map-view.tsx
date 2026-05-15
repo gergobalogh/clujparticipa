@@ -24,25 +24,29 @@ export type IdeaMapData = {
 const CLUJ_CENTER: [number, number] = [46.77, 23.59];
 const DEFAULT_ZOOM = 13;
 
-const statusColors: Record<string, string> = {
-  SUBMITTED: "#64748b",
-  UNDER_REVIEW: "#c2410c",
-  ELIGIBLE: "#1e5f9e",
-  IN_VOTING: "#7c3aed",
-  SELECTED: "#0f766e",
-  IN_PROGRESS: "#1e5f9e",
-  COMPLETED: "#0f766e",
-  REJECTED: "#dc2626",
+/** Category-to-hex color mapping for map marker icons (inline styles). */
+export const categoryMarkerColors: Record<string, string> = {
+  INFRASTRUCTURE: "#C2410C",
+  EDUCATION: "#1E5F9E",
+  ENVIRONMENT: "#0F766E",
+  CULTURE: "#7E22CE",
+  SAFETY: "#DC2626",
+  TRANSPORT: "#0E7490",
+  HEALTH: "#BE185D",
+  OTHER: "#8C8C8C",
 };
 
-function markerIcon(status: string) {
-  const color = statusColors[status] ?? "#64748b";
+const activeStatuses = new Set(["IN_PROGRESS", "SELECTED"]);
+
+export function markerIcon(category: string, status: string) {
+  const color = categoryMarkerColors[category] ?? categoryMarkerColors.OTHER;
+  const pulse = activeStatuses.has(status) ? "animate-pulse" : "";
   return L.divIcon({
     className: "",
     iconSize: [16, 16],
     iconAnchor: [8, 8],
     popupAnchor: [0, -10],
-    html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>`,
+    html: `<div class="ring-8 ${pulse}" style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>`,
   });
 }
 
@@ -95,7 +99,7 @@ export default function MapView({ ideas, compact = false, defaultCenter = CLUJ_C
         <Marker
           key={idea.id}
           position={[idea.latitude, idea.longitude]}
-          icon={markerIcon(idea.status)}
+          icon={markerIcon(idea.category, idea.status)}
           eventHandlers={{ click: handleMarkerClick }}
         >
           <Popup>
