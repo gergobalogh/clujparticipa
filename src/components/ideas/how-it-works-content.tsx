@@ -161,7 +161,7 @@ export function HowItWorksContent(): JSX.Element {
               key={status}
               id={status.toLowerCase()}
               ref={setCardRef(status)}
-              className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+              className="stage-card scroll-mt-24 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
             >
               <Badge variant={statusToBadgeVariant(status)}>
                 {s(status)}

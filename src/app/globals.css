@@ -24,6 +24,12 @@
   color: #FDFCFB;
 }
 
+/* Hash-navigation :target highlight for stage cards */
+.stage-card:target {
+  outline: 2px solid var(--color-civic-blue);
+  outline-offset: 2px;
+}
+
 /* Reduced motion: disable all CSS animations */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

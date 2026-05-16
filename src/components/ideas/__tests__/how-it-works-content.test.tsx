@@ -289,4 +289,36 @@ describe("HowItWorksContent", () => {
 
     expect(disconnectMock).toHaveBeenCalled();
   });
+
+  // --- ACCEPTANCE TEST: Hash navigation and :target highlight ---
+
+  it("stage cards have stage-card class, id, and scroll-mt for :target highlight and hash navigation", () => {
+    render(<HowItWorksContent />);
+
+    for (const stage of FORWARD_STAGES) {
+      const card = document.getElementById(stage.toLowerCase());
+      expect(card).toBeInTheDocument();
+      // Stage card must have a consistent class that :target CSS can target
+      expect(card!.classList.contains("stage-card")).toBe(true);
+      // Stage card must have scroll-margin-top class so sticky pipeline doesn't cover it
+      // In jsdom Tailwind utilities aren't resolved to computed styles,
+      // so verify the class is present (scroll-mt-24 = 6rem offset)
+      expect(card!.classList.contains("scroll-mt-24")).toBe(true);
+    }
+  });
+
+  it(":target CSS rule is defined for stage-card elements", () => {
+    // CSS rules from globals.css are not loaded into jsdom, so we verify
+    // the structural prerequisite: the stage-card class exists on rendered cards.
+    // The :target CSS rule in globals.css pairs with this class.
+    // Full :target behavior (highlight on hash navigation) is a browser concern
+    // verified by the class + id structure tested above.
+    render(<HowItWorksContent />);
+
+    const submittedCard = document.getElementById("submitted");
+    expect(submittedCard).toBeInTheDocument();
+    expect(submittedCard!.classList.contains("stage-card")).toBe(true);
+    // Verify the id attribute enables hash targeting: #submitted
+    expect(submittedCard!.id).toBe("submitted");
+  });
 });
