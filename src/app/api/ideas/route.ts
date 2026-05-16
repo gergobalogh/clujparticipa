@@ -20,8 +20,9 @@ const listParamsSchema = z.object({
     "BORHANCI", "DAMBU_ROTUND", "OTHER",
   ]).optional(),
   status: z.enum([
-    "SUBMITTED", "UNDER_REVIEW", "ELIGIBLE", "IN_VOTING",
-    "SELECTED", "IN_PROGRESS", "COMPLETED", "REJECTED",
+    "SUBMITTED", "IN_VOTING", "SELECTED", "ACCEPTED",
+    "IN_PROGRESS", "COMPLETED", "REJECTED", "NEEDS_REVISION",
+    "MERGED", "WITHDRAWN",
   ]).optional(),
   sort: z.enum(["date", "votes"]).default("date"),
   page: z.coerce.number().int().min(1).default(1),
@@ -43,29 +44,29 @@ export async function GET(request: NextRequest) {
   }
 
   const { category, district, status, sort, page, limit, showRejected } = parsed.data;
+  const terminalStatuses: Status[] = ["REJECTED", "NEEDS_REVISION", "MERGED", "WITHDRAWN"];
   const where: Prisma.IdeaWhereInput = {};
   if (category) where.category = category;
   if (district) where.district = district;
   if (status) where.status = status;
-  if (!showRejected && !status) where.status = { not: "REJECTED" };
+  if (!showRejected && !status) where.status = { notIn: terminalStatuses };
 
   const skip = (page - 1) * limit;
 
-  // Sort REJECTED to the bottom: fetch non-rejected and rejected separately, then concatenate
-  const nonRejectedWhere: Prisma.IdeaWhereInput = status
-    ? where // specific status already set in where — don't override
-    : { ...where, status: { not: "REJECTED" as Status } };
-  const rejectedWhere: Prisma.IdeaWhereInput = { ...where, status: "REJECTED" as Status };
+  // Sort terminal-status ideas to the bottom
+  const activeWhere: Prisma.IdeaWhereInput = status
+    ? where
+    : { ...where, status: { notIn: terminalStatuses } };
+  const terminalWhere: Prisma.IdeaWhereInput = { ...where, status: { in: terminalStatuses } };
 
   const effectiveOrderBy = sort === "votes"
     ? { votes: { _count: "desc" as const } }
     : { createdAt: "desc" as const };
 
-  const rejectionStatus: Status = "REJECTED";
   const includeArgs = {
     _count: { select: { votes: true, comments: true, images: true } },
     statusChanges: {
-      where: { toStatus: rejectionStatus },
+      where: { toStatus: { in: terminalStatuses } },
       select: { note: true },
       orderBy: { createdAt: "desc" as const },
       take: 1,
@@ -78,7 +79,8 @@ export async function GET(request: NextRequest) {
   };
 
   if (status || !showRejected) {
-    const singleWhere = status === "REJECTED" ? rejectedWhere : (showRejected ? where : nonRejectedWhere);
+    const isTerminalFilter = status && terminalStatuses.includes(status as Status);
+    const singleWhere = isTerminalFilter ? terminalWhere : (showRejected ? where : activeWhere);
     const [ideas, total] = await Promise.all([
       prisma.idea.findMany({
         where: singleWhere,
@@ -106,22 +108,22 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const [nonRejected, nonRejectedTotal, rejected] = await Promise.all([
+  const [active, activeTotal, terminal] = await Promise.all([
     prisma.idea.findMany({
-      where: nonRejectedWhere,
+      where: activeWhere,
       include: includeArgs,
       orderBy: effectiveOrderBy,
     }),
-    prisma.idea.count({ where: nonRejectedWhere }),
+    prisma.idea.count({ where: activeWhere }),
     prisma.idea.findMany({
-      where: rejectedWhere,
+      where: terminalWhere,
       include: includeArgs,
       orderBy: effectiveOrderBy,
     }),
   ]);
 
-  const allIdeas = [...nonRejected, ...rejected];
-  const total = nonRejectedTotal + rejected.length;
+  const allIdeas = [...active, ...terminal];
+  const total = activeTotal + terminal.length;
   const paginatedIdeas = allIdeas.slice(skip, skip + limit);
 
   return NextResponse.json({

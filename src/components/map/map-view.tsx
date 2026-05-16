@@ -87,11 +87,11 @@ export default function MapView({ ideas, compact = false, defaultCenter = CLUJ_C
       center={defaultCenter}
       zoom={DEFAULT_ZOOM}
       scrollWheelZoom
+      attributionControl={false}
       className={`w-full rounded-sm border border-ink/8 ${compact ? "h-[280px] sm:h-[360px]" : "h-[500px] sm:h-[calc(100vh-200px)] min-h-[400px] max-h-[700px]"}`}
     >
       <MapClickHandler onMapTap={onMapTap} markerClickedRef={markerClickedRef} />
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         maxZoom={19}
       />

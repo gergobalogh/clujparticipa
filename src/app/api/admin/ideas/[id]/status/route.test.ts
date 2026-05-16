@@ -27,7 +27,7 @@ describe("PATCH /api/admin/ideas/[id]/status", () => {
 
   async function changeStatus(
     id: string,
-    body: { status: string; note: string; force?: boolean },
+    body: { status: string; note: string; force?: boolean; mergedIntoIdeaId?: string },
     secret?: string | null
   ) {
     const headers: Record<string, string> = {
@@ -48,48 +48,88 @@ describe("PATCH /api/admin/ideas/[id]/status", () => {
     return PATCH(req, { params: Promise.resolve({ id }) });
   }
 
-  it("allows valid transition SUBMITTED→UNDER_REVIEW", async () => {
-    const idea = await createIdea(testPrisma, { status: "SUBMITTED" });
-    const res = await changeStatus(idea.id, {
-      status: "UNDER_REVIEW",
-      note: "Starting review",
-    });
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.status).toBe("UNDER_REVIEW");
-  });
-
-  it("allows REJECTED→UNDER_REVIEW (reopening)", async () => {
-    const idea = await createIdea(testPrisma, { status: "REJECTED" });
-    const res = await changeStatus(idea.id, {
-      status: "UNDER_REVIEW",
-      note: "Reopening",
-    });
-    expect(res.status).toBe(200);
-  });
-
-  it("rejects invalid skip-around without force (422)", async () => {
+  it("allows valid transition SUBMITTED→IN_VOTING", async () => {
     const idea = await createIdea(testPrisma, { status: "SUBMITTED" });
     const res = await changeStatus(idea.id, {
       status: "IN_VOTING",
+      note: "Sending to voting",
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.status).toBe("IN_VOTING");
+  });
+
+  it("allows valid transition SELECTED→ACCEPTED", async () => {
+    const idea = await createIdea(testPrisma, { status: "SELECTED" });
+    const res = await changeStatus(idea.id, {
+      status: "ACCEPTED",
+      note: "City accepts this idea",
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.status).toBe("ACCEPTED");
+  });
+
+  it("allows valid transition SELECTED→NEEDS_REVISION", async () => {
+    const idea = await createIdea(testPrisma, { status: "SELECTED" });
+    const res = await changeStatus(idea.id, {
+      status: "NEEDS_REVISION",
+      note: "Please add more detail",
+    });
+    expect(res.status).toBe(200);
+  });
+
+  it("allows valid transition SELECTED→REJECTED", async () => {
+    const idea = await createIdea(testPrisma, { status: "SELECTED" });
+    const res = await changeStatus(idea.id, {
+      status: "REJECTED",
+      note: "Not feasible",
+    });
+    expect(res.status).toBe(200);
+  });
+
+  it("sets mergedIntoIdeaId when transitioning to MERGED", async () => {
+    const idea = await createIdea(testPrisma, { status: "SUBMITTED" });
+    const targetIdea = await createIdea(testPrisma, { status: "IN_VOTING" });
+    const res = await changeStatus(idea.id, {
+      status: "MERGED",
+      note: "Duplicate",
+      mergedIntoIdeaId: targetIdea.id,
+    });
+    expect(res.status).toBe(200);
+  });
+
+  it("rejects invalid transition SUBMITTED→COMPLETED without force (422)", async () => {
+    const idea = await createIdea(testPrisma, { status: "SUBMITTED" });
+    const res = await changeStatus(idea.id, {
+      status: "COMPLETED",
       note: "Skip-around",
     });
     expect(res.status).toBe(422);
     const body = await res.json();
     expect(body.from).toBe("SUBMITTED");
-    expect(body.to).toBe("IN_VOTING");
+    expect(body.to).toBe("COMPLETED");
+  });
+
+  it("rejects transition from terminal status REJECTED (422)", async () => {
+    const idea = await createIdea(testPrisma, { status: "REJECTED" });
+    const res = await changeStatus(idea.id, {
+      status: "IN_VOTING",
+      note: "Reopen attempt",
+    });
+    expect(res.status).toBe(422);
   });
 
   it("allows skip-around with force:true", async () => {
     const idea = await createIdea(testPrisma, { status: "SUBMITTED" });
     const res = await changeStatus(idea.id, {
-      status: "IN_VOTING",
+      status: "IN_PROGRESS",
       note: "Force override",
       force: true,
     });
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.status).toBe("IN_VOTING");
+    expect(body.status).toBe("IN_PROGRESS");
   });
 
   it("returns 409 for same status", async () => {
@@ -104,7 +144,7 @@ describe("PATCH /api/admin/ideas/[id]/status", () => {
   it("returns 401 without admin secret", async () => {
     const idea = await createIdea(testPrisma, { status: "SUBMITTED" });
     const res = await changeStatus(idea.id, {
-      status: "UNDER_REVIEW",
+      status: "IN_VOTING",
       note: "No auth",
     }, "");
     expect(res.status).toBe(401);
@@ -113,7 +153,7 @@ describe("PATCH /api/admin/ideas/[id]/status", () => {
   it("returns 401 for wrong secret", async () => {
     const idea = await createIdea(testPrisma, { status: "SUBMITTED" });
     const res = await changeStatus(idea.id, {
-      status: "UNDER_REVIEW",
+      status: "IN_VOTING",
       note: "Wrong auth",
     }, "wrong-secret");
     expect(res.status).toBe(401);
@@ -121,7 +161,7 @@ describe("PATCH /api/admin/ideas/[id]/status", () => {
 
   it("returns 404 for nonexistent idea", async () => {
     const res = await changeStatus("nonexistent-id", {
-      status: "UNDER_REVIEW",
+      status: "IN_VOTING",
       note: "Not found",
     });
     expect(res.status).toBe(404);
@@ -139,7 +179,7 @@ describe("PATCH /api/admin/ideas/[id]/status", () => {
   it("creates audit trail (StatusChange + ModerationEvent)", async () => {
     const idea = await createIdea(testPrisma, { status: "SUBMITTED" });
     await changeStatus(idea.id, {
-      status: "UNDER_REVIEW",
+      status: "IN_VOTING",
       note: "Audit test note",
     });
 
@@ -148,7 +188,7 @@ describe("PATCH /api/admin/ideas/[id]/status", () => {
     });
     expect(statusChanges).toHaveLength(1);
     expect(statusChanges[0].fromStatus).toBe("SUBMITTED");
-    expect(statusChanges[0].toStatus).toBe("UNDER_REVIEW");
+    expect(statusChanges[0].toStatus).toBe("IN_VOTING");
     expect(statusChanges[0].note).toBe("Audit test note");
 
     const modEvents = await testPrisma.moderationEvent.findMany({

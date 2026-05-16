@@ -10,6 +10,7 @@ const statusSchema = z.object({
   status: z.nativeEnum(Status),
   note: z.string().min(1).max(2000),
   force: z.boolean().optional().default(false),
+  mergedIntoIdeaId: z.string().optional(),
 });
 
 export async function PATCH(
@@ -49,7 +50,7 @@ export async function PATCH(
     );
   }
 
-  const { status: newStatus, note, force } = parsed.data;
+  const { status: newStatus, note, force, mergedIntoIdeaId } = parsed.data;
 
   if (newStatus === idea.status) {
     return NextResponse.json(
@@ -70,9 +71,14 @@ export async function PATCH(
   }
 
   const updated = await prisma.$transaction(async (tx) => {
+    const updateData: Record<string, unknown> = { status: newStatus };
+    if (newStatus === "MERGED" && mergedIntoIdeaId) {
+      updateData.mergedIntoIdeaId = mergedIntoIdeaId;
+    }
+
     const updatedIdea = await tx.idea.update({
       where: { id },
-      data: { status: newStatus },
+      data: updateData,
     });
 
     await tx.statusChange.create({

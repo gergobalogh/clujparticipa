@@ -27,6 +27,9 @@ const ideaImageMap = {
   2: [4, 5],
   3: [6],
   4: [0],
+  5: [1, 4],
+  6: [2, 5],
+  7: [3],
 };
 
 const ideas = [
@@ -48,18 +51,6 @@ const ideas = [
       },
       {
         fromStatus: "SUBMITTED",
-        toStatus: "UNDER_REVIEW",
-        note: "Proposal entered technical evaluation. Team is checking feasibility, costs, and venue availability.",
-        changedBy: ADMIN,
-      },
-      {
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "ELIGIBLE",
-        note: "Proposal declared eligible. Estimated cost: €7,200. Grigorescu Beach space is available and suitable.",
-        changedBy: ADMIN,
-      },
-      {
-        fromStatus: "ELIGIBLE",
         toStatus: "IN_VOTING",
         note: "Proposal is open for public voting for 30 days.",
         changedBy: ADMIN,
@@ -72,6 +63,12 @@ const ideas = [
       },
       {
         fromStatus: "SELECTED",
+        toStatus: "ACCEPTED",
+        note: "Proposal accepted by the municipal committee. Budget allocated.",
+        changedBy: ADMIN,
+      },
+      {
+        fromStatus: "ACCEPTED",
         toStatus: "IN_PROGRESS",
         note: "Contract signed with the organizer. First screening planned for July 18.",
         changedBy: ADMIN,
@@ -120,18 +117,6 @@ const ideas = [
       },
       {
         fromStatus: "SUBMITTED",
-        toStatus: "UNDER_REVIEW",
-        note: "Proposal entered technical evaluation.",
-        changedBy: ADMIN,
-      },
-      {
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "ELIGIBLE",
-        note: "Proposal eligible. Estimated cost: €22,000. Land available on the embankment, no conflict with other uses.",
-        changedBy: ADMIN,
-      },
-      {
-        fromStatus: "ELIGIBLE",
         toStatus: "IN_VOTING",
         note: "Proposal is open for public voting.",
         changedBy: ADMIN,
@@ -144,6 +129,12 @@ const ideas = [
       },
       {
         fromStatus: "SELECTED",
+        toStatus: "ACCEPTED",
+        note: "Proposal accepted. Budget allocated for implementation.",
+        changedBy: ADMIN,
+      },
+      {
+        fromStatus: "ACCEPTED",
         toStatus: "IN_PROGRESS",
         note: "Auction completed. Installation works have started. Estimated completion: September.",
         changedBy: ADMIN,
@@ -181,18 +172,6 @@ const ideas = [
       },
       {
         fromStatus: "SUBMITTED",
-        toStatus: "UNDER_REVIEW",
-        note: "Proposal entered evaluation.",
-        changedBy: ADMIN,
-      },
-      {
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "ELIGIBLE",
-        note: "Proposal eligible. Estimated cost: €14,500. Weather-resistant street furniture options will be analyzed.",
-        changedBy: ADMIN,
-      },
-      {
-        fromStatus: "ELIGIBLE",
         toStatus: "IN_VOTING",
         note: "Proposal is open for public voting.",
         changedBy: ADMIN,
@@ -218,7 +197,7 @@ const ideas = [
       "Setting up a water access point with floating docks for kayaking, SUP (stand-up paddleboarding), and other non-motorized nautical activities, active during the summer season (May–September). Includes the possibility of a rental service managed by a local operator.",
     category: "CULTURE",
     district: "GRIGORESCU",
-    status: "UNDER_REVIEW",
+    status: "IN_VOTING",
     latitude: 46.7690,
     longitude: 23.6160,
     statusChanges: [
@@ -230,8 +209,8 @@ const ideas = [
       },
       {
         fromStatus: "SUBMITTED",
-        toStatus: "UNDER_REVIEW",
-        note: "Proposal is under technical and legal evaluation. Checking water access regulations and possible environmental restrictions.",
+        toStatus: "IN_VOTING",
+        note: "Proposal is open for public voting. Checking water access regulations and possible environmental restrictions.",
         changedBy: ADMIN,
       },
     ],
@@ -270,6 +249,119 @@ const ideas = [
       },
     ],
   },
+  {
+    title: "Community garden in the Manastur district",
+    description:
+      "Creating a community garden with raised beds, a tool shed, and a rainwater collection system in the Manastur district. Residents can apply for individual plots to grow vegetables and herbs. The project includes composting stations and educational workshops on urban agriculture.",
+    category: "ENVIRONMENT",
+    district: "MANASTUR",
+    status: "MERGED",
+    latitude: 46.7580,
+    longitude: 23.5450,
+    statusChanges: [
+      {
+        fromStatus: null,
+        toStatus: "SUBMITTED",
+        note: "Proposal submitted by a Manastur resident.",
+        changedBy: ADMIN,
+      },
+      {
+        fromStatus: "SUBMITTED",
+        toStatus: "IN_VOTING",
+        note: "Proposal is open for public voting.",
+        changedBy: ADMIN,
+      },
+      {
+        fromStatus: "IN_VOTING",
+        toStatus: "MERGED",
+        note: "Merged with idea #[idea0Id] — outdoor cinema at Grigorescu Beach covers a similar green community space initiative. Combined resources for a larger impact.",
+        changedBy: ADMIN,
+      },
+    ],
+    votes: 8,
+    comments: [
+      {
+        text: "Great idea for Manastur! We need more green spaces in the district.",
+        participantSeed: "c6-1",
+        status: "VISIBLE",
+      },
+    ],
+  },
+  {
+    title: "Bike repair stations along the Someș corridor",
+    description:
+      "Installing self-service bike repair stations with basic tools, a tire pump, and a QR-code linked video tutorial at five points along the Someș corridor. Aimed at cyclists commuting between the city center and residential areas. Model based on similar stations in Amsterdam and Copenhagen.",
+    category: "TRANSPORT",
+    district: "CENTRU",
+    status: "NEEDS_REVISION",
+    latitude: 46.7650,
+    longitude: 23.5580,
+    statusChanges: [
+      {
+        fromStatus: null,
+        toStatus: "SUBMITTED",
+        note: "Proposal submitted by a cycling advocacy group.",
+        changedBy: ADMIN,
+      },
+      {
+        fromStatus: "SUBMITTED",
+        toStatus: "IN_VOTING",
+        note: "Proposal is open for public voting.",
+        changedBy: ADMIN,
+      },
+      {
+        fromStatus: "IN_VOTING",
+        toStatus: "SELECTED",
+        note: "Proposal selected with 22 supports.",
+        changedBy: ADMIN,
+      },
+      {
+        fromStatus: "SELECTED",
+        toStatus: "NEEDS_REVISION",
+        note: "Feedback: The proposed locations overlap with existing municipal repair points. Please revise the site selection to avoid duplication and include a maintenance plan for the stations.",
+        changedBy: ADMIN,
+      },
+    ],
+    votes: 22,
+    comments: [
+      {
+        text: "Very useful for daily commuters. The Someș corridor is the main cycling route.",
+        participantSeed: "c7-1",
+        status: "VISIBLE",
+      },
+      {
+        text: "Make sure the tools are vandalism-resistant and weatherproof.",
+        participantSeed: "c7-2",
+        status: "VISIBLE",
+      },
+    ],
+  },
+  {
+    title: "Dog park in Zorilor district",
+    description:
+      "Building a fenced off-leash dog park with separate areas for small and large dogs, agility equipment, waste bag dispensers, and shaded benches for owners in the Zorilor district. Currently, dog owners have no designated public space in the area.",
+    category: "OTHER",
+    district: "ZORILOR",
+    status: "WITHDRAWN",
+    latitude: 46.7520,
+    longitude: 23.5620,
+    statusChanges: [
+      {
+        fromStatus: null,
+        toStatus: "SUBMITTED",
+        note: "Proposal submitted by a Zorilor dog owner.",
+        changedBy: "citizen:a1b2c3",
+      },
+      {
+        fromStatus: "SUBMITTED",
+        toStatus: "WITHDRAWN",
+        note: "Withdrawn by the submitter. A similar private dog park opened nearby, reducing the need for a public one.",
+        changedBy: "citizen:a1b2c3",
+      },
+    ],
+    votes: 5,
+    comments: [],
+  },
 ];
 
 async function main() {
@@ -279,17 +371,36 @@ async function main() {
   await prisma.vote.deleteMany();
   await prisma.idea.deleteMany();
 
+  const createdIdeaIds = [];
+
   for (const [index, idea] of ideas.entries()) {
     const { statusChanges, votes, comments, ...ideaData } = idea;
 
+    // For idea 5 (MERGED), we need to set mergedIntoIdeaId after idea 0 is created
+    const createData = { ...ideaData };
+    if (index === 5) {
+      // Will update mergedIntoIdeaId after idea 0 is created
+      // Remove mergedIntoIdeaId from createData for now, will set after
+    }
+
     const created = await prisma.idea.create({
       data: {
-        ...ideaData,
+        ...createData,
         statusChanges: {
           create: statusChanges,
         },
       },
     });
+
+    createdIdeaIds.push(created.id);
+
+    // For idea 5 (MERGED), set mergedIntoIdeaId to idea 0's ID
+    if (index === 5 && createdIdeaIds[0]) {
+      await prisma.idea.update({
+        where: { id: created.id },
+        data: { mergedIntoIdeaId: createdIdeaIds[0] },
+      });
+    }
 
     await prisma.vote.createMany({
       data: Array.from({ length: votes }, (_, voteIndex) => ({

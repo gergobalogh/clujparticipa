@@ -1,0 +1,61 @@
+schema_version: "1.0"
+id: operator-analytics
+name: Operator Sets Up and Uses Analytics
+persona_id: operator
+job_ids: ["JOB-002", "JOB-003"]
+steps:
+  - id: s1-deploy
+    name: Deploy Umami server
+    action: Configure and deploy self-hosted Umami instance
+    expected_output: Running instance at ${umamiUrl}, admin login works
+    emotional_state: focused
+    artifacts_produced: ["${umamiUrl}"]
+    artifacts_consumed: []
+  - id: s2-verify
+    name: Verify data flows
+    action: Add tracking script, visit site, check dashboard for pageview
+    expected_output: First pageview appears in Umami within seconds
+    emotional_state: anxious_relieved
+    artifacts_produced: ["${consentStatus}"]
+    artifacts_consumed: ["${umamiUrl}"]
+  - id: s3-check
+    name: Check dashboard
+    action: Open Umami dashboard, see pageviews, referrers, top pages
+    expected_output: Real-time and historical pageview data with locale paths
+    emotional_state: curious
+    artifacts_produced: ["${dashboardUrl}"]
+    artifacts_consumed: ["${umamiUrl}", "${consentStatus}"]
+  - id: s4-spot
+    name: Spot problem
+    action: Notice anomaly in engagement metrics
+    expected_output: Data shows specific page/action with low engagement
+    emotional_state: worried
+    artifacts_produced: []
+    artifacts_consumed: ["${dashboardUrl}"]
+  - id: s5-diagnose
+    name: Diagnose funnel
+    action: Use Umami funnel/goals to trace journey steps
+    expected_output: Funnel shows exact drop-off step
+    emotional_state: digging_focused
+    artifacts_produced: ["${funnelData}"]
+    artifacts_consumed: ["${dashboardUrl}", "${consentStatus}"]
+  - id: s6-act
+    name: Act on insight
+    action: Make UX change based on data, tag as goal, measure improvement
+    expected_output: Before/after comparison shows fix effectiveness
+    emotional_state: decisive
+    artifacts_produced: []
+    artifacts_consumed: ["${funnelData}", "${dashboardUrl}"]
+error_paths:
+  - id: e1-server-down
+    name: Umami server down
+    trigger: Deploy fails or container crashes
+    recovery: Tracking script is no-op, site works without analytics
+  - id: e2-no-data
+    name: No data appears
+    trigger: Script loaded but events don't fire
+    recovery: Check CORS, ad blockers, consent gate. Debug via browser devtools.
+  - id: e3-consent-block
+    name: Consent blocking all data
+    trigger: All users opt out or consent component broken
+    recovery: Verify consent component renders. Consider anonymous pageview under GDPR.

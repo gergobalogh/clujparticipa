@@ -1,0 +1,290 @@
+{
+  "project_id": "editorial-redesign-how-it-works",
+  "goal": "How It Works page with sticky pipeline and status explanations",
+  "phases": [
+    {
+      "id": "01",
+      "name": "Foundation",
+      "description": "i18n namespace, Badge variants, PipelineTrack showcase extension",
+      "steps": [
+        {
+          "id": "01-01",
+          "step_id": "01-01",
+          "name": "Add HowItWorks i18n namespace to all 3 locale files",
+          "description": "Add a new HowItWorks namespace to en.json, hu.json, and ro.json. Keys: title, subtitle, forwardSection, terminalSection, cta, ctaBrowse. 6 status description keys (submittedDesc through completedDesc) for forward pipeline stages. 4 terminal description keys (rejectedDesc, needsRevisionDesc, mergedDesc, withdrawnDesc). nextStep template key for per-stage next-step text. Status labels are reused from the existing Statuses namespace; only descriptions and page-level strings are new.",
+          "acceptance_criteria": [
+            "AC-1: HowItWorks namespace exists in en.json, hu.json, and ro.json with all 17 keys (title, subtitle, forwardSection, terminalSection, cta, ctaBrowse, submittedDesc, inVotingDesc, selectedDesc, acceptedDesc, inProgressDesc, completedDesc, rejectedDesc, needsRevisionDesc, mergedDesc, withdrawnDesc, nextStep)",
+            "AC-2: No keys are missing from any of the 3 locale files",
+            "AC-3: All visible strings on the How It Works page are drawn from locale files, not hardcoded",
+            "AC-4: TypeScript compiles after i18n changes",
+            "AC-5: Existing i18n namespaces (Statuses, Pipeline, Exception, etc.) remain unchanged"
+          ],
+          "test_file": "src/i18n/__tests__/how-it-works-locale.test.ts",
+          "scenario_name": "HowItWorks i18n namespace has all keys in all locales",
+          "files_to_modify": [
+            "src/i18n/messages/en.json",
+            "src/i18n/messages/hu.json",
+            "src/i18n/messages/ro.json",
+            "src/i18n/__tests__/how-it-works-locale.test.ts"
+          ],
+          "dependencies": [],
+          "estimated_hours": 1,
+          "deliverables": [
+            "HowItWorks namespace in all 3 locale files",
+            "Locale completeness test"
+          ],
+          "quality_gates": [
+            "All 3 locale files parse as valid JSON",
+            "All 17 keys present in each locale",
+            "No hardcoded user-facing strings introduced",
+            "Existing namespaces untouched"
+          ]
+        },
+        {
+          "id": "01-02",
+          "step_id": "01-02",
+          "name": "Extend Badge component with 4 new variants and update statusToBadge mapping",
+          "description": "Add accepted, needs_revision, merged, and withdrawn variants to BadgeVariant type and variantClasses map in badge.tsx. Color assignments: accepted = civic-teal (authority commitment), needs_revision = amber (caution), merged = purple-700 (redirect), withdrawn = gray (inactive). Update statusToBadge in status.ts to map ACCEPTED->accepted, NEEDS_REVISION->needs_revision, MERGED->merged, WITHDRAWN->withdrawn (replacing the current fallback mappings that reuse other variant styles).",
+          "acceptance_criteria": [
+            "AC-1: BadgeVariant type includes 'accepted', 'needs_revision', 'merged', 'withdrawn'",
+            "AC-2: variantClasses map has color entries for all 4 new variants",
+            "AC-3: statusToBadgeVariant('ACCEPTED') returns 'accepted'",
+            "AC-4: statusToBadgeVariant('NEEDS_REVISION') returns 'needs_revision'",
+            "AC-5: statusToBadgeVariant('MERGED') returns 'merged'",
+            "AC-6: statusToBadgeVariant('WITHDRAWN') returns 'withdrawn'",
+            "AC-7: Existing Badge variants (submitted, in_voting, selected, etc.) render unchanged",
+            "AC-8: TypeScript compiles"
+          ],
+          "test_file": "src/lib/__tests__/status.test.ts",
+          "scenario_name": "Badge renders all 4 new variants with correct colors",
+          "files_to_modify": [
+            "src/components/ui/badge.tsx",
+            "src/lib/status.ts",
+            "src/lib/__tests__/status.test.ts"
+          ],
+          "dependencies": [],
+          "estimated_hours": 1,
+          "deliverables": [
+            "Extended Badge with 4 variants",
+            "Updated statusToBadge mapping",
+            "Unit tests for new mappings"
+          ],
+          "quality_gates": [
+            "No existing Badge variant broken",
+            "All 4 new statuses map to dedicated variants (not fallbacks)",
+            "Visual colors match design intent (teal, amber, purple, gray)",
+            "TypeScript compiles"
+          ]
+        },
+        {
+          "id": "01-03",
+          "step_id": "01-03",
+          "name": "Extend PipelineTrack with showcase and onStageClick props",
+          "description": "Add optional `showcase` boolean prop and `onStageClick` callback prop to PipelineTrack. When showcase=true: all stages render as reached (colored, no gray future segments), each stage marker becomes an anchor link (<a href=\"#statusSlug\">) instead of a passive span, and the click handler is wired to onStageClick. No real idea data is required in showcase mode. When showcase is false or absent, PipelineTrack renders identically to current behavior. The stage slug for the anchor href is the lowercase status string (e.g., '#submitted', '#in_voting').",
+          "acceptance_criteria": [
+            "AC-1: PipelineTrack accepts optional showcase?: boolean and onStageClick?: (status: Status) => void props",
+            "AC-2: When showcase=true, all stages render as reached (colored track segments, filled markers, no gray future segments)",
+            "AC-3: When showcase=true, each marker renders as <a href=\"#statusSlug\"> (e.g., #submitted) instead of a span",
+            "AC-4: Clicking a showcase marker calls onStageClick with the clicked stage's Status value",
+            "AC-5: When showcase=false or absent, PipelineTrack renders identically to current behavior (no visual or DOM change)",
+            "AC-6: Existing PipelineTrack tests continue to pass without modification",
+            "AC-7: TypeScript compiles"
+          ],
+          "test_file": "src/components/ideas/__tests__/pipeline-track.test.tsx",
+          "scenario_name": "PipelineTrack showcase mode renders all stages as clickable anchors",
+          "files_to_modify": [
+            "src/components/ideas/pipeline-track.tsx",
+            "src/components/ideas/__tests__/pipeline-track.test.tsx"
+          ],
+          "dependencies": [],
+          "estimated_hours": 1.5,
+          "deliverables": [
+            "Extended PipelineTrack with showcase + onStageClick",
+            "New test cases for showcase mode"
+          ],
+          "quality_gates": [
+            "Non-showcase PipelineTrack renders unchanged (existing tests pass)",
+            "Showcase mode renders all stages as reached",
+            "Showcase markers are anchor elements with correct href values",
+            "onStageClick fires with correct Status on click",
+            "No console errors in either mode",
+            "TypeScript compiles"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Page and Integration",
+      "description": "HowItWorksContent client component, page route, navigation entry points, CSS :target wiring",
+      "steps": [
+        {
+          "id": "02-01",
+          "step_id": "02-01",
+          "name": "Create HowItWorksContent client component",
+          "description": "Create the main client component at src/components/ideas/how-it-works-content.tsx. It owns activeStage state and IntersectionObserver for scroll-spy. Renders: (1) Sticky pipeline hero using PipelineTrack with showcase=true and onStageClick that scrolls to the corresponding card. Pipeline sticks below nav (sticky top-16). Pipeline unsticks after the last stage card via a sentinel element that triggers unstick. (2) 6 StageCards, each with an id matching the status slug (e.g., id='submitted'), a Badge showing the status label, a description from HowItWorks namespace, and a nextStep line. (3) Terminal section heading ('What if things don't go as planned?') with 4 TerminalCards showing a colored dot (matching ExceptionState markerColor convention) and terminal description. (4) CTA section with a link to browse ideas. IntersectionObserver watches each StageCard's intersection and updates activeStage; the active stage marker in the pipeline gets a visual highlight.",
+          "acceptance_criteria": [
+            "AC-1: HowItWorksContent renders PipelineTrack in showcase mode with all 6 forward stages shown as reached",
+            "AC-2: Pipeline sticks below nav on scroll (sticky top-16) and unsticks after the last stage card",
+            "AC-3: IntersectionObserver tracks which stage card is in viewport and updates activeStage state",
+            "AC-4: Clicking a pipeline marker scrolls to the corresponding stage card (via hash URL anchor)",
+            "AC-5: 6 StageCards render with id attribute matching status slug, Badge, description, and nextStep",
+            "AC-6: Terminal section renders 4 TerminalCards with colored dots and terminal descriptions",
+            "AC-7: CTA section renders with a link to the ideas page",
+            "AC-8: All visible strings come from the HowItWorks i18n namespace",
+            "AC-9: Component is a client component ('use client')",
+            "AC-10: No real idea data is required (showcase mode uses static stage data)"
+          ],
+          "test_file": "src/components/ideas/__tests__/how-it-works-content.test.tsx",
+          "scenario_name": "HowItWorksContent renders sticky pipeline, stage cards, terminal section, and CTA",
+          "files_to_modify": [
+            "src/components/ideas/how-it-works-content.tsx",
+            "src/components/ideas/__tests__/how-it-works-content.test.tsx"
+          ],
+          "dependencies": [
+            "01-01",
+            "01-03"
+          ],
+          "estimated_hours": 4,
+          "deliverables": [
+            "HowItWorksContent client component",
+            "Component tests for layout, scroll-spy, and click-to-scroll"
+          ],
+          "quality_gates": [
+            "PipelineTrack renders in showcase mode without errors",
+            "Sticky behavior works (sticks on scroll, unsticks after last card)",
+            "IntersectionObserver updates activeStage without errors",
+            "Click-to-scroll navigates to correct card",
+            "All 6 StageCards and 4 TerminalCards render",
+            "No hardcoded strings",
+            "TypeScript compiles"
+          ]
+        },
+        {
+          "id": "02-02",
+          "step_id": "02-02",
+          "name": "Create page route at /[locale]/how-it-works",
+          "description": "Create the server component page at src/app/[locale]/how-it-works/page.tsx. Follows the same pattern as the Terms page: server component shell wrapping the client HowItWorksContent component. Page metadata includes title and description for SEO. The page shell provides the max-w-3xl centered layout consistent with other info pages (Terms, Privacy).",
+          "acceptance_criteria": [
+            "AC-1: GET /[locale]/how-it-works returns 200 and renders the HowItWorksContent component",
+            "AC-2: Page is a server component (no 'use client' directive) that wraps the client HowItWorksContent",
+            "AC-3: Page metadata (title, description) is set for SEO",
+            "AC-4: Layout follows max-w-3xl centered pattern consistent with Terms/Privacy pages",
+            "AC-5: Route works for all 3 locales (ro, hu, en)",
+            "AC-6: TypeScript compiles"
+          ],
+          "test_file": "src/app/[locale]/how-it-works/__tests__/page.test.tsx",
+          "scenario_name": "How it works page renders with correct metadata and layout",
+          "files_to_modify": [
+            "src/app/[locale]/how-it-works/page.tsx",
+            "src/app/[locale]/how-it-works/__tests__/page.test.tsx"
+          ],
+          "dependencies": [
+            "02-01"
+          ],
+          "estimated_hours": 1,
+          "deliverables": [
+            "How It Works page route",
+            "Page test"
+          ],
+          "quality_gates": [
+            "Page renders without errors for all locales",
+            "Server component boundary correct (no client directive in page file)",
+            "Metadata present in document head",
+            "Layout consistent with other info pages",
+            "TypeScript compiles"
+          ]
+        },
+        {
+          "id": "02-03",
+          "step_id": "02-03",
+          "name": "Add How It Works links to nav, footer, and idea detail page",
+          "description": "Add 'How it works' navigation entry points per D15. (1) Header: add a 'howItWorks' key to the navItems array in header.tsx with href '/how-it-works'. Add the corresponding 'howItWorks' key to the Navigation i18n namespace in all 3 locale files. (2) Footer: add a 'How it works' link in the Legal column (or a new 'Explore' column if that better groups it) of footer.tsx. Add 'howItWorks' key to the Footer i18n namespace. (3) Idea detail page: add a 'Learn about the process' link near the pipeline section that links to /how-it-works. Add 'learnAboutProcess' key to the IdeaDetail i18n namespace.",
+          "acceptance_criteria": [
+            "AC-1: Header nav includes 'How it works' link pointing to /how-it-works (desktop and mobile)",
+            "AC-2: Footer includes 'How it works' link pointing to /how-it-works",
+            "AC-3: Idea detail page includes 'Learn about the process' link near the pipeline that points to /how-it-works",
+            "AC-4: All 3 link labels come from i18n locale files in all 3 locales",
+            "AC-5: Navigation key 'howItWorks' added to Navigation namespace in all 3 locale files",
+            "AC-6: Footer key 'howItWorks' added to Footer namespace in all 3 locale files",
+            "AC-7: IdeaDetail key 'learnAboutProcess' added to IdeaDetail namespace in all 3 locale files",
+            "AC-8: Existing nav items (Home, Ideas, Map, Results) render unchanged",
+            "AC-9: TypeScript compiles"
+          ],
+          "test_file": "src/components/layout/__tests__/header-how-it-works-link.test.tsx",
+          "scenario_name": "How it works link appears in header, footer, and idea detail",
+          "files_to_modify": [
+            "src/components/layout/header.tsx",
+            "src/components/layout/footer.tsx",
+            "src/app/[locale]/ideas/[id]/page.tsx",
+            "src/i18n/messages/en.json",
+            "src/i18n/messages/hu.json",
+            "src/i18n/messages/ro.json",
+            "src/components/layout/__tests__/header-how-it-works-link.test.tsx"
+          ],
+          "dependencies": [
+            "02-02"
+          ],
+          "estimated_hours": 1.5,
+          "deliverables": [
+            "How It Works link in header nav",
+            "How It Works link in footer",
+            "Learn about the process link in idea detail",
+            "i18n keys for all 3 entry points"
+          ],
+          "quality_gates": [
+            "All 3 entry points visible and functional",
+            "Links preserve locale in URL (via @/i18n/navigation Link)",
+            "No existing nav/footer/detail elements broken",
+            "All labels from locale files",
+            "TypeScript compiles"
+          ]
+        },
+        {
+          "id": "02-04",
+          "step_id": "02-04",
+          "name": "Wire CSS :target highlight and verify hash navigation",
+          "description": "Add CSS :target styles so that when a stage card is navigated to via hash URL (e.g., /how-it-works#submitted), the card gets a visual highlight (e.g., brief border or background flash via Tailwind :target or a custom CSS rule). Verify end-to-end: clicking a pipeline marker scrolls to the card, the card highlights, and the URL hash updates. Verify sticky behavior: pipeline stays fixed below nav while scrolling through stage cards and unsticks after the last one. Test with IntersectionObserver that activeStage updates correctly as user scrolls.",
+          "acceptance_criteria": [
+            "AC-1: Navigating to /how-it-works#submitted scrolls to the submitted stage card",
+            "AC-2: The target stage card has a visible :target highlight (border or background accent)",
+            "AC-3: Clicking a pipeline marker scrolls to the correct card and highlights it",
+            "AC-4: Pipeline sticks below nav while stage cards are in viewport",
+            "AC-5: Pipeline unsticks after scrolling past the last stage card",
+            "AC-6: IntersectionObserver correctly identifies which stage card is currently in viewport",
+            "AC-7: :target highlight does not persist after user scrolls away (no permanent highlight)",
+            "AC-8: Hash navigation works correctly on initial page load with a hash in the URL"
+          ],
+          "test_file": "src/components/ideas/__tests__/how-it-works-content.test.tsx",
+          "scenario_name": "Hash navigation scrolls to card and applies :target highlight",
+          "files_to_modify": [
+            "src/components/ideas/how-it-works-content.tsx",
+            "src/app/globals.css",
+            "src/components/ideas/__tests__/how-it-works-content.test.tsx"
+          ],
+          "dependencies": [
+            "02-01",
+            "02-02"
+          ],
+          "estimated_hours": 1.5,
+          "deliverables": [
+            "CSS :target rule for stage card highlight",
+            "Verified sticky behavior and hash navigation",
+            "Updated component tests for scroll and target behavior"
+          ],
+          "quality_gates": [
+            ":target highlight visible and non-persistent",
+            "Hash navigation scrolls to correct card",
+            "Sticky pipeline works during scroll",
+            "Pipeline unsticks after last stage card",
+            "No console errors during scroll or hash navigation",
+            "TypeScript compiles"
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "status": "pending"
+  }
+}

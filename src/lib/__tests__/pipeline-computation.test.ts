@@ -2,15 +2,6 @@ import { describe, it, expect } from "vitest";
 import type { Status } from "@prisma/client";
 import type { PipelineStage } from "@/components/ideas/pipeline-track";
 
-/**
- * The computePipelineStages function is the driving port for this test suite.
- * It is a pure function that transforms idea data into PipelineStage[] for
- * rendering by the IdeaPipeline component.
- *
- * Until the function is extracted into a module, we define the expected
- * contract here and will import from the implementation module once created.
- */
-
 type StatusChange = {
   id: string;
   fromStatus: string | null;
@@ -30,31 +21,33 @@ import {
   computePipelineStages,
   getExceptionState,
   resolveExceptionType,
+  findTerminalChange,
   findRejectionChange,
   parseMergeNote,
   parseReturnNote,
 } from "../pipeline-computation";
 
+const PIPELINE_STATUS_ORDER: Status[] = [
+  "SUBMITTED",
+  "IN_VOTING",
+  "SELECTED",
+  "ACCEPTED",
+  "IN_PROGRESS",
+  "COMPLETED",
+];
+
 describe("computePipelineStages", () => {
   describe("happy path: SUBMITTED idea with no status changes", () => {
-    it("maps all 7 PIPELINE_STAGES to PipelineStage[]", () => {
+    it("maps all 6 PIPELINE_STAGES to PipelineStage[]", () => {
       const idea: IdeaData = {
         status: "SUBMITTED",
         createdAt: "2025-01-15T10:00:00Z",
         statusChanges: [],
       };
       const stages = computePipelineStages(idea);
-      expect(stages).toHaveLength(7);
+      expect(stages).toHaveLength(6);
       const stageStatuses = stages.map((s) => s.status);
-      expect(stageStatuses).toEqual([
-        "SUBMITTED",
-        "UNDER_REVIEW",
-        "ELIGIBLE",
-        "IN_VOTING",
-        "SELECTED",
-        "IN_PROGRESS",
-        "COMPLETED",
-      ]);
+      expect(stageStatuses).toEqual(PIPELINE_STATUS_ORDER);
     });
 
     it("marks only SUBMITTED as reached and current", () => {
@@ -67,7 +60,7 @@ describe("computePipelineStages", () => {
       const submitted = stages[0];
       expect(submitted.reached).toBe(true);
       expect(submitted.current).toBe(true);
-      expect(submitted.date).toBe("2025-01-15T10:00:00Z");
+      expect(submitted.date).toBe("2025-01-15");
 
       const unreached = stages.slice(1);
       for (const stage of unreached) {
@@ -78,17 +71,17 @@ describe("computePipelineStages", () => {
     });
   });
 
-  describe("mid-pipeline: UNDER_REVIEW with status change", () => {
-    it("marks SUBMITTED as reached (not current) and UNDER_REVIEW as current", () => {
+  describe("mid-pipeline: IN_VOTING with status change", () => {
+    it("marks SUBMITTED as reached (not current) and IN_VOTING as current", () => {
       const idea: IdeaData = {
-        status: "UNDER_REVIEW",
+        status: "IN_VOTING",
         createdAt: "2025-01-10T08:00:00Z",
         statusChanges: [
           {
             id: "sc1",
             fromStatus: "SUBMITTED",
-            toStatus: "UNDER_REVIEW",
-            note: "Starting review",
+            toStatus: "IN_VOTING",
+            note: "Sent to voting",
             changedBy: "admin",
             createdAt: "2025-01-12T14:00:00Z",
           },
@@ -98,12 +91,12 @@ describe("computePipelineStages", () => {
       expect(stages[0].status).toBe("SUBMITTED");
       expect(stages[0].reached).toBe(true);
       expect(stages[0].current).toBe(false);
-      expect(stages[0].date).toBe("2025-01-10T08:00:00Z");
+      expect(stages[0].date).toBe("2025-01-10");
 
-      expect(stages[1].status).toBe("UNDER_REVIEW");
+      expect(stages[1].status).toBe("IN_VOTING");
       expect(stages[1].reached).toBe(true);
       expect(stages[1].current).toBe(true);
-      expect(stages[1].date).toBe("2025-01-12T14:00:00Z");
+      expect(stages[1].date).toBe("2025-01-12");
 
       for (const stage of stages.slice(2)) {
         expect(stage.reached).toBe(false);
@@ -122,64 +115,109 @@ describe("computePipelineStages", () => {
           {
             id: "sc1",
             fromStatus: "SUBMITTED",
-            toStatus: "UNDER_REVIEW",
+            toStatus: "IN_VOTING",
             note: "",
             changedBy: "admin",
             createdAt: "2025-01-02T00:00:00Z",
           },
           {
             id: "sc2",
-            fromStatus: "UNDER_REVIEW",
-            toStatus: "ELIGIBLE",
+            fromStatus: "IN_VOTING",
+            toStatus: "SELECTED",
             note: "",
             changedBy: "admin",
             createdAt: "2025-01-03T00:00:00Z",
           },
           {
             id: "sc3",
-            fromStatus: "ELIGIBLE",
-            toStatus: "IN_VOTING",
+            fromStatus: "SELECTED",
+            toStatus: "ACCEPTED",
             note: "",
             changedBy: "admin",
             createdAt: "2025-01-04T00:00:00Z",
           },
           {
             id: "sc4",
-            fromStatus: "IN_VOTING",
-            toStatus: "SELECTED",
+            fromStatus: "ACCEPTED",
+            toStatus: "IN_PROGRESS",
             note: "",
             changedBy: "admin",
             createdAt: "2025-01-05T00:00:00Z",
           },
           {
             id: "sc5",
-            fromStatus: "SELECTED",
-            toStatus: "IN_PROGRESS",
-            note: "",
-            changedBy: "admin",
-            createdAt: "2025-01-06T00:00:00Z",
-          },
-          {
-            id: "sc6",
             fromStatus: "IN_PROGRESS",
             toStatus: "COMPLETED",
             note: "",
             changedBy: "admin",
-            createdAt: "2025-01-07T00:00:00Z",
+            createdAt: "2025-01-06T00:00:00Z",
           },
         ],
       };
       const stages = computePipelineStages(idea);
+      expect(stages).toHaveLength(6);
       for (const stage of stages) {
         expect(stage.reached).toBe(true);
       }
-      expect(stages[6].current).toBe(true);
-      expect(stages.slice(0, 6).every((s) => !s.current)).toBe(true);
+      expect(stages[5].current).toBe(true);
+      expect(stages.slice(0, 5).every((s) => !s.current)).toBe(true);
     });
   });
 
-  describe("REJECTED status: exception state handling", () => {
-    it("computes pipeline up to the stage before rejection with correct reached/current flags", () => {
+  describe("terminal statuses: exception state handling", () => {
+    it.each([
+      ["REJECTED", "Rejected idea that went through SELECTED"],
+      ["NEEDS_REVISION", "Needs revision idea that went through SELECTED"],
+      ["MERGED", "Merged idea that was in IN_VOTING"],
+      ["WITHDRAWN", "Withdrawn idea that was in IN_VOTING"],
+    ] as const)(
+      "%s: no stage marked current, stages before exit still reached",
+      (terminalStatus, _description) => {
+        const idea: IdeaData = {
+          status: terminalStatus,
+          createdAt: "2025-01-01T00:00:00Z",
+          statusChanges: [
+            {
+              id: "sc1",
+              fromStatus: "SUBMITTED",
+              toStatus: "IN_VOTING",
+              note: "",
+              changedBy: "admin",
+              createdAt: "2025-01-02T00:00:00Z",
+            },
+            {
+              id: "sc2",
+              fromStatus: "IN_VOTING",
+              toStatus: "SELECTED",
+              note: "",
+              changedBy: "admin",
+              createdAt: "2025-01-03T00:00:00Z",
+            },
+            {
+              id: "sc3",
+              fromStatus: "SELECTED",
+              toStatus: terminalStatus,
+              note: "Exit reason",
+              changedBy: "admin",
+              createdAt: "2025-01-05T00:00:00Z",
+            },
+          ],
+        };
+        const stages = computePipelineStages(idea);
+        // No stage should be marked current for terminal-status ideas
+        expect(stages.every((s) => !s.current)).toBe(true);
+        // Stages before the exit point should be reached
+        expect(stages[0].reached).toBe(true); // SUBMITTED
+        expect(stages[1].reached).toBe(true); // IN_VOTING
+        expect(stages[2].reached).toBe(true); // SELECTED
+        // Stages after the exit point should not be reached
+        expect(stages[3].reached).toBe(false); // ACCEPTED
+        expect(stages[4].reached).toBe(false); // IN_PROGRESS
+        expect(stages[5].reached).toBe(false); // COMPLETED
+      }
+    );
+
+    it("REJECTED with only SUBMITTED reached: only SUBMITTED marked reached", () => {
       const idea: IdeaData = {
         status: "REJECTED",
         createdAt: "2025-01-01T00:00:00Z",
@@ -187,14 +225,6 @@ describe("computePipelineStages", () => {
           {
             id: "sc1",
             fromStatus: "SUBMITTED",
-            toStatus: "UNDER_REVIEW",
-            note: "",
-            changedBy: "admin",
-            createdAt: "2025-01-02T00:00:00Z",
-          },
-          {
-            id: "sc2",
-            fromStatus: "UNDER_REVIEW",
             toStatus: "REJECTED",
             note: "Not feasible",
             changedBy: "admin",
@@ -203,30 +233,87 @@ describe("computePipelineStages", () => {
         ],
       };
       const stages = computePipelineStages(idea);
-      expect(stages[0].reached).toBe(true);
-      expect(stages[0].current).toBe(false);
-      expect(stages[1].reached).toBe(true);
-      expect(stages[1].current).toBe(false);
-      for (const stage of stages.slice(2)) {
+      expect(stages[0].reached).toBe(true); // SUBMITTED
+      for (const stage of stages.slice(1)) {
         expect(stage.reached).toBe(false);
         expect(stage.current).toBe(false);
       }
     });
+
+    it("WITHDRAWN with no forward stage in statusChanges defaults to SUBMITTED as last forward", () => {
+      const idea: IdeaData = {
+        status: "WITHDRAWN",
+        createdAt: "2025-01-01T00:00:00Z",
+        statusChanges: [],
+      };
+      const stages = computePipelineStages(idea);
+      // No forward stages in statusChanges, defaults to SUBMITTED
+      expect(stages[0].reached).toBe(true);
+      expect(stages.every((s) => !s.current)).toBe(true);
+    });
+  });
+
+  describe("legacy status normalization: UNDER_REVIEW and ELIGIBLE", () => {
+    it("UNDER_REVIEW normalizes to IN_VOTING in pipeline stages", () => {
+      const idea: IdeaData = {
+        status: "UNDER_REVIEW",
+        createdAt: "2025-01-10T08:00:00Z",
+        statusChanges: [
+          {
+            id: "sc1",
+            fromStatus: "SUBMITTED",
+            toStatus: "UNDER_REVIEW",
+            note: "Legacy review",
+            changedBy: "admin",
+            createdAt: "2025-01-12T14:00:00Z",
+          },
+        ],
+      };
+      const stages = computePipelineStages(idea);
+      expect(stages).toHaveLength(6);
+      // UNDER_REVIEW normalizes to IN_VOTING, so IN_VOTING is current
+      expect(stages[0].reached).toBe(true); // SUBMITTED
+      expect(stages[0].current).toBe(false);
+      expect(stages[1].status).toBe("IN_VOTING");
+      expect(stages[1].reached).toBe(true);
+      expect(stages[1].current).toBe(true);
+    });
+
+    it("ELIGIBLE normalizes to IN_VOTING in pipeline stages", () => {
+      const idea: IdeaData = {
+        status: "ELIGIBLE",
+        createdAt: "2025-01-10T08:00:00Z",
+        statusChanges: [
+          {
+            id: "sc1",
+            fromStatus: "SUBMITTED",
+            toStatus: "IN_VOTING",
+            note: "Went to voting",
+            changedBy: "admin",
+            createdAt: "2025-01-12T14:00:00Z",
+          },
+        ],
+      };
+      const stages = computePipelineStages(idea);
+      // ELIGIBLE normalizes to IN_VOTING
+      expect(stages[1].status).toBe("IN_VOTING");
+      expect(stages[1].current).toBe(true);
+    });
   });
 
   describe("error path: empty status changes array", () => {
-    it("renders all 7 stages with only SUBMITTED filled when statusChanges is empty", () => {
+    it("renders all 6 stages with only SUBMITTED filled when statusChanges is empty", () => {
       const idea: IdeaData = {
         status: "SUBMITTED",
         createdAt: "2025-06-01T08:00:00Z",
         statusChanges: [],
       };
       const stages = computePipelineStages(idea);
-      expect(stages).toHaveLength(7);
+      expect(stages).toHaveLength(6);
       expect(stages[0].status).toBe("SUBMITTED");
       expect(stages[0].reached).toBe(true);
       expect(stages[0].current).toBe(true);
-      expect(stages[0].date).toBe("2025-06-01T08:00:00Z");
+      expect(stages[0].date).toBe("2025-06-01");
       for (const stage of stages.slice(1)) {
         expect(stage.reached).toBe(false);
         expect(stage.current).toBe(false);
@@ -241,9 +328,8 @@ describe("computePipelineStages", () => {
         statusChanges: [],
       };
       const stages = computePipelineStages(idea);
-      expect(stages).toHaveLength(7);
-      // SUBMITTED should still have the creation date
-      expect(stages[0].date).toBe("2025-06-01T08:00:00Z");
+      expect(stages).toHaveLength(6);
+      expect(stages[0].date).toBe("2025-06-01");
     });
   });
 
@@ -255,7 +341,7 @@ describe("computePipelineStages", () => {
         statusChanges: [],
       };
       const stages = computePipelineStages(idea);
-      expect(stages).toHaveLength(7);
+      expect(stages).toHaveLength(6);
     });
 
     it("marks no stage as current for unexpected status", () => {
@@ -276,83 +362,60 @@ describe("computePipelineStages", () => {
         statusChanges: [],
       };
       const stages = computePipelineStages(idea);
-      // getStageIndex returns -1 for unknown, so resolveEffectiveStatus also returns unknown,
-      // and no stages should be reached (both stageIndex and effectiveIndex checks fail)
       const reachedStages = stages.filter((s) => s.reached);
       expect(reachedStages).toHaveLength(0);
     });
 
-    it("preserves the raw status label in the pipeline stage", () => {
+    it("preserves the 6 standard pipeline stage labels", () => {
       const idea: IdeaData = {
         status: "UNKNOWN_STATUS" as Status,
         createdAt: "2025-06-01T08:00:00Z",
         statusChanges: [],
       };
       const stages = computePipelineStages(idea);
-      // Labels should still use the Status key from PIPELINE_STAGES
-      // The raw status is not in PIPELINE_STAGES so it won't appear as a label,
-      // but the pipeline should still render all 7 standard stages
-      expect(stages).toHaveLength(7);
       const labels = stages.map((s) => s.label);
-      expect(labels).toEqual([
-        "SUBMITTED",
-        "UNDER_REVIEW",
-        "ELIGIBLE",
-        "IN_VOTING",
-        "SELECTED",
-        "IN_PROGRESS",
-        "COMPLETED",
-      ]);
+      expect(labels).toEqual(PIPELINE_STATUS_ORDER);
     });
   });
 
   describe("error path: malformed status change records", () => {
     it("skips records with null toStatus and renders pipeline", () => {
       const idea: IdeaData = {
-        status: "ELIGIBLE",
+        status: "IN_VOTING",
         createdAt: "2025-01-01T00:00:00Z",
         statusChanges: [
           {
             id: "sc1",
             fromStatus: "SUBMITTED",
-            toStatus: "UNDER_REVIEW" as string,
-            note: "Review started",
+            toStatus: "IN_VOTING" as string,
+            note: "Voting started",
             changedBy: "admin",
             createdAt: "2025-01-05T00:00:00Z",
           },
           {
             id: "sc-malformed",
-            fromStatus: "UNDER_REVIEW",
+            fromStatus: "IN_VOTING",
             toStatus: null as unknown as string,
             note: "Bad record",
             changedBy: "admin",
             createdAt: "2025-01-06T00:00:00Z",
           },
-          {
-            id: "sc2",
-            fromStatus: "UNDER_REVIEW",
-            toStatus: "ELIGIBLE" as string,
-            note: "Marked eligible",
-            changedBy: "admin",
-            createdAt: "2025-01-10T00:00:00Z",
-          },
         ],
       };
       const stages = computePipelineStages(idea);
-      expect(stages).toHaveLength(7);
-      expect(stages[1].date).toBe("2025-01-05T00:00:00Z");
-      expect(stages[2].date).toBe("2025-01-10T00:00:00Z");
+      expect(stages).toHaveLength(6);
+      expect(stages[1].date).toBe("2025-01-05");
     });
 
     it("skips records with missing createdAt and renders pipeline", () => {
       const idea: IdeaData = {
-        status: "UNDER_REVIEW",
+        status: "IN_VOTING",
         createdAt: "2025-01-01T00:00:00Z",
         statusChanges: [
           {
             id: "sc-bad-date",
             fromStatus: "SUBMITTED",
-            toStatus: "UNDER_REVIEW" as string,
+            toStatus: "IN_VOTING" as string,
             note: "Missing date",
             changedBy: "admin",
             createdAt: undefined as unknown as string,
@@ -360,12 +423,9 @@ describe("computePipelineStages", () => {
         ],
       };
       const stages = computePipelineStages(idea);
-      expect(stages).toHaveLength(7);
-      // The record with missing createdAt should be handled gracefully
-      // UNDER_REVIEW should still be reached/current
+      expect(stages).toHaveLength(6);
       expect(stages[1].reached).toBe(true);
       expect(stages[1].current).toBe(true);
-      // date should be null (not undefined) when createdAt is missing
       expect(stages[1].date).toBeNull();
     });
 
@@ -376,7 +436,7 @@ describe("computePipelineStages", () => {
         statusChanges: [],
       };
       const stages = computePipelineStages(idea);
-      expect(stages).toHaveLength(7);
+      expect(stages).toHaveLength(6);
       expect(stages[0].reached).toBe(true);
       expect(stages[0].current).toBe(true);
     });
@@ -385,21 +445,21 @@ describe("computePipelineStages", () => {
   describe("date resolution from statusChanges", () => {
     it("uses idea.createdAt for SUBMITTED stage when no status change has toStatus SUBMITTED", () => {
       const idea: IdeaData = {
-        status: "ELIGIBLE",
+        status: "SELECTED",
         createdAt: "2025-03-01T09:00:00Z",
         statusChanges: [
           {
             id: "sc1",
             fromStatus: "SUBMITTED",
-            toStatus: "UNDER_REVIEW",
+            toStatus: "IN_VOTING",
             note: "",
             changedBy: "admin",
             createdAt: "2025-03-05T12:00:00Z",
           },
           {
             id: "sc2",
-            fromStatus: "UNDER_REVIEW",
-            toStatus: "ELIGIBLE",
+            fromStatus: "IN_VOTING",
+            toStatus: "SELECTED",
             note: "",
             changedBy: "admin",
             createdAt: "2025-03-10T15:00:00Z",
@@ -407,36 +467,36 @@ describe("computePipelineStages", () => {
         ],
       };
       const stages = computePipelineStages(idea);
-      expect(stages[0].date).toBe("2025-03-01T09:00:00Z");
-      expect(stages[1].date).toBe("2025-03-05T12:00:00Z");
-      expect(stages[2].date).toBe("2025-03-10T15:00:00Z");
+      expect(stages[0].date).toBe("2025-03-01");
+      expect(stages[1].date).toBe("2025-03-05");
+      expect(stages[2].date).toBe("2025-03-10");
     });
 
     it("uses the most recent status change date when multiple changes exist for the same toStatus", () => {
       const idea: IdeaData = {
-        status: "ELIGIBLE",
+        status: "SELECTED",
         createdAt: "2025-01-01T00:00:00Z",
         statusChanges: [
           {
             id: "sc1",
             fromStatus: "SUBMITTED",
-            toStatus: "UNDER_REVIEW",
-            note: "First review",
+            toStatus: "IN_VOTING",
+            note: "First voting",
             changedBy: "admin",
             createdAt: "2025-01-10T00:00:00Z",
           },
           {
             id: "sc2",
             fromStatus: "REJECTED",
-            toStatus: "UNDER_REVIEW",
+            toStatus: "IN_VOTING",
             note: "Reopened",
             changedBy: "admin",
             createdAt: "2025-02-10T00:00:00Z",
           },
           {
             id: "sc3",
-            fromStatus: "UNDER_REVIEW",
-            toStatus: "ELIGIBLE",
+            fromStatus: "IN_VOTING",
+            toStatus: "SELECTED",
             note: "",
             changedBy: "admin",
             createdAt: "2025-02-15T00:00:00Z",
@@ -444,8 +504,8 @@ describe("computePipelineStages", () => {
         ],
       };
       const stages = computePipelineStages(idea);
-      // UNDER_REVIEW should use the most recent change (sc2)
-      expect(stages[1].date).toBe("2025-02-10T00:00:00Z");
+      // IN_VOTING should use the most recent change (sc2)
+      expect(stages[1].date).toBe("2025-02-10");
     });
   });
 });
@@ -455,16 +515,20 @@ describe("getExceptionState", () => {
     expect(getExceptionState("REJECTED")).toBe("REJECTED");
   });
 
+  it("returns NEEDS_REVISION for NEEDS_REVISION status", () => {
+    expect(getExceptionState("NEEDS_REVISION")).toBe("NEEDS_REVISION");
+  });
+
+  it("returns MERGED for MERGED status", () => {
+    expect(getExceptionState("MERGED")).toBe("MERGED");
+  });
+
+  it("returns WITHDRAWN for WITHDRAWN status", () => {
+    expect(getExceptionState("WITHDRAWN")).toBe("WITHDRAWN");
+  });
+
   it("returns undefined for forward pipeline statuses", () => {
-    const forwardStatuses: Status[] = [
-      "SUBMITTED",
-      "UNDER_REVIEW",
-      "ELIGIBLE",
-      "IN_VOTING",
-      "SELECTED",
-      "IN_PROGRESS",
-      "COMPLETED",
-    ];
+    const forwardStatuses: Status[] = PIPELINE_STATUS_ORDER;
     for (const status of forwardStatuses) {
       expect(getExceptionState(status)).toBeUndefined();
     }
@@ -475,177 +539,98 @@ describe("getExceptionState", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// resolveExceptionType: MERGED/RETURNED detection from status + note prefix
-// ---------------------------------------------------------------------------
-describe("resolveExceptionType", () => {
-  it("returns MERGED when status is REJECTED and note starts with [MERGED]", () => {
-    const statusChanges: StatusChange[] = [
-      {
-        id: "sc1",
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "REJECTED",
-        note: "[MERGED] merged with idea #cm5x8k2q",
-        changedBy: "admin",
-        createdAt: "2025-01-10T00:00:00Z",
-      },
-    ];
-    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("MERGED");
+describe("resolveExceptionType (deprecated)", () => {
+  it("delegates to getExceptionState and returns the status directly", () => {
+    expect(resolveExceptionType("REJECTED", [])).toBe("REJECTED");
+    expect(resolveExceptionType("NEEDS_REVISION", [])).toBe("NEEDS_REVISION");
+    expect(resolveExceptionType("MERGED", [])).toBe("MERGED");
+    expect(resolveExceptionType("WITHDRAWN", [])).toBe("WITHDRAWN");
   });
 
-  it("returns RETURNED when status is REJECTED and note starts with [RETURNED]", () => {
-    const statusChanges: StatusChange[] = [
-      {
-        id: "sc1",
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "REJECTED",
-        note: "[RETURNED] Please add more specific location details",
-        changedBy: "admin",
-        createdAt: "2025-01-10T00:00:00Z",
-      },
-    ];
-    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("RETURNED");
-  });
-
-  it("returns REJECTED when status is REJECTED and note has no prefix", () => {
-    const statusChanges: StatusChange[] = [
-      {
-        id: "sc1",
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "REJECTED",
-        note: "Outside city jurisdiction",
-        changedBy: "admin",
-        createdAt: "2025-01-10T00:00:00Z",
-      },
-    ];
-    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("REJECTED");
-  });
-
-  it("returns undefined when status is not REJECTED (reopened idea)", () => {
-    const statusChanges: StatusChange[] = [
-      {
-        id: "sc1",
-        fromStatus: "SUBMITTED",
-        toStatus: "REJECTED",
-        note: "[MERGED] merged with idea #abc",
-        changedBy: "admin",
-        createdAt: "2025-01-05T00:00:00Z",
-      },
-      {
-        id: "sc2",
-        fromStatus: "REJECTED",
-        toStatus: "UNDER_REVIEW",
-        note: "Reopened for review",
-        changedBy: "admin",
-        createdAt: "2025-01-15T00:00:00Z",
-      },
-    ];
-    expect(resolveExceptionType("UNDER_REVIEW", statusChanges)).toBeUndefined();
-  });
-
-  it("returns undefined when status is REJECTED but no rejection status change exists", () => {
-    const statusChanges: StatusChange[] = [];
-    expect(resolveExceptionType("REJECTED", statusChanges)).toBeUndefined();
-  });
-
-  it("uses the most recent rejection change when multiple exist", () => {
-    const statusChanges: StatusChange[] = [
-      {
-        id: "sc1",
-        fromStatus: "SUBMITTED",
-        toStatus: "REJECTED",
-        note: "Not feasible",
-        changedBy: "admin",
-        createdAt: "2025-01-05T00:00:00Z",
-      },
-      {
-        id: "sc2",
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "REJECTED",
-        note: "[MERGED] merged with idea #xyz",
-        changedBy: "admin",
-        createdAt: "2025-01-20T00:00:00Z",
-      },
-    ];
-    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("MERGED");
-  });
-
-  it("detects [MERGED] with mixed case as MERGED", () => {
-    const statusChanges: StatusChange[] = [
-      {
-        id: "sc1",
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "REJECTED",
-        note: "[merged] Combined with another idea",
-        changedBy: "admin",
-        createdAt: "2025-01-10T00:00:00Z",
-      },
-    ];
-    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("MERGED");
-  });
-
-  it("detects [RETURNED] with mixed case as RETURNED", () => {
-    const statusChanges: StatusChange[] = [
-      {
-        id: "sc1",
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "REJECTED",
-        note: "[Returned] Needs revision",
-        changedBy: "admin",
-        createdAt: "2025-01-10T00:00:00Z",
-      },
-    ];
-    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("RETURNED");
-  });
-
-  it("returns REJECTED when note contains 'merged' but not as bracketed prefix", () => {
-    const statusChanges: StatusChange[] = [
-      {
-        id: "sc1",
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "REJECTED",
-        note: "This idea was merged with another",
-        changedBy: "admin",
-        createdAt: "2025-01-10T00:00:00Z",
-      },
-    ];
-    expect(resolveExceptionType("REJECTED", statusChanges)).toBe("REJECTED");
+  it("returns undefined for forward pipeline statuses", () => {
+    expect(resolveExceptionType("IN_VOTING", [])).toBeUndefined();
+    expect(resolveExceptionType("SELECTED", [])).toBeUndefined();
   });
 });
 
-// ---------------------------------------------------------------------------
-// findRejectionChange: find most recent StatusChange with toStatus=REJECTED
-// ---------------------------------------------------------------------------
-describe("findRejectionChange", () => {
-  it("returns the most recent rejection status change", () => {
+describe("findTerminalChange", () => {
+  it("returns the most recent terminal status change", () => {
     const statusChanges: StatusChange[] = [
       {
         id: "sc1",
         fromStatus: "SUBMITTED",
-        toStatus: "UNDER_REVIEW",
+        toStatus: "IN_VOTING",
         note: "",
         changedBy: "admin",
         createdAt: "2025-01-02T00:00:00Z",
       },
       {
         id: "sc2",
-        fromStatus: "UNDER_REVIEW",
+        fromStatus: "IN_VOTING",
         toStatus: "REJECTED",
         note: "Not feasible",
         changedBy: "admin",
         createdAt: "2025-01-05T00:00:00Z",
       },
     ];
-    const result = findRejectionChange(statusChanges);
+    const result = findTerminalChange(statusChanges);
     expect(result).not.toBeNull();
     expect(result!.id).toBe("sc2");
     expect(result!.note).toBe("Not feasible");
   });
 
+  it("finds NEEDS_REVISION as a terminal change", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "SELECTED",
+        toStatus: "NEEDS_REVISION",
+        note: "Needs more detail",
+        changedBy: "admin",
+        createdAt: "2025-01-05T00:00:00Z",
+      },
+    ];
+    const result = findTerminalChange(statusChanges);
+    expect(result).not.toBeNull();
+    expect(result!.id).toBe("sc1");
+  });
+
+  it("finds MERGED as a terminal change", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "IN_VOTING",
+        toStatus: "MERGED",
+        note: "[MERGED] merged with idea #abc",
+        changedBy: "admin",
+        createdAt: "2025-01-05T00:00:00Z",
+      },
+    ];
+    const result = findTerminalChange(statusChanges);
+    expect(result).not.toBeNull();
+    expect(result!.id).toBe("sc1");
+  });
+
+  it("finds WITHDRAWN as a terminal change", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "SUBMITTED",
+        toStatus: "WITHDRAWN",
+        note: "Author withdrew",
+        changedBy: "admin",
+        createdAt: "2025-01-05T00:00:00Z",
+      },
+    ];
+    const result = findTerminalChange(statusChanges);
+    expect(result).not.toBeNull();
+    expect(result!.id).toBe("sc1");
+  });
+
   it.each([
-    [["SUBMITTED", "UNDER_REVIEW"] as const, "no rejection change"],
+    [["SUBMITTED", "IN_VOTING"] as const, "no terminal change"],
     [[] as const, "empty statusChanges"],
-  ])("returns null for %s", (statusFlow, description) => {
+  ])("returns null for %s", (statusFlow, _description) => {
     const statusChanges: StatusChange[] = statusFlow.map((status, i) => ({
       id: `sc${i}`,
       fromStatus: i === 0 ? null : "SUBMITTED",
@@ -654,10 +639,10 @@ describe("findRejectionChange", () => {
       changedBy: "admin",
       createdAt: `2025-01-0${i + 1}T00:00:00Z`,
     }));
-    expect(findRejectionChange(statusChanges)).toBeNull();
+    expect(findTerminalChange(statusChanges)).toBeNull();
   });
 
-  it("picks the last rejection when multiple rejections exist", () => {
+  it("picks the last terminal change when multiple exist", () => {
     const statusChanges: StatusChange[] = [
       {
         id: "sc1",
@@ -670,29 +655,48 @@ describe("findRejectionChange", () => {
       {
         id: "sc2",
         fromStatus: "REJECTED",
-        toStatus: "UNDER_REVIEW",
+        toStatus: "IN_VOTING",
         note: "Reopened",
         changedBy: "admin",
         createdAt: "2025-01-10T00:00:00Z",
       },
       {
         id: "sc3",
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "REJECTED",
-        note: "Second rejection",
+        fromStatus: "IN_VOTING",
+        toStatus: "NEEDS_REVISION",
+        note: "Second exit",
         changedBy: "admin",
         createdAt: "2025-01-15T00:00:00Z",
       },
     ];
-    const result = findRejectionChange(statusChanges);
+    const result = findTerminalChange(statusChanges);
     expect(result!.id).toBe("sc3");
-    expect(result!.note).toBe("Second rejection");
+    expect(result!.note).toBe("Second exit");
   });
 });
 
-// ---------------------------------------------------------------------------
-// parseMergeNote: extract parent idea ID from [MERGED] prefix
-// ---------------------------------------------------------------------------
+describe("findRejectionChange (backward-compatible alias)", () => {
+  it("is the same function as findTerminalChange", () => {
+    expect(findRejectionChange).toBe(findTerminalChange);
+  });
+
+  it("finds terminal changes when called via the alias", () => {
+    const statusChanges: StatusChange[] = [
+      {
+        id: "sc1",
+        fromStatus: "IN_VOTING",
+        toStatus: "WITHDRAWN",
+        note: "Author withdrew",
+        changedBy: "admin",
+        createdAt: "2025-01-05T00:00:00Z",
+      },
+    ];
+    const result = findRejectionChange(statusChanges);
+    expect(result).not.toBeNull();
+    expect(result!.id).toBe("sc1");
+  });
+});
+
 describe("parseMergeNote", () => {
   it.each([
     ["[MERGED] merged with idea #cm5x8k2q", "cm5x8k2q"],
@@ -724,9 +728,6 @@ describe("parseMergeNote", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// parseReturnNote: extract feedback text from [RETURNED] prefix
-// ---------------------------------------------------------------------------
 describe("parseReturnNote", () => {
   it.each([
     ["[RETURNED] Please add more details", "Please add more details"],

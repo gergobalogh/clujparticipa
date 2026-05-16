@@ -26,16 +26,16 @@ describe("mapStatusChangesToTimelineEntries", () => {
       {
         id: "sc-2",
         fromStatus: "SUBMITTED",
-        toStatus: "UNDER_REVIEW",
-        note: "Review started",
+        toStatus: "IN_VOTING",
+        note: "Sent to voting",
         changedBy: "admin@cluj.ro",
         createdAt: "2025-02-20T14:30:00Z",
       },
       {
         id: "sc-3",
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "ELIGIBLE",
-        note: "Passed eligibility",
+        fromStatus: "IN_VOTING",
+        toStatus: "SELECTED",
+        note: "Selected for implementation",
         changedBy: "dept-urbanism@cluj.ro",
         createdAt: "2025-03-10T09:00:00Z",
       },
@@ -58,18 +58,18 @@ describe("mapStatusChangesToTimelineEntries", () => {
       id: "sc-2",
       date: "2025-02-20T14:30:00Z",
       fromStatus: "SUBMITTED",
-      toStatus: "UNDER_REVIEW",
+      toStatus: "IN_VOTING",
       actorRole: "Admin",
-      note: "Review started",
+      note: "Sent to voting",
     });
 
     expect(entries[2]).toEqual({
       id: "sc-3",
       date: "2025-03-10T09:00:00Z",
-      fromStatus: "UNDER_REVIEW",
-      toStatus: "ELIGIBLE",
+      fromStatus: "IN_VOTING",
+      toStatus: "SELECTED",
       actorRole: "Department",
-      note: "Passed eligibility",
+      note: "Selected for implementation",
     });
   });
 
@@ -86,15 +86,15 @@ describe("mapStatusChangesToTimelineEntries", () => {
       {
         id: "sc-2",
         fromStatus: "SUBMITTED",
-        toStatus: "UNDER_REVIEW",
+        toStatus: "IN_VOTING",
         note: "",
         changedBy: "admin@cluj.ro",
         createdAt: "2025-02-01T00:00:00Z",
       },
       {
         id: "sc-3",
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "ELIGIBLE",
+        fromStatus: "IN_VOTING",
+        toStatus: "SELECTED",
         note: "",
         changedBy: "system",
         createdAt: "2025-03-01T00:00:00Z",
@@ -163,16 +163,16 @@ describe("mapStatusChangesToTimelineEntries", () => {
       {
         id: "sc-2",
         fromStatus: "SUBMITTED",
-        toStatus: "UNDER_REVIEW",
-        note: "Review",
+        toStatus: "IN_VOTING",
+        note: "Voting",
         changedBy: "admin@cluj.ro",
         createdAt: "2025-02-20T14:30:00Z",
       },
       {
         id: "sc-3",
-        fromStatus: "UNDER_REVIEW",
-        toStatus: "ELIGIBLE",
-        note: "Eligible",
+        fromStatus: "IN_VOTING",
+        toStatus: "SELECTED",
+        note: "Selected",
         changedBy: "dept@cluj.ro",
         createdAt: "2025-03-10T09:00:00Z",
       },
@@ -180,7 +180,7 @@ describe("mapStatusChangesToTimelineEntries", () => {
 
     it("timeline entries and pipeline stages derive dates from the same statusChanges", () => {
       const idea = {
-        status: "ELIGIBLE" as Status,
+        status: "SELECTED" as Status,
         createdAt: "2025-01-15T10:00:00Z",
         statusChanges,
       };
@@ -196,27 +196,27 @@ describe("mapStatusChangesToTimelineEntries", () => {
         (e) => e.toStatus === "SUBMITTED"
       );
 
-      expect(submittedStage?.date).toBe(submittedEntry?.date);
+      expect(submittedStage?.date).toBe(submittedEntry?.date?.slice(0, 10));
 
-      // The UNDER_REVIEW stage date should match the timeline entry for UNDER_REVIEW
-      const reviewStage = pipelineStages.find(
-        (s) => s.status === "UNDER_REVIEW"
+      // The IN_VOTING stage date should match the timeline entry for IN_VOTING
+      const votingStage = pipelineStages.find(
+        (s) => s.status === "IN_VOTING"
       );
-      const reviewEntry = timelineEntries.find(
-        (e) => e.toStatus === "UNDER_REVIEW"
-      );
-
-      expect(reviewStage?.date).toBe(reviewEntry?.date);
-
-      // The ELIGIBLE stage date should match the timeline entry for ELIGIBLE
-      const eligibleStage = pipelineStages.find(
-        (s) => s.status === "ELIGIBLE"
-      );
-      const eligibleEntry = timelineEntries.find(
-        (e) => e.toStatus === "ELIGIBLE"
+      const votingEntry = timelineEntries.find(
+        (e) => e.toStatus === "IN_VOTING"
       );
 
-      expect(eligibleStage?.date).toBe(eligibleEntry?.date);
+      expect(votingStage?.date).toBe(votingEntry?.date?.slice(0, 10));
+
+      // The SELECTED stage date should match the timeline entry for SELECTED
+      const selectedStage = pipelineStages.find(
+        (s) => s.status === "SELECTED"
+      );
+      const selectedEntry = timelineEntries.find(
+        (e) => e.toStatus === "SELECTED"
+      );
+
+      expect(selectedStage?.date).toBe(selectedEntry?.date?.slice(0, 10));
     });
 
     it("concurrent status changes: pipeline shows most recent as current, timeline shows all", () => {
@@ -232,23 +232,23 @@ describe("mapStatusChangesToTimelineEntries", () => {
         {
           id: "sc-2a",
           fromStatus: "SUBMITTED",
-          toStatus: "UNDER_REVIEW",
-          note: "First review",
+          toStatus: "IN_VOTING",
+          note: "First voting round",
           changedBy: "admin@cluj.ro",
           createdAt: "2025-02-01T10:00:00Z",
         },
         {
           id: "sc-2b",
-          fromStatus: "UNDER_REVIEW",
-          toStatus: "ELIGIBLE",
-          note: "Quick eligibility",
+          fromStatus: "IN_VOTING",
+          toStatus: "SELECTED",
+          note: "Quick selection",
           changedBy: "admin@cluj.ro",
           createdAt: "2025-02-01T10:00:01Z",
         },
       ];
 
       const idea = {
-        status: "ELIGIBLE" as Status,
+        status: "SELECTED" as Status,
         createdAt: "2025-01-15T10:00:00Z",
         statusChanges: concurrentChanges,
       };
@@ -258,18 +258,18 @@ describe("mapStatusChangesToTimelineEntries", () => {
         concurrentChanges
       );
 
-      // Pipeline: ELIGIBLE is the current stage
-      const eligibleStage = pipelineStages.find(
-        (s) => s.status === "ELIGIBLE"
+      // Pipeline: SELECTED is the current stage
+      const selectedStage = pipelineStages.find(
+        (s) => s.status === "SELECTED"
       );
-      expect(eligibleStage?.current).toBe(true);
-      expect(eligibleStage?.reached).toBe(true);
+      expect(selectedStage?.current).toBe(true);
+      expect(selectedStage?.reached).toBe(true);
 
       // Timeline: all 3 entries present chronologically
       expect(timelineEntries).toHaveLength(3);
       expect(timelineEntries[0].toStatus).toBe("SUBMITTED");
-      expect(timelineEntries[1].toStatus).toBe("UNDER_REVIEW");
-      expect(timelineEntries[2].toStatus).toBe("ELIGIBLE");
+      expect(timelineEntries[1].toStatus).toBe("IN_VOTING");
+      expect(timelineEntries[2].toStatus).toBe("SELECTED");
     });
   });
 });

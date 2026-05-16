@@ -2,10 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
-import { MiniPipelineTrack } from "@/components/ideas/mini-pipeline-track";
 import { statusToBadgeVariant } from "@/lib/status";
 import { resolveCategoryListColor } from "@/lib/category-colors";
-import type { Status } from "@prisma/client";
 import Image from "next/image";
 
 interface IdeaListRowFirstImage {
@@ -65,11 +63,6 @@ export function IdeaListRow({
             <Badge variant={statusToBadgeVariant(status)}>
               {ts(status as Parameters<typeof ts>[0])}
             </Badge>
-          </div>
-
-          {/* Mini pipeline indicator */}
-          <div className="mt-1">
-            <MiniPipelineTrack currentStatus={status as Status} />
           </div>
 
           {/* Title */}

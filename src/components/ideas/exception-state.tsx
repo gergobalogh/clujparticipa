@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { JSX } from "react";
 
 export type ExceptionStateProps = {
-  exceptionType: "REJECTED" | "MERGED" | "RETURNED";
+  exceptionType: "REJECTED" | "NEEDS_REVISION" | "MERGED" | "WITHDRAWN" | "RETURNED";
   reason: string | null;
   parentIdeaId?: string | null;
   parentIdeaTitle?: string | null;
@@ -22,7 +22,10 @@ const markerColor = (exceptionType: ExceptionStateProps["exceptionType"]): strin
     case "MERGED":
       return "bg-purple-500";
     case "RETURNED":
+    case "NEEDS_REVISION":
       return "bg-amber-500";
+    case "WITHDRAWN":
+      return "bg-gray-400";
   }
 };
 
@@ -166,6 +169,18 @@ export function ExceptionState({
               resubmitUrl={resubmitUrl ?? null}
               translate={translate}
             />
+          )}
+          {(exceptionType === "NEEDS_REVISION") && (
+            <ReturnedContent
+              reason={reason}
+              resubmitUrl={resubmitUrl ?? null}
+              translate={translate}
+            />
+          )}
+          {exceptionType === "WITHDRAWN" && (
+            <div className="space-y-2">
+              <p className="text-gray-700">{reason ?? translate("contactUs")}</p>
+            </div>
           )}
         </div>
       </div>

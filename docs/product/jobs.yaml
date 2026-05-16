@@ -46,6 +46,78 @@ jobs:
     features:
       - "clujparticipa-redesign"
 
+  - id: "JOB-002"
+    statement: "When I see few ideas being submitted or users leaving without acting, I want to see exactly where in the journey they drop off and what they did before leaving, so I can fix the broken step before more users lose trust."
+    abstraction_level: "physical"
+    type: "functional"
+    context: "Civic participation prototype; operator needs data-driven UX iteration"
+    emotional_job: "When I see low engagement numbers, I want to feel confident I know WHY rather than guessing, so I can act decisively instead of hoping."
+    social_job: "When I report progress to the coalition, I want to show data-backed evidence that the platform is improving, so I am seen as a credible steward of civic resources."
+    outcomes:
+      - id: "O6"
+        statement: "Minimize the time it takes to identify which page or action causes user drop-off"
+        type: "speed"
+        importance: 9
+        satisfaction: 1
+        score: 81
+        status: "critically-under-served"
+    features:
+      - "umami-analytics"
+
+  - id: "JOB-003"
+    statement: "When I invest effort in a new feature, I want to measure whether it actually changes user behavior, so I can double down on what works and cut what doesn't."
+    abstraction_level: "physical"
+    type: "functional"
+    context: "Feature investment without measurement is guesswork"
+    emotional_job: "When I ship a feature, I want to feel certainty that it mattered, rather than shipping into a void and never knowing."
+    social_job: "When I discuss priorities with the team, I want to bring evidence of what users actually do, so I'm not just advocating from opinion."
+    outcomes:
+      - id: "O7"
+        statement: "Minimize the likelihood of investing in features that don't change user behavior"
+        type: "likelihood_of_result"
+        importance: 8
+        satisfaction: 1
+        score: 72
+        status: "critically-under-served"
+    features:
+      - "umami-analytics"
+
+  - id: "JOB-004"
+    statement: "When I visit a civic participation site, I want to know that my behavior on the site isn't being sold or profiled, so I can engage honestly without feeling surveilled."
+    abstraction_level: "physical"
+    type: "emotional"
+    context: "Civic platform users are privacy-sensitive; surveillance undermines participation"
+    emotional_job: "When I see a tracking notice, I want to feel respected and informed, not tricked or watched."
+    social_job: "When I tell neighbors about this platform, I want to say 'it respects your privacy' with confidence, so I'm not recommending a surveillance tool."
+    outcomes:
+      - id: "O8"
+        statement: "Minimize the likelihood of a resident abandoning participation because the platform feels surveilled"
+        type: "likelihood_of_result"
+        importance: 7
+        satisfaction: 5
+        score: 35
+        status: "appropriately-served"
+    features:
+      - "umami-analytics"
+
+  - id: "JOB-005"
+    statement: "When I return to the platform after weeks away, I want to see evidence that things are happening, so I feel my participation matters and the platform isn't abandoned."
+    abstraction_level: "physical"
+    type: "functional"
+    context: "Return visits need social proof of activity to sustain engagement"
+    emotional_job: "When I see stale content, I feel like I wasted my time. When I see movement, I feel hopeful."
+    social_job: "When I see others participating actively, I feel part of a community effort rather than shouting into the void."
+    outcomes:
+      - id: "O9"
+        statement: "Minimize the likelihood of a resident abandoning the platform because it appears abandoned"
+        type: "likelihood_of_result"
+        importance: 6
+        satisfaction: 3
+        score: 42
+        status: "under-served"
+    features:
+      - "umami-analytics"
+
 changelog:
   - date: "2026-05-14"
     action: "created"

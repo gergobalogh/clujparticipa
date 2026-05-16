@@ -23,9 +23,13 @@ enum Status {
   ELIGIBLE
   IN_VOTING
   SELECTED
+  ACCEPTED
   IN_PROGRESS
   COMPLETED
   REJECTED
+  NEEDS_REVISION
+  MERGED
+  WITHDRAWN
 }
 
 enum CommentStatus {
@@ -73,6 +77,7 @@ model Idea {
   longitude               Float
   district                District
   status                  Status           @default(SUBMITTED)
+  mergedIntoIdeaId        String?
   submitterParticipantHash String?
   notifyOnStatusChange     Boolean          @default(false)
   unsubscribeToken         String?          @unique

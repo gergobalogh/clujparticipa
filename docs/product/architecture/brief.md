@@ -36,12 +36,14 @@ graph TB
         subgraph "Server Components"
             HomePage[Homepage<br/>Server Component]
             DetailPage[Idea Detail<br/>Server Component]
+            HowItWorksPage[How It Works<br/>Server Component]
         end
         subgraph "Client Components"
             Pipeline[PipelineTrack<br/>Client Component]
             MiniPipeline[MiniPipelineTrack<br/>Client Component]
             Timeline[StatusChangeTimeline<br/>Client Component]
             Map[MapView<br/>Client Component]
+            HowItWorksContent[HowItWorksContent<br/>Client Component]
         end
         subgraph "API Routes"
             IdeasAPI[/api/ideas]
@@ -67,6 +69,8 @@ graph TB
     Pipeline --> PipelineComputation
     Pipeline --> StalledDetector
     MiniPipeline --> PipelineStages
+    HowItWorksContent --> Pipeline
+    HowItWorksContent --> PipelineStages
     Timeline --> ActorResolver
 ```
 
@@ -109,6 +113,7 @@ graph TB
 |----------|------|-------------|
 | Pipeline domain | Stage ordering, stalled detection, milestone grouping, exception state detection | transitions.ts (domain peer) |
 | Pipeline visual | PipelineTrack, PipelineTrackSegment, MiniPipelineTrack, StalledIndicator, ExceptionState | pipeline domain, i18n messages, motion v12 |
+| How It Works page | HowItWorksContent (client), how-it-works page (server) | pipeline visual, pipeline domain, i18n HowItWorks namespace, IntersectionObserver |
 | UI presentation | EditorialIdeaCard, LiveBadge, SidebarCta, StatusChangeTimeline, MapView | pipeline visual, pipeline domain, i18n messages |
 | Data access | Prisma queries, API route handlers | Domain (status types), Prisma schema |
 | Notifications | useNotificationOptIn hook, browser API probe | Browser Notification API (outbound) |
@@ -221,3 +226,32 @@ New layout:
 ```
 
 Map moves from sidebar to hero. Stats strip moves below map. Idea feed stays but gains mini-pipelines. Mobile: map is full-width and visible (remove `hidden lg:block`).
+
+### Status Pipeline Redesign (10-Status State Machine)
+
+The pipeline transitions from an 8-status enum (SUBMITTED, UNDER_REVIEW, ELIGIBLE, IN_VOTING, SELECTED, IN_PROGRESS, COMPLETED, REJECTED) to a 10-status enum with a cleaner flow and real terminal states.
+
+**New 10-status enum:** SUBMITTED, IN_VOTING, SELECTED, ACCEPTED, IN_PROGRESS, COMPLETED, REJECTED, NEEDS_REVISION, MERGED, WITHDRAWN.
+
+**Removed:** UNDER_REVIEW (feasibility is the authority decision at SELECTED), ELIGIBLE (was a yes/no check, not a stage).
+
+**Added:** ACCEPTED (bridge between SELECTED and IN_PROGRESS), NEEDS_REVISION (terminal, replaces `[RETURNED]` prefix hack), MERGED (terminal, replaces `[MERGED]` prefix hack), WITHDRAWN (terminal, citizen-initiated within 24h).
+
+**Active flow:** SUBMITTED --(24h auto)--> IN_VOTING --(threshold auto | admin)--> SELECTED --(admin)--> ACCEPTED --> IN_PROGRESS --> COMPLETED
+
+**Terminal states:** REJECTED, NEEDS_REVISION, MERGED, WITHDRAWN (no way out, render via ExceptionState only).
+
+**New components:**
+- `GET /api/cron/transition-submitted` -- cron endpoint for 24h auto-transition, protected by CRON_SECRET
+- `POST /api/ideas/[id]/withdraw` -- citizen withdrawal endpoint, validates 24h window
+- `mergedIntoIdeaId` column on Idea model -- optional String for MERGED parent reference
+
+**Migration:** Two-phase additive-first. Phase 1: add 4 new enum values (zero downtime). Phase 2: migrate UNDER_REVIEW/ELIGIBLE ideas to IN_VOTING, rebuild enum without old values (brief maintenance window).
+
+**Domain logic impact:** transitions.ts (rewrite for new graph), pipeline-computation.ts (simplify -- status itself is authoritative for exception type, no more note-prefix parsing for type detection), pipeline-stages.ts (6 forward stages instead of 7), stalled-detector.ts (update maps for 10 states).
+
+**Visual/presentation impact:** PipelineTrack, MiniPipelineTrack, ExceptionState, Badge, status.ts all extend to handle new statuses. The visual metaphor (solid track with markers) is unchanged. Terminal statuses render via ExceptionState below the pipeline, not on the forward track.
+
+**Changed assumptions from prior DESIGN wave:**
+- D2 (MERGED/RETURNED via note prefix) -- superseded: MERGED and NEEDS_REVISION are real statuses now
+- D7 (no new API endpoints or data models) -- superseded: new cron endpoint, withdraw endpoint, mergedIntoIdeaId column

@@ -12,15 +12,15 @@ describe("detectStalledIdea", () => {
   const now = new Date("2025-06-15T12:00:00Z");
 
   describe("acceptance criteria", () => {
-    it("UNDER_REVIEW at 35 days is stalled with correct days and label", () => {
-      const result = detectStalledIdea("UNDER_REVIEW", daysAgo(35, now), now);
+    it("IN_VOTING at 35 days is stalled with correct days and label", () => {
+      const result = detectStalledIdea("IN_VOTING", daysAgo(35, now), now);
       expect(result.isStalled).toBe(true);
       expect(result.daysSinceLastChange).toBe(35);
-      expect(result.waitingForLabel).toBe("waitingForDepartmentReview");
+      expect(result.waitingForLabel).toBe("waitingForVotingPeriod");
     });
 
-    it("UNDER_REVIEW at 15 days is not stalled", () => {
-      const result = detectStalledIdea("UNDER_REVIEW", daysAgo(15, now), now);
+    it("IN_VOTING at 15 days is not stalled", () => {
+      const result = detectStalledIdea("IN_VOTING", daysAgo(15, now), now);
       expect(result.isStalled).toBe(false);
     });
 
@@ -29,23 +29,35 @@ describe("detectStalledIdea", () => {
       expect(result.isStalled).toBe(false);
     });
 
-    it("ELIGIBLE at 40 days has waitingForLabel 'Eligibility assessment'", () => {
-      const result = detectStalledIdea("ELIGIBLE", daysAgo(40, now), now);
-      expect(result.waitingForLabel).toBe("waitingForEligibility");
+    it("SELECTED at 40 days has waitingForLabel 'waitingForSelection'", () => {
+      const result = detectStalledIdea("SELECTED", daysAgo(40, now), now);
+      expect(result.waitingForLabel).toBe("waitingForSelection");
+    });
+
+    it("ACCEPTED at 35 days is stalled with waitingForImplementation label", () => {
+      const result = detectStalledIdea("ACCEPTED", daysAgo(35, now), now);
+      expect(result.isStalled).toBe(true);
+      expect(result.waitingForLabel).toBe("waitingForImplementation");
     });
   });
 
   describe("stall eligibility by status", () => {
-    const neverStalled: Status[] = ["SUBMITTED", "COMPLETED", "REJECTED"];
+    const neverStalled: Status[] = [
+      "SUBMITTED",
+      "COMPLETED",
+      "REJECTED",
+      "NEEDS_REVISION",
+      "MERGED",
+      "WITHDRAWN",
+    ];
     const stallEligible: Status[] = [
-      "UNDER_REVIEW",
-      "ELIGIBLE",
       "IN_VOTING",
       "SELECTED",
+      "ACCEPTED",
       "IN_PROGRESS",
     ];
 
-    it("SUBMITTED, COMPLETED, REJECTED are never stalled even after 60 days", () => {
+    it("SUBMITTED, COMPLETED, REJECTED, NEEDS_REVISION, MERGED, WITHDRAWN are never stalled even after 60 days", () => {
       for (const status of neverStalled) {
         const result = detectStalledIdea(status, daysAgo(60, now), now);
         expect(result.isStalled, `${status} should not be stalled`).toBe(false);
@@ -66,21 +78,32 @@ describe("detectStalledIdea", () => {
     });
   });
 
+  describe("legacy statuses are never stalled", () => {
+    it("UNDER_REVIEW and ELIGIBLE are never stalled even after 60 days", () => {
+      expect(detectStalledIdea("UNDER_REVIEW", daysAgo(60, now), now).isStalled).toBe(false);
+      expect(detectStalledIdea("ELIGIBLE", daysAgo(60, now), now).isStalled).toBe(false);
+    });
+
+    it("UNDER_REVIEW and ELIGIBLE have empty waiting labels", () => {
+      expect(detectStalledIdea("UNDER_REVIEW", daysAgo(60, now), now).waitingForLabel).toBe("");
+      expect(detectStalledIdea("ELIGIBLE", daysAgo(60, now), now).waitingForLabel).toBe("");
+    });
+  });
+
   describe("30-day threshold boundary", () => {
     it("exactly 30 days is stalled, 29 days is not", () => {
-      const at30 = detectStalledIdea("UNDER_REVIEW", daysAgo(30, now), now);
-      const at29 = detectStalledIdea("UNDER_REVIEW", daysAgo(29, now), now);
+      const at30 = detectStalledIdea("IN_VOTING", daysAgo(30, now), now);
+      const at29 = detectStalledIdea("IN_VOTING", daysAgo(29, now), now);
       expect(at30.isStalled).toBe(true);
       expect(at29.isStalled).toBe(false);
     });
   });
 
-  describe("waiting labels per upstream-issues.md", () => {
+  describe("waiting labels per status", () => {
     const expectedLabels: [Status, string][] = [
-      ["UNDER_REVIEW", "waitingForDepartmentReview"],
-      ["ELIGIBLE", "waitingForEligibility"],
       ["IN_VOTING", "waitingForVotingPeriod"],
       ["SELECTED", "waitingForSelection"],
+      ["ACCEPTED", "waitingForImplementation"],
       ["IN_PROGRESS", "waitingForImplementation"],
     ];
 
@@ -96,7 +119,7 @@ describe("detectStalledIdea", () => {
     it("uses the provided now date instead of system time", () => {
       const referenceNow = new Date("2025-01-01T00:00:00Z");
       const result = detectStalledIdea(
-        "UNDER_REVIEW",
+        "IN_VOTING",
         daysAgo(31, referenceNow),
         referenceNow
       );
@@ -107,9 +130,9 @@ describe("detectStalledIdea", () => {
 
   describe("daysSinceLastChange calculation", () => {
     it("returns 0 for same date, 1 for yesterday", () => {
-      const sameDay = detectStalledIdea("UNDER_REVIEW", now, now);
+      const sameDay = detectStalledIdea("IN_VOTING", now, now);
       const yesterday = detectStalledIdea(
-        "UNDER_REVIEW",
+        "IN_VOTING",
         daysAgo(1, now),
         now
       );

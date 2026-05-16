@@ -1,0 +1,243 @@
+{
+  "feature_id": "editorial-redesign-how-it-works",
+  "steps": {
+    "01-01": {
+      "phases": [
+        {
+          "phase": "PREPARE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:02:30Z",
+          "data": "PASS: Read all 3 locale files, understood structure, created __tests__ directory"
+        },
+        {
+          "phase": "RED_ACCEPTANCE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:02:45Z",
+          "data": "FAIL: HowItWorks namespace does not exist in any locale file — business logic reason"
+        },
+        {
+          "phase": "RED_UNIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:02:50Z",
+          "data": "3 tests written covering 2 behaviors: key presence + non-empty values (acceptance), no extra keys, existing namespaces preserved. Budget: 2x2=4, used 3."
+        },
+        {
+          "phase": "GREEN",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:03:20Z",
+          "data": "PASS: all 3 tests pass, all 3 locale files parse as valid JSON, TypeScript compiles (pre-existing error in unrelated test route)"
+        },
+        {
+          "phase": "COMMIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:03:50Z",
+          "data": "PASS: commit dc33928 on redesign. 4 files: en.json, hu.json, ro.json, how-it-works-locale.test.ts. Test budget 3/4."
+        }
+      ]
+    },
+    "01-02": {
+      "phases": [
+        {
+          "phase": "PREPARE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:02:50Z",
+          "data": "PASS: Read badge.tsx (9 variants, BadgeVariant type union + variantClasses record), status.ts (statusToBadge with 4 fallback mappings), status.test.ts (16 tests green). Identified existing test at src/lib/status.test.ts not src/lib/__tests__/status.test.ts."
+        },
+        {
+          "phase": "RED_ACCEPTANCE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:03:00Z",
+          "data": "FAIL: 4 status mapping tests fail — statusToBadgeVariant returns old fallback variants (ACCEPTED->in_progress, NEEDS_REVISION->rejected, MERGED->in_voting, WITHDRAWN->default). Also created badge.test.tsx with 4 parametrized variant class tests, all 4 fail (variants not defined)."
+        },
+        {
+          "phase": "RED_UNIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:03:05Z",
+          "data": "Badge test enters through Badge component (driving port), asserts rendered Tailwind classes. Status test enters through statusToBadgeVariant (pure function = own driving port), asserts return values. No mocks inside hexagon. Budget: 2 behaviors x 2 = 4 max, used 1 parametrized test."
+        },
+        {
+          "phase": "GREEN",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:03:22Z",
+          "data": "PASS: 20/20 tests pass (status.test.ts + badge.test.tsx). 206/206 lib tests pass. No new TypeScript errors. Added 4 variants to BadgeVariant type + variantClasses, updated 4 statusToBadge mappings."
+        },
+        {
+          "phase": "COMMIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:05:00Z",
+          "data": "PASS: commit 5515e2a on redesign. 4 files: badge.tsx, status.ts, status.test.ts, badge.test.tsx. Test budget 1/4."
+        }
+      ]
+    },
+    "01-03": {
+      "phases": [
+        {
+          "phase": "PREPARE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:03:00Z",
+          "data": "PASS: Read pipeline-track.tsx, pipeline-stages.ts, pipeline-computation.ts, transitions.ts, status.ts, and existing pipeline-track.test.tsx (14 tests). Understood component renders 7-stage continuous track with markers, uses PipelineStage[] with reached/current booleans. Test budget: 3 behaviors x 2 = 6 max unit tests."
+        },
+        {
+          "phase": "RED_ACCEPTANCE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:03:15Z",
+          "data": "FAIL: Wrote acceptance test rendering PipelineTrack with showcase=true. Failed with 'expected 0 future markers but got 3' — business logic failure because showcase prop does not exist yet, so stages render normally with gray future markers."
+        },
+        {
+          "phase": "RED_UNIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:03:25Z",
+          "data": "Decomposed acceptance test into 4 focused unit tests: (1) renders all stages as reached when showcase=true, (2) wraps each marker in anchor with correct href, (3) calls onStageClick with clicked status, (4) no regression without showcase prop. 3 failed for correct business logic reasons, 1 passed (regression check). Budget: 4/6 used."
+        },
+        {
+          "phase": "GREEN",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:03:55Z",
+          "data": "PASS: Added showcase?: boolean and onStageClick?: (status: Status) => void props. When showcase=true, effectiveStages overrides all stages to reached=true/current=false, markers wrapped in anchor elements with href and onClick. 18/18 tests pass. TypeScript compiles cleanly. No regressions in broader test suite."
+        },
+        {
+          "phase": "COMMIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:04:20Z",
+          "data": "PASS: commit cbeb950 on redesign. 2 files: pipeline-track.tsx, pipeline-track.test.tsx. 4 new unit tests (budget 4/6). All 18 tests pass. Zero regression."
+        }
+      ]
+    },
+    "02-01": {
+      "phases": [
+        {
+          "phase": "PREPARE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:07:10Z",
+          "data": "PASS: Read pipeline-track.tsx (showcase+onStageClick props), badge.tsx (BadgeVariant+variantClasses), pipeline-stages.ts (PIPELINE_STAGES=6 forward), transitions.ts (TERMINAL_STATUSES=4), status.ts (statusToBadgeVariant), en.json (HowItWorks namespace with 17 keys). Test budget: 9 distinct behaviors x 2 = 18 max unit tests."
+        },
+        {
+          "phase": "RED_ACCEPTANCE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:07:25Z",
+          "data": "FAIL: 5 acceptance tests written covering PipelineTrack showcase mode, 6 stage cards with id/Badge/desc/nextStep, 4 terminal cards with colored dots, CTA link, all strings from HowItWorks namespace. All failed — component file does not exist (import resolution error). Correct business logic reason."
+        },
+        {
+          "phase": "RED_UNIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:07:30Z",
+          "data": "4 unit tests: (1) activeStage updates on IntersectionObserver callback, (2) onStageClick scrolls to correct card via scrollIntoView, (3) sticky toggle on sentinel intersection, (4) observer cleanup on unmount. All fail for correct reasons (component does not exist). Budget: 9 tests total / 18 max."
+        },
+        {
+          "phase": "GREEN",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:08:25Z",
+          "data": "PASS: Created how-it-works-content.tsx with full implementation: sticky pipeline with IntersectionObserver for activeStage tracking, sentinel-based sticky/unstick, onStageClick scroll, 6 StageCards with id/Badge/desc/nextStep, 4 TerminalCards with colored dots, CTA link. 9/9 tests pass. No regressions in pipeline-track tests (18/18 pass). TypeScript compiles (pre-existing error in unrelated test route)."
+        },
+        {
+          "phase": "COMMIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:09:00Z",
+          "data": "PASS: commit 4a35cfd on redesign. 2 files: how-it-works-content.tsx, how-it-works-content.test.tsx. 9 new tests (budget 9/18). All quality gates pass."
+        }
+      ]
+    },
+    "02-02": {
+      "phases": [
+        {
+          "phase": "PREPARE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:11:00Z",
+          "data": "PASS: Read Terms page (server component, max-w-3xl layout, useTranslations), Privacy page (same pattern), HowItWorksContent client component (has own main wrapper with max-w-3xl, IntersectionObserver, renders PipelineTrack). Checked i18n: all 3 locales have HowItWorks namespace. No generateMetadata usage found in existing pages. Test budget: 5 behaviors x 2 = 10 max unit tests."
+        },
+        {
+          "phase": "RED_ACCEPTANCE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:11:30Z",
+          "data": "FAIL: 5 acceptance tests written covering: (1) renders HowItWorksContent, (2) server component no use-client, (3) max-w-3xl layout, (4) exports generateMetadata, (5) generateMetadata returns title+description. All failed — page module does not exist (import resolution error). Correct business logic reason."
+        },
+        {
+          "phase": "RED_UNIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:11:40Z",
+          "data": "5 unit tests covering 5 distinct behaviors. Boundary mock for HowItWorksContent (hexagonal boundary). Initial run: 2 tests failed due to IntersectionObserver not available in jsdom from real HowItWorksContent rendering. Fixed by mocking HowItWorksContent at boundary instead of its internals. Budget: 5/10 used."
+        },
+        {
+          "phase": "GREEN",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:12:00Z",
+          "data": "PASS: Created page.tsx server component that imports HowItWorksContent and exports generateMetadata using getTranslations from next-intl/server. 5/5 tests pass. TypeScript compiles (no errors in new files). Prettier formatting applied. HowItWorksContent tests still pass (9/9). All 3 locales have HowItWorks namespace confirmed."
+        },
+        {
+          "phase": "COMMIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:12:45Z",
+          "data": "PASS: commit 6ef80d4 on redesign. 2 files: page.tsx, page.test.tsx. 5 new tests (budget 5/10). All quality gates pass."
+        }
+      ]
+    },
+    "02-03": {
+      "phases": [
+        {
+          "phase": "PREPARE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:14:00Z",
+          "data": "PASS: Read header.tsx (navItems array with 3 entries + conditional results), footer.tsx (3-column layout: About, Legal, Language), idea detail page.tsx (mobile+desktop PipelineTrack sections, no Link import from @/i18n/navigation), all 3 locale files (Navigation, Footer, IdeaDetail namespaces). Test budget: 5 distinct behaviors x 2 = 10 max unit tests."
+        },
+        {
+          "phase": "RED_ACCEPTANCE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:14:30Z",
+          "data": "FAIL: 4 of 5 acceptance tests fail for correct business logic reasons: header has no howItWorks nav item, footer has no howItWorks link, i18n keys Navigation.howItWorks/Footer.howItWorks/IdeaDetail.learnAboutProcess do not exist in any locale. 1 test passes (existing nav items still render)."
+        },
+        {
+          "phase": "RED_UNIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:14:35Z",
+          "data": "5 unit tests covering 5 distinct behaviors: (1) header howItWorks link exists with correct href, (2) header renders howItWorks in both desktop+mobile nav, (3) footer howItWorks link exists with correct href, (4) existing nav items unchanged, (5) i18n keys present in all 3 locales. 4 fail for correct reasons, 1 passes. Budget: 5/10 used."
+        },
+        {
+          "phase": "GREEN",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:15:30Z",
+          "data": "PASS: Added howItWorks to navItems array in header.tsx, added howItWorks Link in footer.tsx Legal column, added Link import + learnAboutProcess links after PipelineTrack in idea detail page (mobile+desktop), added Navigation.howItWorks/Footer.howItWorks/IdeaDetail.learnAboutProcess keys to all 3 locale files. 5/5 tests pass. TypeScript compiles (no new errors). All layout tests pass (6/6). All lib tests pass (206/206)."
+        },
+        {
+          "phase": "COMMIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:16:30Z",
+          "data": "PASS: commit ba0a5d7 on redesign. 7 files: header.tsx, footer.tsx, page.tsx, en.json, hu.json, ro.json, header-how-it-works-link.test.tsx. 5 new tests (budget 5/10). All quality gates pass."
+        }
+      ]
+    },
+    "02-04": {
+      "phases": [
+        {
+          "phase": "PREPARE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:14:00Z",
+          "data": "PASS: Read how-it-works-content.tsx (stage cards with id attributes, IntersectionObserver, sticky pipeline, handleStageClick with scrollIntoView), globals.css (Tailwind import, theme inline vars, ::selection, prefers-reduced-motion). Identified missing: stage-card class, :target CSS rule, scroll-mt-24 on cards. Test budget: 3 distinct behaviors x 2 = 6 max unit tests."
+        },
+        {
+          "phase": "RED_ACCEPTANCE",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:14:15Z",
+          "data": "FAIL: 2 acceptance tests written. (1) Stage cards must have stage-card class, scroll-mt-24 class, and correct id attributes — failed on classList.contains('stage-card') returning false. (2) Structural verification that stage-card class and id enable :target CSS targeting — failed on classList check. Both fail for correct business logic reasons (classes not yet added to component)."
+        },
+        {
+          "phase": "RED_UNIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:14:20Z",
+          "data": "Acceptance tests already cover all 3 distinct behaviors (stage-card class, scroll-mt-24 class, id for :target). Budget: 3 behaviors x 2 = 6 max, 2 tests used. No additional unit tests needed — acceptance tests decompose the structure sufficiently for this CSS-focused step."
+        },
+        {
+          "phase": "GREEN",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:17:00Z",
+          "data": "PASS: Added stage-card and scroll-mt-24 classes to stage card divs in how-it-works-content.tsx. Added .stage-card:target CSS rule with outline: 2px solid var(--color-civic-blue) and outline-offset: 2px to globals.css. Adjusted tests to verify Tailwind class presence (jsdom cannot resolve computed scroll-margin-top). 11/11 tests pass. No regressions in pipeline-track or related tests."
+        },
+        {
+          "phase": "COMMIT",
+          "status": "EXECUTED",
+          "timestamp": "2026-05-16T07:17:45Z",
+          "data": "PASS: commit 7b41819 on redesign. 3 files: how-it-works-content.tsx, globals.css, how-it-works-content.test.tsx. 2 new acceptance tests (budget 2/6). All quality gates pass. :target highlight is non-persistent by CSS specification."
+        }
+      ]
+    }
+  }
+}

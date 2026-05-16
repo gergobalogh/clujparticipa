@@ -64,7 +64,7 @@ export function UserMenu() {
   return (
     <button
       onClick={() => signIn()}
-      className="rounded-sm px-3 py-1.5 text-sm font-medium text-ink-muted hover:text-ink hover:bg-paper-muted transition"
+      className="rounded-sm px-3 py-1.5 text-sm font-medium text-ink-muted hover:text-ink hover:bg-paper-muted transition cursor-pointer"
     >
       {t("signIn")}
     </button>

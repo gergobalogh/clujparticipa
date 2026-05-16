@@ -158,6 +158,149 @@
           "implementation_notes": "Search codebase for all imports of IdeaPipeline, IdeaPipelineStage, MiniPipeline. Replace with PipelineTrack, PipelineTrackSegment, MiniPipelineTrack. Props should be compatible (same shape). Verify: grep -r 'idea-pipeline' src/ should only find pipeline-track files (via path), not old imports. After migration, delete old files and their tests."
         }
       ]
+    },
+    {
+      "id": "02",
+      "name": "Status Pipeline State Machine",
+      "description": "Rewrite the 8-status pipeline to the new 10-status state machine. Backend/domain only — no frontend changes.",
+      "steps": [
+        {
+          "id": "02-01",
+          "step_id": "02-01",
+          "name": "Prisma schema + transitions.ts + normalizeStatus",
+          "description": "Add 4 new Status enum values (ACCEPTED, NEEDS_REVISION, MERGED, WITHDRAWN) and mergedIntoIdeaId column to Prisma schema. Create migration. Rewrite transitions.ts with new 10-state VALID_TRANSITIONS graph, ALL_STATUSES, VOTE_ELIGIBLE_STATUSES, SUPPORT_LABEL_STATUSES, QUICK_ACTIONS. Add normalizeStatus() to status.ts that maps UNDER_REVIEW/ELIGIBLE to IN_VOTING for Phase 1 compatibility.",
+          "acceptance_criteria": [
+            "Prisma schema includes ACCEPTED, NEEDS_REVISION, MERGED, WITHDRAWN in Status enum",
+            "Prisma schema includes mergedIntoIdeaId String? on Idea model",
+            "Migration SQL contains ALTER TYPE ADD VALUE for 4 new statuses",
+            "transitions.ts VALID_TRANSITIONS matches the agreed transition graph",
+            "transitions.ts ALL_STATUSES lists all 10 statuses",
+            "VOTE_ELIGIBLE_STATUSES = [SUBMITTED, IN_VOTING]",
+            "SUPPORT_LABEL_STATUSES = [SUBMITTED]",
+            "QUICK_ACTIONS updated per D34",
+            "normalizeStatus('UNDER_REVIEW') returns 'IN_VOTING'",
+            "normalizeStatus('ELIGIBLE') returns 'IN_VOTING'",
+            "isValidTransition('SUBMITTED', 'IN_VOTING') returns true",
+            "isValidTransition('SELECTED', 'ACCEPTED') returns true",
+            "isValidTransition('SELECTED', 'NEEDS_REVISION') returns true",
+            "TypeScript compiles"
+          ],
+          "files_to_modify": [
+            "prisma/schema.prisma",
+            "src/lib/transitions.ts",
+            "src/lib/status.ts",
+            "src/lib/__tests__/transitions.test.ts"
+          ],
+          "dependencies": [],
+          "estimated_hours": 2,
+          "deliverables": [
+            "Updated Prisma schema with 4 new statuses + mergedIntoIdeaId",
+            "Prisma migration file",
+            "Rewritten transitions.ts",
+            "normalizeStatus() in status.ts",
+            "Unit tests for transitions"
+          ]
+        },
+        {
+          "id": "02-02",
+          "step_id": "02-02",
+          "name": "Domain logic updates",
+          "description": "Update pipeline-stages.ts (6 forward stages: SUBMITTED, IN_VOTING, SELECTED, ACCEPTED, IN_PROGRESS, COMPLETED). Rewrite pipeline-computation.ts (remove note-prefix detection, status-based exception handling: REJECTED/NEEDS_REVISION/MERGED/WITHDRAWN). Update stalled-detector.ts (new NEVER_STALLED: SUBMITTED, COMPLETED, REJECTED, NEEDS_REVISION, MERGED, WITHDRAWN; new STALLED_WAITING_LABELS for IN_VOTING, SELECTED, ACCEPTED, IN_PROGRESS). Update actor-role-resolver.ts (add Citizen role for citizen: prefix).",
+          "acceptance_criteria": [
+            "PIPELINE_STAGES = [SUBMITTED, IN_VOTING, SELECTED, ACCEPTED, IN_PROGRESS, COMPLETED]",
+            "getStageIndex('ACCEPTED') returns 3",
+            "getStageIndex('UNDER_REVIEW') returns -1 (no longer a pipeline stage)",
+            "getExceptionState('REJECTED') returns 'REJECTED'",
+            "getExceptionState('NEEDS_REVISION') returns 'NEEDS_REVISION'",
+            "getExceptionState('MERGED') returns 'MERGED'",
+            "getExceptionState('WITHDRAWN') returns 'WITHDRAWN'",
+            "resolveExceptionType() removed or simplified (status is authoritative)",
+            "detectStalledIdea('NEEDS_REVISION', ...) returns isStalled: false",
+            "resolveActorRole('citizen:abc123') returns 'Citizen'",
+            "All existing domain logic tests pass (updated for new statuses)",
+            "TypeScript compiles"
+          ],
+          "files_to_modify": [
+            "src/lib/pipeline-stages.ts",
+            "src/lib/pipeline-computation.ts",
+            "src/lib/stalled-detector.ts",
+            "src/lib/actor-role-resolver.ts",
+            "src/lib/__tests__/pipeline-stages.test.ts",
+            "src/lib/__tests__/pipeline-computation.test.ts",
+            "src/lib/__tests__/stalled-detector.test.ts",
+            "src/lib/__tests__/actor-role-resolver.test.ts"
+          ],
+          "dependencies": ["02-01"],
+          "estimated_hours": 2,
+          "deliverables": [
+            "Updated pipeline-stages.ts with 6 forward stages",
+            "Rewritten pipeline-computation.ts with status-based exceptions",
+            "Updated stalled-detector.ts for 10-state machine",
+            "Updated actor-role-resolver.ts with Citizen role",
+            "All unit tests updated and passing"
+          ]
+        },
+        {
+          "id": "02-03",
+          "step_id": "02-03",
+          "name": "API routes — admin status, ideas list, withdraw endpoint",
+          "description": "Update admin status API to use new Zod Status enum and VALID_TRANSITIONS. Update ideas list API status filter to include new statuses. Create POST /api/ideas/[id]/withdraw endpoint that validates participant identity, 24h window, and SUBMITTED/IN_VOTING status. The withdraw endpoint creates a StatusChange with changedBy='citizen:{hash}' and a ModerationEvent.",
+          "acceptance_criteria": [
+            "Admin PATCH /api/admin/ideas/[id]/status accepts all 10 statuses in Zod schema",
+            "Admin API validates transitions using new VALID_TRANSITIONS",
+            "Admin API handles MERGED status (sets mergedIntoIdeaId if provided)",
+            "GET /api/ideas status filter accepts all 10 statuses",
+            "GET /api/ideas rejection sort handles REJECTED, NEEDS_REVISION, MERGED, WITHDRAWN",
+            "POST /api/ideas/[id]/withdraw returns 403 for ideas outside 24h window",
+            "POST /api/ideas/[id]/withdraw returns 403 for wrong participant",
+            "POST /api/ideas/[id]/withdraw returns 403 for non-SUBMITTED/IN_VOTING ideas",
+            "POST /api/ideas/[id]/withdraw creates StatusChange with changedBy='citizen:{hash}'",
+            "POST /api/ideas/[id]/withdraw creates ModerationEvent",
+            "TypeScript compiles"
+          ],
+          "files_to_modify": [
+            "src/app/api/admin/ideas/[id]/status/route.ts",
+            "src/app/api/ideas/route.ts",
+            "src/app/api/ideas/[id]/withdraw/route.ts",
+            "src/app/api/ideas/[id]/route.test.ts"
+          ],
+          "dependencies": ["02-02"],
+          "estimated_hours": 3,
+          "deliverables": [
+            "Updated admin status API with 10-status validation",
+            "Updated ideas list API with 10-status filter",
+            "New withdraw endpoint with 24h window + participant validation",
+            "API route tests"
+          ]
+        },
+        {
+          "id": "02-04",
+          "step_id": "02-04",
+          "name": "i18n locale files + seed data rewrite",
+          "description": "Add i18n keys for ACCEPTED, NEEDS_REVISION, MERGED, WITHDRAWN to all 3 locale files. Update Stalled waiting labels for new statuses. Update Admin.quickActions for new action labels. Add Exception messages for NEEDS_REVISION and WITHDRAWN. Rewrite seed.mjs to replace UNDER_REVIEW/ELIGIBLE with IN_VOTING path and add MERGED, NEEDS_REVISION, WITHDRAWN seed ideas.",
+          "acceptance_criteria": [
+            "Statuses namespace in all 3 locales includes ACCEPTED, NEEDS_REVISION, MERGED, WITHDRAWN",
+            "Stalled.waitingFor* labels updated for IN_VOTING, SELECTED, ACCEPTED, IN_PROGRESS",
+            "Admin.quickActions updated for new action keys",
+            "Exception namespace has NEEDS_REVISION and WITHDRAWN messages",
+            "Seed data uses 6-step forward path (no UNDER_REVIEW/ELIGIBLE)",
+            "Seed data includes MERGED, NEEDS_REVISION, WITHDRAWN example ideas",
+            "TypeScript compiles"
+          ],
+          "files_to_modify": [
+            "src/i18n/messages/ro.json",
+            "src/i18n/messages/en.json",
+            "src/i18n/messages/hu.json",
+            "prisma/seed.mjs"
+          ],
+          "dependencies": ["02-03"],
+          "estimated_hours": 2,
+          "deliverables": [
+            "Updated i18n files (RO, EN, HU)",
+            "Rewritten seed data with new status paths"
+          ]
+        }
+      ]
     }
   ]
 }

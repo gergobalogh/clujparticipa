@@ -20,16 +20,13 @@ describe("MiniPipelineTrack - Acceptance", () => {
   it("renders a thin horizontal bar with 3 milestone markers and labels below", () => {
     render(<MiniPipelineTrack currentStatus="SUBMITTED" />);
 
-    // Base bar exists
     const baseBar = screen.getByTestId("mini-track-base");
     expect(baseBar).toBeInTheDocument();
     expect(baseBar).toHaveClass("bg-gray-200");
 
-    // 3 milestone markers positioned on the bar
     const markers = screen.getAllByTestId(/^milestone-/);
     expect(markers).toHaveLength(3);
 
-    // Labels appear below markers
     expect(screen.getByText("MiniPipeline.submitted")).toBeInTheDocument();
     expect(screen.getByText("MiniPipeline.inVoting")).toBeInTheDocument();
     expect(screen.getByText("MiniPipeline.completed")).toBeInTheDocument();
@@ -37,41 +34,48 @@ describe("MiniPipelineTrack - Acceptance", () => {
 
   it("renders nothing for REJECTED status", () => {
     const { container } = render(<MiniPipelineTrack currentStatus="REJECTED" />);
+    expect(container.innerHTML).toBe("");
+  });
 
+  it("renders nothing for NEEDS_REVISION status", () => {
+    const { container } = render(<MiniPipelineTrack currentStatus="NEEDS_REVISION" />);
+    expect(container.innerHTML).toBe("");
+  });
+
+  it("renders nothing for MERGED status", () => {
+    const { container } = render(<MiniPipelineTrack currentStatus="MERGED" />);
+    expect(container.innerHTML).toBe("");
+  });
+
+  it("renders nothing for WITHDRAWN status", () => {
+    const { container } = render(<MiniPipelineTrack currentStatus="WITHDRAWN" />);
     expect(container.innerHTML).toBe("");
   });
 
   it("renders colored segments for reached milestones and gray for future", () => {
     render(<MiniPipelineTrack currentStatus="IN_VOTING" />);
 
-    // Submitted is reached
     const submitted = screen.getByTestId("milestone-submitted");
     expect(submitted).toHaveAttribute("data-reached", "true");
     expect(submitted).toHaveAttribute("data-current", "false");
 
-    // In Voting is current (reached + current)
     const inVoting = screen.getByTestId("milestone-inVoting");
     expect(inVoting).toHaveAttribute("data-reached", "true");
     expect(inVoting).toHaveAttribute("data-current", "true");
 
-    // Completed is future
     const completed = screen.getByTestId("milestone-completed");
     expect(completed).toHaveAttribute("data-reached", "false");
   });
 });
 
 // ---------------------------------------------------------------------------
-// Unit: milestone grouping per ADR-003
+// Unit: milestone grouping (new 10-status pipeline)
 // ---------------------------------------------------------------------------
 
 describe("MiniPipelineTrack - Unit: milestone grouping", () => {
-  const submittedMilestoneStatuses: Status[] = [
-    "SUBMITTED",
-    "UNDER_REVIEW",
-    "ELIGIBLE",
-  ];
+  const submittedMilestoneStatuses: Status[] = ["SUBMITTED"];
 
-  const inVotingMilestoneStatuses: Status[] = ["IN_VOTING", "SELECTED"];
+  const inVotingMilestoneStatuses: Status[] = ["IN_VOTING", "SELECTED", "ACCEPTED"];
 
   const completedMilestoneStatuses: Status[] = ["IN_PROGRESS", "COMPLETED"];
 
@@ -130,16 +134,20 @@ describe("MiniPipelineTrack - Unit: milestone grouping", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Unit: REJECTED returns null
+// Unit: terminal statuses return null
 // ---------------------------------------------------------------------------
 
-describe("MiniPipelineTrack - Unit: REJECTED handling", () => {
-  it("returns null for REJECTED status with no track rendered", () => {
-    const { container } = render(<MiniPipelineTrack currentStatus="REJECTED" />);
+describe("MiniPipelineTrack - Unit: terminal status handling", () => {
+  const terminalStatuses: Status[] = ["REJECTED", "NEEDS_REVISION", "MERGED", "WITHDRAWN"];
 
-    expect(container.innerHTML).toBe("");
-    expect(screen.queryByTestId("mini-track-base")).not.toBeInTheDocument();
-  });
+  it.each(terminalStatuses)(
+    "returns null for %s status with no track rendered",
+    (status) => {
+      const { container } = render(<MiniPipelineTrack currentStatus={status} />);
+      expect(container.innerHTML).toBe("");
+      expect(screen.queryByTestId("mini-track-base")).not.toBeInTheDocument();
+    }
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -152,7 +160,6 @@ describe("MiniPipelineTrack - Unit: visual milestone states", () => {
 
     const submitted = screen.getByTestId("milestone-submitted");
     expect(submitted).toHaveAttribute("data-reached", "true");
-    // Reached milestones get their milestone color class
     const submittedDot = submitted.querySelector("[data-reached-dot]");
     expect(submittedDot).toHaveClass("bg-amber-600");
   });

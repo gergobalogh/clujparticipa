@@ -33,23 +33,23 @@ const MILESTONES: Milestone[] = [
     labelKey: "submitted",
     minStageIndex: 0, // SUBMITTED
     currentFrom: 0,   // SUBMITTED
-    currentTo: 2,     // ELIGIBLE
+    currentTo: 0,     // SUBMITTED
     color: "bg-amber-600",
   },
   {
     key: "inVoting",
     labelKey: "inVoting",
-    minStageIndex: 3, // IN_VOTING
-    currentFrom: 3,   // IN_VOTING
-    currentTo: 4,     // SELECTED
+    minStageIndex: 1, // IN_VOTING
+    currentFrom: 1,   // IN_VOTING
+    currentTo: 3,     // ACCEPTED
     color: "bg-purple-700",
   },
   {
     key: "completed",
     labelKey: "completed",
-    minStageIndex: 5, // IN_PROGRESS
-    currentFrom: 5,   // IN_PROGRESS
-    currentTo: 6,     // COMPLETED
+    minStageIndex: 4, // IN_PROGRESS
+    currentFrom: 4,   // IN_PROGRESS
+    currentTo: 5,     // COMPLETED
     color: "bg-teal-600",
   },
 ];
@@ -72,7 +72,7 @@ export function MiniPipelineTrack({ currentStatus }: MiniPipelineTrackProps): JS
   const t = useTranslations("MiniPipeline");
   const stageIndex = getStageIndex(currentStatus);
 
-  // REJECTED ideas show no mini-pipeline
+  // Terminal-status ideas (REJECTED, NEEDS_REVISION, MERGED, WITHDRAWN) and legacy statuses show no mini-pipeline
   if (stageIndex === -1) return null;
 
   return (

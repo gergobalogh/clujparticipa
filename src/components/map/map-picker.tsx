@@ -54,10 +54,10 @@ export default function MapPicker({ latitude, longitude, onChange, districtCente
       center={latitude != null && longitude != null ? [latitude, longitude] : CLUJ_CENTER}
       zoom={latitude != null ? 15 : DEFAULT_ZOOM}
       scrollWheelZoom
+      attributionControl={false}
       className="h-[300px] w-full rounded-sm border border-ink/8"
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         maxZoom={19}
       />

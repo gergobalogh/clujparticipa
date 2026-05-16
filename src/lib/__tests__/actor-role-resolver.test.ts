@@ -25,6 +25,20 @@ describe("resolveActorRole", () => {
     });
   });
 
+  describe("citizen prefix match", () => {
+    it.each([
+      ["citizen:abc123", "Citizen"],
+      ["citizen:", "Citizen"],
+      ["citizen:long-token-here", "Citizen"],
+    ] as const)("resolveActorRole('%s') => '%s'", (input, expected) => {
+      expect(resolveActorRole(input)).toBe(expected);
+    });
+
+    it("does not match citizen without colon prefix", () => {
+      expect(resolveActorRole("citizen@cluj.ro")).toBe("Department");
+    });
+  });
+
   describe("department default", () => {
     it.each([
       ["unknown-user@example.com", "Department"],

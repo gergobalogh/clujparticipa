@@ -1,4 +1,4 @@
-/**Stalled idea detection logic — pure function, no side effects. */
+/** Stalled idea detection logic — pure function, no side effects. */
 import type { Status } from "@prisma/client";
 
 export type StalledInfo = {
@@ -9,13 +9,17 @@ export type StalledInfo = {
 
 const STALLED_WAITING_LABELS: Record<Status, string> = {
   SUBMITTED: "",
-  UNDER_REVIEW: "waitingForDepartmentReview",
-  ELIGIBLE: "waitingForEligibility",
+  UNDER_REVIEW: "", // legacy — never stalled (auto-transitions)
+  ELIGIBLE: "", // legacy — never stalled
   IN_VOTING: "waitingForVotingPeriod",
   SELECTED: "waitingForSelection",
+  ACCEPTED: "waitingForImplementation",
   IN_PROGRESS: "waitingForImplementation",
   COMPLETED: "",
   REJECTED: "",
+  NEEDS_REVISION: "",
+  MERGED: "",
+  WITHDRAWN: "",
 };
 
 const STALLED_THRESHOLD_DAYS = 30;
@@ -25,6 +29,11 @@ const NEVER_STALLED_STATUSES: Set<Status> = new Set<Status>([
   "SUBMITTED",
   "COMPLETED",
   "REJECTED",
+  "NEEDS_REVISION",
+  "MERGED",
+  "WITHDRAWN",
+  "UNDER_REVIEW", // legacy
+  "ELIGIBLE", // legacy
 ]);
 
 function calculateDaysSince(lastChangeDate: Date, now: Date): number {

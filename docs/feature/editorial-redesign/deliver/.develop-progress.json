@@ -1,30 +1,14 @@
 {
-  "project_id": "editorial-redesign",
+  "project_id": "",
   "total_steps": 4,
-  "completed_steps": 2,
-  "completed_step_ids": [
-    "01-01",
-    "01-02"
-  ],
+  "completed_steps": 0,
+  "completed_step_ids": [],
   "pending_step_ids": [
+    "01-01",
+    "01-02",
     "01-03",
     "01-04"
   ],
   "all_steps_done": false,
-  "phases_completed": {
-    "01-01": [
-      "PREPARE",
-      "RED_ACCEPTANCE",
-      "RED_UNIT",
-      "GREEN",
-      "COMMIT"
-    ],
-    "01-02": [
-      "PREPARE",
-      "RED_ACCEPTANCE",
-      "RED_UNIT",
-      "GREEN",
-      "COMMIT"
-    ]
-  }
+  "phases_completed": {}
 }

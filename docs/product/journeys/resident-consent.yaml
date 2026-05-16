@@ -1,0 +1,54 @@
+schema_version: "1.0"
+id: resident-consent
+name: Resident Encounters Privacy Consent
+persona_id: maria-manasur
+job_id: "JOB-004"
+steps:
+  - id: s1-land
+    name: Land on site
+    action: Visit any page on clujparticipa.ro
+    expected_output: Page loads with all content visible, no content gated behind consent
+    emotional_state: curious
+    artifacts_produced: []
+    artifacts_consumed: []
+  - id: s2-notice
+    name: See privacy notice
+    action: Notice lightweight bottom bar about analytics
+    expected_output: Short text about privacy-friendly analytics, Accept/Decline options
+    emotional_state: wary_ok
+    artifacts_produced: []
+    artifacts_consumed: []
+  - id: s3-decide
+    name: Decide opt-in or out
+    action: Click Accept or Decline (or scroll past)
+    expected_output: Choice remembered in localStorage, site works identically either way
+    emotional_state: deciding
+    artifacts_produced: ["${consentChoice}"]
+    artifacts_consumed: []
+  - id: s4-use
+    name: Use site normally
+    action: Browse ideas, vote, comment
+    expected_output: No visible difference whether tracking is active or not
+    emotional_state: natural_flow
+    artifacts_produced: []
+    artifacts_consumed: ["${consentChoice}"]
+  - id: s5-reconsider
+    name: Return and reconsider
+    action: Visit privacy page to change consent choice
+    expected_output: Current consent status shown with toggle to change
+    emotional_state: thoughtful
+    artifacts_produced: []
+    artifacts_consumed: ["${consentChoice}"]
+error_paths:
+  - id: e1-blocks-content
+    name: Notice blocks content
+    trigger: Consent banner overlays page and blocks interaction
+    recovery: Banner must be dismissable, non-modal, never gate content
+  - id: e2-consent-lost
+    name: Consent not remembered
+    trigger: localStorage cleared or not persisted
+    recovery: Treat as no-consent, no tracking fires, notice re-shows on next visit
+  - id: e3-adblock
+    name: Ad blocker strips script
+    trigger: User has uBlock/NoScript
+    recovery: Umami script doesn't load, graceful no-op, site works perfectly

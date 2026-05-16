@@ -1,12 +1,13 @@
-/**Pipeline stage ordering logic — pure functions derived from transitions.ts. */
+/** Pipeline stage ordering logic — pure functions derived from transitions.ts. */
 import type { Status } from "@prisma/client";
-import { ALL_STATUSES } from "./transitions";
+import { ALL_STATUSES, TERMINAL_STATUSES, LEGACY_STATUSES } from "./transitions";
 
+/** Forward pipeline stages — the active path from submission to completion. */
 export const PIPELINE_STAGES: Status[] = ALL_STATUSES.filter(
-  (s) => s !== "REJECTED"
+  (s) => !TERMINAL_STATUSES.includes(s) && !LEGACY_STATUSES.includes(s)
 );
 
-/** Index of a status within the forward pipeline. Returns -1 for REJECTED or unknown values. */
+/** Index of a status within the forward pipeline. Returns -1 for terminal or legacy values. */
 export function getStageIndex(status: Status): number {
   return PIPELINE_STAGES.indexOf(status);
 }
