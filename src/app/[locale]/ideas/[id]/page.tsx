@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
+import { Link } from "@/i18n/navigation";
 import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ import { StatusChangeTimeline } from "@/components/ideas/status-change-timeline"
 import { VotingCountdown } from "@/components/ideas/voting-countdown";
 import { mapStatusChangesToTimelineEntries } from "@/lib/timeline-mapping";
 import { getOrCreateParticipantToken } from "@/lib/client-participant";
-import { computePipelineStages, resolveExceptionType, findRejectionChange, parseMergeNote, parseReturnNote } from "@/lib/pipeline-computation";
+import { computePipelineStages, resolveExceptionType, findTerminalChange, parseMergeNote, parseReturnNote } from "@/lib/pipeline-computation";
 import { ExceptionState } from "@/components/ideas/exception-state";
 import { detectStalledIdea } from "@/lib/stalled-detector";
 import { useNotificationOptIn } from "@/hooks/use-notification-opt-in";
@@ -283,7 +284,7 @@ export default function IdeaDetailPage() {
     statusChanges: idea.statusChanges,
   });
   const exceptionType = resolveExceptionType(ideaStatus, idea.statusChanges);
-  const rejectionChange = exceptionType ? findRejectionChange(idea.statusChanges) : null;
+  const rejectionChange = exceptionType ? findTerminalChange(idea.statusChanges) : null;
   const exceptionState = exceptionType ?? undefined;
   const lastStatusChangeDate = idea.statusChanges.length > 0
     ? new Date(idea.statusChanges[idea.statusChanges.length - 1].createdAt)
@@ -310,12 +311,18 @@ export default function IdeaDetailPage() {
         parentIdeaTitle,
       };
     }
-    if (exceptionType === "RETURNED") {
+    if (exceptionType === "NEEDS_REVISION") {
       const feedback = parseReturnNote(rejectionChange.note);
       return {
-        exceptionType: "RETURNED" as const,
+        exceptionType: "NEEDS_REVISION" as const,
         reason: feedback || null,
         resubmitUrl: `/ideas/new?from=${idea.id}`,
+      };
+    }
+    if (exceptionType === "WITHDRAWN") {
+      return {
+        exceptionType: "WITHDRAWN" as const,
+        reason: rejectionChange.note || null,
       };
     }
     // Default REJECTED
@@ -458,6 +465,13 @@ export default function IdeaDetailPage() {
           />
         </div>
 
+        <Link
+          href="/how-it-works"
+          className="mt-2 inline-block text-sm text-civic-blue hover:text-ink transition"
+        >
+          {t("learnAboutProcess")}
+        </Link>
+
         {/* Vote section on mobile near top */}
         {voteSection && <div className="mt-4">{voteSection}</div>}
       </div>
@@ -493,6 +507,13 @@ export default function IdeaDetailPage() {
                 isMobile={false}
               />
             </div>
+
+            <Link
+              href="/how-it-works"
+              className="mt-2 inline-block text-sm text-civic-blue hover:text-ink transition"
+            >
+              {t("learnAboutProcess")}
+            </Link>
           </div>
 
           {idea.images && idea.images.length > 0 && (

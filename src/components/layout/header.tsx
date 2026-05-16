@@ -10,6 +10,7 @@ const navItems = [
   { key: "home", href: "/" },
   { key: "ideas", href: "/ideas" },
   { key: "map", href: "/map" },
+  { key: "howItWorks", href: "/how-it-works" },
 ] as const;
 
 export function Header() {

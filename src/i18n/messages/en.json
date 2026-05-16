@@ -7,7 +7,8 @@
     "ideas": "Ideas",
     "map": "Map",
     "admin": "Admin",
-    "results": "Results"
+    "results": "Results",
+    "howItWorks": "How It Works"
   },
   "Common": {
     "notFound": "Not found",
@@ -25,7 +26,8 @@
     "dataDeletion": "Data deletion",
     "terms": "Terms of Service",
     "nonBinding": "Support votes are non-binding and collected for prototype testing only.",
-    "languageLabel": "Choose language"
+    "languageLabel": "Choose language",
+    "howItWorks": "How It Works"
   },
   "Privacy": {
     "title": "Privacy and Prototype Notice",
@@ -187,7 +189,8 @@
     "votingHours": "hours",
     "votingMinutes": "minutes",
     "progressUpdatesHeading": "Progress Updates",
-    "commentError": "An error occurred while adding the comment."
+    "commentError": "An error occurred while adding the comment.",
+    "learnAboutProcess": "Learn about the process"
   },
   "Map": {
     "title": "Map",

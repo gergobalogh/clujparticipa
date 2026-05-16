@@ -7,7 +7,8 @@
     "ideas": "Idei",
     "map": "Hartă",
     "admin": "Admin",
-    "results": "Rezultate"
+    "results": "Rezultate",
+    "howItWorks": "Cum funcționează"
   },
   "Footer": {
     "prototypeNote": "Acesta este un prototip în scop demonstrativ. Datele și voturile nu sunt cu valoare decizională.",
@@ -16,7 +17,8 @@
     "dataDeletion": "Ștergerea datelor",
     "terms": "Termeni și condiții",
     "nonBinding": "Voturile de susținere sunt neobligatorii și colectate exclusiv pentru testarea prototipului.",
-    "languageLabel": "Alege limba"
+    "languageLabel": "Alege limba",
+    "howItWorks": "Cum funcționează"
   },
   "Privacy": {
     "title": "Confidențialitate și notă de prototip",
@@ -178,7 +180,8 @@
     "votingHours": "ore",
     "votingMinutes": "minute",
     "progressUpdatesHeading": "Actualizări de progres",
-    "commentError": "A apărut o eroare la adăugarea comentariului."
+    "commentError": "A apărut o eroare la adăugarea comentariului.",
+    "learnAboutProcess": "Află despre proces"
   },
   "Map": {
     "title": "Hartă",

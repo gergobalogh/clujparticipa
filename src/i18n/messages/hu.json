@@ -7,7 +7,8 @@
     "ideas": "Ötletek",
     "map": "Térkép",
     "admin": "Admin",
-    "results": "Eredmények"
+    "results": "Eredmények",
+    "howItWorks": "Hogyan működik"
   },
   "Footer": {
     "prototypeNote": "Ez egy bemutató célú prototípus. Az adatok és a szavazatok nem kötelező érvényűek.",
@@ -16,7 +17,8 @@
     "dataDeletion": "Adattörlés",
     "terms": "Felhasználási feltételek",
     "nonBinding": "A támogató szavazatok nem kötelezőek, és kizárólag a prototípus teszteléséhez gyűjtöttek.",
-    "languageLabel": "Nyelv kiválasztása"
+    "languageLabel": "Nyelv kiválasztása",
+    "howItWorks": "Hogyan működik"
   },
   "Privacy": {
     "title": "Adatvédelem és prototípus megjegyzés",
@@ -178,7 +180,8 @@
     "votingHours": "óra",
     "votingMinutes": "perc",
     "progressUpdatesHeading": "Előrehaladási jelentések",
-    "commentError": "Hiba történt a hozzászólás hozzáadásakor."
+    "commentError": "Hiba történt a hozzászólás hozzáadásakor.",
+    "learnAboutProcess": "Tudj meg többet a folyamatról"
   },
   "Map": {
     "title": "Térkép",

@@ -16,72 +16,101 @@ export function Footer() {
   const pathname = usePathname();
 
   return (
-    <footer className="mt-auto bg-ink text-paper">
-      <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-paper/70 leading-relaxed">{t("prototypeNote")}</p>
-            <p className="mt-1 text-xs text-paper/50 leading-relaxed">{t("nonBinding")}</p>
-            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+    <footer className="border-t-2 border-ink bg-paper">
+      <div className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+          {/* Column 1: About */}
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest text-ink/40">
+              About
+            </span>
+            <p className="mt-3 font-serif text-sm italic leading-relaxed text-ink">
+              {t("prototypeNote")}
+            </p>
+            <p className="mt-2 text-xs leading-relaxed text-ink-muted">
+              {t("nonBinding")}
+            </p>
+          </div>
+
+          {/* Column 2: Legal */}
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest text-ink/40">
+              Legal
+            </span>
+            <div className="mt-3 flex flex-col gap-1">
+              <Link
+                href="/how-it-works"
+                locale={locale}
+                className="py-1 text-sm text-ink-muted transition hover:text-ink"
+              >
+                {t("howItWorks")}
+              </Link>
               <Link
                 href="/bug-report"
                 locale={locale}
-                className="text-xs text-paper/60 underline hover:text-paper"
+                className="py-1 text-sm text-ink-muted transition hover:text-ink"
               >
                 {t("bugReport")}
               </Link>
-              <span className="text-paper/20">·</span>
               <Link
                 href="/privacy"
                 locale={locale}
-                className="text-xs text-paper/60 underline hover:text-paper"
+                className="py-1 text-sm text-ink-muted transition hover:text-ink"
               >
                 {t("privacy")}
               </Link>
-              <span className="text-paper/20">·</span>
               <Link
                 href="/data-deletion"
                 locale={locale}
-                className="text-xs text-paper/60 underline hover:text-paper"
+                className="py-1 text-sm text-ink-muted transition hover:text-ink"
               >
                 {t("dataDeletion")}
               </Link>
-              <span className="text-paper/20">·</span>
               <Link
                 href="/terms"
                 locale={locale}
-                className="text-xs text-paper/60 underline hover:text-paper"
+                className="py-1 text-sm text-ink-muted transition hover:text-ink"
               >
                 {t("terms")}
               </Link>
             </div>
           </div>
 
-          {/* Language switcher in footer */}
-          <nav
-            aria-label={t("languageLabel")}
-            className="flex items-center gap-1 shrink-0"
-          >
-            {locales.map((loc) => {
-              const isActive = loc === locale;
-              return (
-                <Link
-                  aria-current={isActive ? "page" : undefined}
-                  className={[
-                    "flex h-8 min-w-9 items-center justify-center rounded-sm px-2.5 text-xs font-semibold transition",
-                    isActive
-                      ? "bg-paper text-ink"
-                      : "text-paper/50 border border-paper/20 hover:text-paper hover:border-paper/40",
-                  ].join(" ")}
-                  href={pathname}
-                  key={loc}
-                  locale={loc}
-                >
-                  {localeLabels[loc]}
-                </Link>
-              );
-            })}
-          </nav>
+          {/* Column 3: Language */}
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest text-ink/40">
+              Language
+            </span>
+            <nav
+              aria-label={t("languageLabel")}
+              className="mt-3 flex items-center gap-1"
+            >
+              {locales.map((loc) => {
+                const isActive = loc === locale;
+                return (
+                  <Link
+                    aria-current={isActive ? "page" : undefined}
+                    className={[
+                      "flex h-8 min-w-9 items-center justify-center rounded-sm border px-2.5 text-xs font-semibold transition",
+                      isActive
+                        ? "border-ink bg-ink text-paper"
+                        : "border-ink/15 bg-paper text-ink-muted hover:border-ink/30",
+                    ].join(" ")}
+                    href={pathname}
+                    key={loc}
+                    locale={loc}
+                  >
+                    {localeLabels[loc]}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+
+        {/* Bottom rule */}
+        <div className="mt-6 border-t border-ink/5 pt-4">
+          <p className="text-xs text-ink-muted/60">ClujParticipa 2026</p>
         </div>
       </div>
     </footer>
