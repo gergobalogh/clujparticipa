@@ -7,7 +7,11 @@ export type BadgeVariant =
   | "selected"
   | "in_progress"
   | "completed"
-  | "rejected";
+  | "rejected"
+  | "accepted"
+  | "needs_revision"
+  | "merged"
+  | "withdrawn";
 
 const variantClasses: Record<BadgeVariant, string> = {
   default: "bg-paper-muted text-ink-muted",
@@ -19,6 +23,10 @@ const variantClasses: Record<BadgeVariant, string> = {
   in_progress: "bg-civic-blue-light text-civic-blue",
   completed: "bg-civic-teal-light text-civic-teal",
   rejected: "bg-red-50 text-red-700",
+  accepted: "bg-civic-teal-light text-civic-teal",
+  needs_revision: "bg-amber-50 text-amber-700",
+  merged: "bg-purple-50 text-purple-700",
+  withdrawn: "bg-gray-100 text-gray-600",
 };
 
 type BadgeProps = {
