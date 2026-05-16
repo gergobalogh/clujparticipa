@@ -230,7 +230,11 @@
       "startImplementation": "Megvalósítás indítása",
       "markCompleted": "Befejezettnek jelölés",
       "reject": "Elutasítás",
-      "reopen": "Újranyitás"
+      "reopen": "Újranyitás",
+      "merge": "Egyesítés",
+      "withdraw": "Visszavon",
+      "accept": "Elfogad",
+      "needsRevision": "Átdolgozás kérése"
     },
     "feasibilitySection": "Megvalósíthatósági értékelés",
     "feasibilityResponseLabel": "Hivatalos válasz",
@@ -290,9 +294,13 @@
     "ELIGIBLE": "Jogosult",
     "IN_VOTING": "Szavazás alatt",
     "SELECTED": "Kiválasztott",
+    "ACCEPTED": "Elfogadva",
     "IN_PROGRESS": "Folyamatban",
     "COMPLETED": "Befejezett",
-    "REJECTED": "Elutasított"
+    "REJECTED": "Elutasított",
+    "NEEDS_REVISION": "Átdolgozás szükséges",
+    "MERGED": "Egyesítve",
+    "WITHDRAWN": "Visszavonva"
   },
   "ApiErrors": {
     "invalidParticipantToken": "Érvénytelen vagy hiányzó résztvevő token.",
@@ -391,11 +399,9 @@
   "Stalled": {
     "label": "Akadályozva",
     "waitingDays": "{days} nap frissítés nélkül",
-    "waitingForDepartmentReview": "Hivatali felülvizsgálat",
-    "waitingForEligibility": "Jogosultsági értékelés",
-    "waitingForVotingPeriod": "Nyilvános szavazási időszak",
+    "waitingForVotingPeriod": "Szavazási időszak kezdete",
     "waitingForSelection": "Kiválasztás megvalósításra",
-    "waitingForImplementation": "Megvalósítás folyamatban"
+    "waitingForImplementation": "Megvalósítás kezdete"
   },
   "MiniPipeline": {
     "submitted": "Beküldve",
@@ -412,7 +418,9 @@
     "reviseAndResubmit": "Átdolgozás és újraküldés",
     "noSimilarIdeas": "Nincsenek hasonló ötletek ebben a kategóriában",
     "mergedWith": "Ez az ötlet összevonásra került egy másik ötlettel",
-    "parentUnavailable": "A szülőötlet már nem elérhető"
+    "parentUnavailable": "A szülőötlet már nem elérhető",
+    "needsRevisionTitle": "Átdolgozás szükséges",
+    "withdrawnTitle": "Visszavonva"
   },
   "Notification": {
     "optInTitle": "Engedélyezi az értesítéseket?",
@@ -420,5 +428,24 @@
     "optInAllow": "Értesítések engedélyezése",
     "optInDismiss": "Most nem",
     "statusChangedBanner": "Ez az ötlet a következő státuszba került: {stage}"
+  },
+  "HowItWorks": {
+    "title": "Hogyan működik",
+    "subtitle": "Kövesd nyomon ötletedet a beküldéstől a megvalósításig",
+    "forwardSection": "A folyamat",
+    "terminalSection": "Eredmények",
+    "cta": "Küldd be ötleted",
+    "ctaBrowse": "Ötletek böngészése",
+    "submittedDesc": "Ötleted beérkezett és felülvizsgálatra vár.",
+    "inVotingDesc": "A közösség szavaz a jogosult ötletekről.",
+    "selectedDesc": "Az ötlet kiválasztásra került megvalósításra.",
+    "acceptedDesc": "Az ötlet jóváhagyásra került és folytatódhat.",
+    "inProgressDesc": "Az ötlet megvalósítása megkezdődött.",
+    "completedDesc": "Az ötlet teljesen megvalósult.",
+    "rejectedDesc": "Az ötlet nem felelt meg a feltételeknek.",
+    "needsRevisionDesc": "Az ötlet módosításra szorul a folytatás előtt.",
+    "mergedDesc": "Ez az ötlet összevonásra került egy másikkal.",
+    "withdrawnDesc": "A szerző visszavonta ezt az ötletet.",
+    "nextStep": "Következő: {stage}"
   }
 }

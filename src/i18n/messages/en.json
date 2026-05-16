@@ -239,7 +239,11 @@
       "startImplementation": "Start implementation",
       "markCompleted": "Mark completed",
       "reject": "Reject",
-      "reopen": "Reopen"
+      "reopen": "Reopen",
+      "merge": "Merge",
+      "withdraw": "Withdraw",
+      "accept": "Accept",
+      "needsRevision": "Request Revision"
     },
     "feasibilitySection": "Feasibility assessment",
     "feasibilityResponseLabel": "Official response",
@@ -299,9 +303,13 @@
     "ELIGIBLE": "Eligible",
     "IN_VOTING": "In voting",
     "SELECTED": "Selected",
+    "ACCEPTED": "Accepted",
     "IN_PROGRESS": "In progress",
     "COMPLETED": "Completed",
-    "REJECTED": "Rejected"
+    "REJECTED": "Rejected",
+    "NEEDS_REVISION": "Needs Revision",
+    "MERGED": "Merged",
+    "WITHDRAWN": "Withdrawn"
   },
   "ApiErrors": {
     "invalidParticipantToken": "Invalid or missing participant token.",
@@ -400,11 +408,9 @@
   "Stalled": {
     "label": "Stalled",
     "waitingDays": "{days} days without update",
-    "waitingForDepartmentReview": "City department review",
-    "waitingForEligibility": "Eligibility assessment",
-    "waitingForVotingPeriod": "Public voting period",
+    "waitingForVotingPeriod": "Voting period to open",
     "waitingForSelection": "Selection for implementation",
-    "waitingForImplementation": "Implementation in progress"
+    "waitingForImplementation": "Implementation to begin"
   },
   "MiniPipeline": {
     "submitted": "Submitted",
@@ -421,7 +427,9 @@
     "reviseAndResubmit": "Revise and resubmit",
     "noSimilarIdeas": "No similar ideas in this category",
     "mergedWith": "This idea has been merged with another idea",
-    "parentUnavailable": "Parent idea is no longer available"
+    "parentUnavailable": "Parent idea is no longer available",
+    "needsRevisionTitle": "Needs Revision",
+    "withdrawnTitle": "Withdrawn"
   },
   "Notification": {
     "optInTitle": "Enable notifications?",
@@ -429,5 +437,24 @@
     "optInAllow": "Allow notifications",
     "optInDismiss": "Not now",
     "statusChangedBanner": "This idea moved to {stage}"
+  },
+  "HowItWorks": {
+    "title": "How It Works",
+    "subtitle": "Follow your idea from submission to completion",
+    "forwardSection": "The Pipeline",
+    "terminalSection": "Outcomes",
+    "cta": "Submit your idea",
+    "ctaBrowse": "Browse ideas",
+    "submittedDesc": "Your idea is received and awaits review.",
+    "inVotingDesc": "The community votes on eligible ideas.",
+    "selectedDesc": "The idea is chosen for implementation.",
+    "acceptedDesc": "The idea is approved and ready to proceed.",
+    "inProgressDesc": "Work on the idea has started.",
+    "completedDesc": "The idea has been fully implemented.",
+    "rejectedDesc": "The idea did not meet the criteria.",
+    "needsRevisionDesc": "The idea needs changes before it can proceed.",
+    "mergedDesc": "This idea has been combined with another.",
+    "withdrawnDesc": "The author has withdrawn this idea.",
+    "nextStep": "Next: {stage}"
   }
 }

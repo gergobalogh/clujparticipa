@@ -230,7 +230,11 @@
       "startImplementation": "Începe implementarea",
       "markCompleted": "Marchează finalizată",
       "reject": "Respinge",
-      "reopen": "Redeschide"
+      "reopen": "Redeschide",
+      "merge": "Fuzionează",
+      "withdraw": "Retrage",
+      "accept": "Acceptă",
+      "needsRevision": "Solicită revizuire"
     },
     "feasibilitySection": "Evaluare de fezabilitate",
     "feasibilityResponseLabel": "Răspuns oficial",
@@ -290,9 +294,13 @@
     "ELIGIBLE": "Eligibilă",
     "IN_VOTING": "În votare",
     "SELECTED": "Selectată",
+    "ACCEPTED": "Acceptat",
     "IN_PROGRESS": "În desfășurare",
     "COMPLETED": "Finalizată",
-    "REJECTED": "Respinsă"
+    "REJECTED": "Respinsă",
+    "NEEDS_REVISION": "Necesită revizuire",
+    "MERGED": "Fuzionat",
+    "WITHDRAWN": "Retras"
   },
   "ApiErrors": {
     "invalidParticipantToken": "Token de participant invalid sau lipsă.",
@@ -391,11 +399,9 @@
   "Stalled": {
     "label": "Blocată",
     "waitingDays": "{days} zile fără actualizare",
-    "waitingForDepartmentReview": "Revizuire de direcție",
-    "waitingForEligibility": "Evaluarea eligibilității",
-    "waitingForVotingPeriod": "Perioada de votare publică",
+    "waitingForVotingPeriod": "A szavazási időszak kezdete",
     "waitingForSelection": "Selecție pentru implementare",
-    "waitingForImplementation": "Implementare în curs"
+    "waitingForImplementation": "Implementarea începe"
   },
   "MiniPipeline": {
     "submitted": "Trimisă",
@@ -412,7 +418,9 @@
     "reviseAndResubmit": "Revizuiește și retrimite",
     "noSimilarIdeas": "Nu există idei similare în această categorie",
     "mergedWith": "Această idee a fost contopită cu altă idee",
-    "parentUnavailable": "Ideea părinte nu mai este disponibilă"
+    "parentUnavailable": "Ideea părinte nu mai este disponibilă",
+    "needsRevisionTitle": "Necesită revizuire",
+    "withdrawnTitle": "Retras"
   },
   "Notification": {
     "optInTitle": "Activezi notificările?",
@@ -420,5 +428,24 @@
     "optInAllow": "Permite notificările",
     "optInDismiss": "Nu acum",
     "statusChangedBanner": "Această idee a trecut la {stage}"
+  },
+  "HowItWorks": {
+    "title": "Cum funcționează",
+    "subtitle": "Urmărește ideea ta de la trimitere până la finalizare",
+    "forwardSection": "Parcursul ideii",
+    "terminalSection": "Rezultate",
+    "cta": "Trimite o idee",
+    "ctaBrowse": "Caută idei",
+    "submittedDesc": "Ideea ta a fost primită și așteaptă revizuirea.",
+    "inVotingDesc": "Comunitatea votează ideile eligibile.",
+    "selectedDesc": "Ideea a fost selectată pentru implementare.",
+    "acceptedDesc": "Ideea a fost aprobată și poate fi continuată.",
+    "inProgressDesc": "Implementarea ideii a început.",
+    "completedDesc": "Ideea a fost finalizată complet.",
+    "rejectedDesc": "Ideea nu a îndeplinit criteriile.",
+    "needsRevisionDesc": "Ideea necesită modificări înainte de a continua.",
+    "mergedDesc": "Această idee a fost contopită cu altă idee.",
+    "withdrawnDesc": "Autorul a retras această idee.",
+    "nextStep": "Următorul: {stage}"
   }
 }
