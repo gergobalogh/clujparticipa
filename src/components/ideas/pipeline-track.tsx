@@ -2,8 +2,7 @@
 
 import type { JSX } from "react";
 import type { Status } from "@prisma/client";
-import { motion } from "motion/react";
-import { PipelineTrackSegment } from "./pipeline-track-segment";
+import { useTranslations } from "next-intl";
 import { StalledIndicator } from "./stalled-indicator";
 
 export type PipelineStage = {
@@ -16,10 +15,12 @@ export type PipelineStage = {
 
 export type PipelineTrackProps = {
   stages: PipelineStage[];
-  exceptionState?: "REJECTED" | "MERGED" | "RETURNED" | "STALLED";
+  exceptionState?: "REJECTED" | "NEEDS_REVISION" | "MERGED" | "WITHDRAWN" | "STALLED";
   stalledLabel?: string;
   stalledDays?: number;
   isMobile?: boolean;
+  showcase?: boolean;
+  onStageClick?: (status: Status) => void;
 };
 
 export function PipelineTrack({
@@ -28,91 +29,111 @@ export function PipelineTrack({
   stalledLabel,
   stalledDays,
   isMobile = false,
+  showcase = false,
+  onStageClick,
 }: PipelineTrackProps): JSX.Element {
-  const isVertical = isMobile;
+  const t = useTranslations("Statuses");
+  const v = isMobile;
+  const effectiveStages = showcase
+    ? stages.map((s) => ({ ...s, reached: true, current: false }))
+    : stages;
+  const rej = showcase ? false : exceptionState === "REJECTED";
+  const rc = effectiveStages.filter((s) => s.reached || s.current).length;
+  const intervals = effectiveStages.length > 1 ? effectiveStages.slice(0, -1) : effectiveStages;
 
   return (
     <div>
       <div
         data-testid="pipeline-track"
-        className={`relative flex ${isVertical ? "flex-col items-start" : "sm:flex-row flex-row items-center"}`}
+        className={`relative ${v ? "ml-2 min-h-72 w-full py-2 pl-6" : "h-28 w-full px-4"}`}
       >
-        {/* Gray base bar */}
-        <div
-          data-testid="track-base"
-          className={`rounded-full bg-gray-200 ${
-            isVertical ? "w-2 h-full min-h-64" : "h-2 w-full"
-          }`}
-        />
+        {/* Shared positioning context for bar + markers */}
+        <div className={`relative ${v ? "h-full w-2" : "h-2 w-full"} ${v ? "ml-3" : "mt-[52px]"}`}>
+          {/* Gray base bar */}
+          <div
+            data-testid="track-base"
+            className="absolute inset-0 rounded-full bg-gray-200"
+          />
 
-        {/* Colored overlay with entrance animation */}
-        <motion.div
-          data-testid="track-overlay"
-          className={`absolute rounded-full ${
-            isVertical
-              ? "left-0 top-0 w-2 h-full"
-              : "left-0 top-1/2 -translate-y-1/2 h-2 w-full"
-          }`}
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.6 }}
-          style={{ transformOrigin: isVertical ? "top" : "left" }}
-        >
-          <div className="flex h-full w-full">
-            {stages.map((stage, index) => {
-              const segmentWidth = `${100 / stages.length}%`;
-              return (
+          {/* Colored overlay */}
+          <div
+            data-testid="track-overlay"
+            className="absolute inset-0 overflow-hidden rounded-full"
+          >
+            <div className={`flex h-full w-full ${v ? "flex-col" : ""}`}>
+              {intervals.map((stage, i) => (
                 <div
                   key={stage.status}
                   data-testid="track-segment"
-                  className={`h-full ${
-                    stage.reached || stage.current
-                      ? getSegmentColor(stage.status, exceptionState)
-                      : "bg-gray-200"
-                  }`}
-                  style={{ width: segmentWidth }}
+                  className={`${v ? "w-full" : "h-full"} ${i < rc - 1 ? (rej ? "bg-red-600" : "bg-ink") : "bg-gray-200"}`}
+                  style={v ? { height: `${100 / intervals.length}%` } : { width: `${100 / intervals.length}%` }}
                 />
-              );
-            })}
-          </div>
-        </motion.div>
-
-        {/* Stage markers and labels positioned on the bar */}
-        {stages.map((stage, index) => {
-          const positionPercent = stages.length > 1
-            ? (index / (stages.length - 1)) * 100
-            : 50;
-
-          return (
-            <div
-              key={`marker-${stage.status}`}
-              className={`absolute flex flex-col items-center ${
-                isVertical
-                  ? "flex-row"
-                  : ""
-              }`}
-              style={
-                isVertical
-                  ? { top: `${positionPercent}%`, left: "0" }
-                  : { left: `${positionPercent}%`, top: "50%", transform: "translate(-50%, -50%)" }
-              }
-            >
-              <PipelineTrackSegment
-                stage={stage}
-                exceptionState={exceptionState}
-                index={index}
-                isVertical={isVertical}
-                labelPosition={
-                  isVertical
-                    ? "after"
-                    : index % 2 === 0
-                      ? "before"
-                      : "after"
-                }
-              />
+              ))}
             </div>
-          );
-        })}
+          </div>
+
+          {/* Stage markers */}
+          {effectiveStages.map((stage, i) => {
+            const cur = stage.current && !rej;
+            const fut = !stage.reached && !stage.current;
+            const first = i === 0;
+            const above = !v && i % 2 === 0;
+            const pct = effectiveStages.length > 1 ? (i / (effectiveStages.length - 1)) * 100 : 50;
+            const markerStyle = v
+              ? { top: `${pct}%`, left: "50%", transform: "translate(-50%, -50%)" }
+              : { left: `${pct}%`, top: "50%", transform: "translate(-50%, -50%)" };
+
+            const markerContent = (
+              <div className={`relative flex ${v ? "items-center" : "flex-col items-center"}`}>
+                <span
+                  data-testid="stage-marker"
+                  className={`relative z-10 inline-flex rounded-full ${
+                    rej ? "h-3 w-3 border-2 border-red-600 bg-red-600"
+                    : cur ? "h-4 w-4 border-[3px] border-ink bg-paper"
+                    : fut ? "h-3 w-3 border-2 border-gray-300 bg-paper"
+                    : first ? "h-3 w-3 bg-ink"
+                    : "h-3 w-3 bg-ink"
+                  }`}
+                />
+                <div
+                  data-testid="stage-label"
+                  className={`absolute ${
+                    v ? "left-5 top-1/2 -translate-y-1/2"
+                    : above ? "bottom-5" : "top-5"
+                  }`}
+                >
+                  <span className={`whitespace-nowrap text-sm ${cur ? "font-semibold text-ink" : fut ? "text-gray-400" : "text-gray-500"}`}>
+                    {t(stage.status)}
+                  </span>
+                  {cur && stage.date && (
+                    <span className="block whitespace-nowrap text-xs text-ink-muted">
+                      {stage.date}
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+
+            return (
+              <div key={stage.status} className="absolute" style={markerStyle}>
+                {showcase ? (
+                  <a
+                    data-testid="stage-anchor"
+                    href={`#${stage.status.toLowerCase()}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onStageClick?.(stage.status);
+                    }}
+                  >
+                    {markerContent}
+                  </a>
+                ) : (
+                  markerContent
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Stalled indicator below the track */}
@@ -125,21 +146,4 @@ export function PipelineTrack({
       )}
     </div>
   );
-}
-
-function getSegmentColor(
-  status: PipelineStage["status"],
-  exceptionState?: string
-): string {
-  if (exceptionState === "REJECTED") return "bg-red-600";
-  const colors: Record<string, string> = {
-    SUBMITTED: "bg-civic-orange",
-    UNDER_REVIEW: "bg-civic-orange",
-    ELIGIBLE: "bg-civic-blue",
-    IN_VOTING: "bg-purple-700",
-    SELECTED: "bg-civic-teal",
-    IN_PROGRESS: "bg-civic-teal",
-    COMPLETED: "bg-civic-teal",
-  };
-  return colors[status] ?? "bg-gray-400";
 }
