@@ -179,17 +179,21 @@ describe("PipelineTrack", () => {
   });
 
   describe("showcase mode", () => {
-    it("renders all stages as reached when showcase=true", () => {
+    it("preserves reached and current stage state when showcase=true", () => {
       render(<PipelineTrack stages={sevenStages} showcase={true} />);
 
       const markers = screen.getAllByTestId("stage-marker");
-      // No gray future markers — all stages appear reached
       const futureMarkers = markers.filter(
         (m) =>
           m.classList.contains("border-gray-300") &&
           m.classList.contains("bg-paper")
       );
-      expect(futureMarkers).toHaveLength(0);
+      expect(futureMarkers.length).toBeGreaterThanOrEqual(1);
+
+      const currentMarker = markers.find((m) =>
+        m.classList.contains("border-ink") && m.classList.contains("bg-paper")
+      );
+      expect(currentMarker).toBeInTheDocument();
     });
 
     it("wraps each stage marker in an anchor with correct href when showcase=true", () => {
@@ -219,9 +223,7 @@ describe("PipelineTrack", () => {
     });
 
     it("renders identically without showcase prop — no regression", () => {
-      const { container: withoutShowcase } = render(
-        <PipelineTrack stages={sevenStages} />
-      );
+      render(<PipelineTrack stages={sevenStages} />);
       const markersWithoutShowcase = screen.getAllByTestId("stage-marker");
 
       // Verify the standard behavior is preserved: future markers exist

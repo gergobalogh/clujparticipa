@@ -10,6 +10,7 @@ import { DISTRICT_CENTERS } from "@/lib/district-centers";
 import { getOrCreateParticipantToken } from "@/lib/client-participant";
 import { ImageUpload, ImageUploadHandle, ImageUploadResult } from "@/components/ideas/image-upload";
 import { useNotificationOptIn } from "@/hooks/use-notification-opt-in";
+import { trackEvent } from "@/lib/analytics";
 
 const CATEGORIES = [
   "INFRASTRUCTURE", "EDUCATION", "ENVIRONMENT", "CULTURE",
@@ -116,9 +117,14 @@ function NewIdeaForm() {
 
       const data = await res.json();
       setCreatedId(data.id);
+      trackEvent("idea_submit", { category, district });
 
       // Prompt for notification permission after successful submission
-      requestPermission();
+      requestPermission().then((result) => {
+        if (result === "granted") {
+          trackEvent("notification_opt_in");
+        }
+      });
     } catch {
       setError(t("submissionError"));
     } finally {
@@ -136,7 +142,13 @@ function NewIdeaForm() {
             <p className="mt-1 text-sm text-ink-muted">{tn("optInDescription")}</p>
             <div className="mt-3 flex gap-2">
               <button
-                onClick={() => requestPermission()}
+                onClick={() => {
+                  requestPermission().then((result) => {
+                    if (result === "granted") {
+                      trackEvent("notification_opt_in");
+                    }
+                  });
+                }}
                 className="inline-flex items-center rounded-sm bg-ink px-3 py-1.5 text-sm font-medium text-paper transition hover:bg-ink/90"
               >
                 {tn("optInAllow")}

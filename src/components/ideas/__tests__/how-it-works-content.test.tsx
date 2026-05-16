@@ -3,8 +3,12 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, waitFor } from "@testing-library/react";
 import { HowItWorksContent } from "../how-it-works-content";
+
+const { trackEventMock } = vi.hoisted(() => ({
+  trackEventMock: vi.fn(),
+}));
 
 // Mock next-intl to verify namespace usage
 const translationCalls: Array<{ namespace: string; key: string }> = [];
@@ -15,16 +19,24 @@ vi.mock("next-intl", () => ({
   },
 }));
 
+vi.mock("@/lib/analytics", () => ({
+  trackEvent: trackEventMock,
+}));
+
 // Mock IntersectionObserver — track all observer instances
 const observerInstances: MockIntersectionObserver[] = [];
 const observeMock = vi.fn();
 const unobserveMock = vi.fn();
 const disconnectMock = vi.fn();
+const addMediaListenerMock = vi.fn();
+const removeMediaListenerMock = vi.fn();
 
 class MockIntersectionObserver {
   callback: IntersectionObserverCallback;
-  constructor(cb: IntersectionObserverCallback) {
+  options?: IntersectionObserverInit;
+  constructor(cb: IntersectionObserverCallback, options?: IntersectionObserverInit) {
     this.callback = cb;
+    this.options = options;
     observerInstances.push(this);
   }
   observe = observeMock;
@@ -38,7 +50,23 @@ beforeEach(() => {
   observeMock.mockClear();
   unobserveMock.mockClear();
   disconnectMock.mockClear();
+  addMediaListenerMock.mockClear();
+  removeMediaListenerMock.mockClear();
+  trackEventMock.mockClear();
   vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: addMediaListenerMock,
+      removeEventListener: removeMediaListenerMock,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }))
+  );
 });
 
 afterEach(() => {
@@ -83,23 +111,43 @@ const TERMINAL_DESC_KEYS: Record<string, string> = {
 describe("HowItWorksContent", () => {
   // --- ACCEPTANCE TESTS ---
 
-  it("renders PipelineTrack in showcase mode with all 6 forward stages shown as reached", () => {
+  it("renders a roomier max-w-5xl page layout with taller stage cards", () => {
+    const { container } = render(<HowItWorksContent />);
+
+    const main = container.querySelector("main");
+    expect(main).toHaveClass("max-w-5xl", "py-10");
+
+    const submittedCard = document.getElementById("submitted");
+    expect(submittedCard).toHaveClass("min-h-[40vh]", "p-6", "sm:p-8");
+  });
+
+  it("renders PipelineTrack with only the first stage active on page load", () => {
     render(<HowItWorksContent />);
 
     // PipelineTrack is rendered
     expect(screen.getByTestId("pipeline-track")).toBeInTheDocument();
 
-    // All 6 stage markers rendered (no future/gray markers in showcase mode)
+    // All 6 stage markers rendered
     const markers = screen.getAllByTestId("stage-marker");
     expect(markers).toHaveLength(6);
 
-    // All markers are solid (reached) — none should have gray-300 future border
+    expect(screen.getByTestId("active-stage-indicator")).toHaveAttribute(
+      "data-active-stage",
+      "SUBMITTED"
+    );
+    expect(markers[0]).toHaveClass("border-ink", "bg-paper");
+
     const futureMarkers = markers.filter(
       (m) =>
         m.classList.contains("border-gray-300") &&
         m.classList.contains("bg-paper")
     );
-    expect(futureMarkers).toHaveLength(0);
+    expect(futureMarkers).toHaveLength(5);
+
+    const filledSegments = screen
+      .getAllByTestId("track-segment")
+      .filter((segment) => segment.classList.contains("bg-ink"));
+    expect(filledSegments).toHaveLength(0);
   });
 
   it("renders 6 stage cards with correct id attributes, Badge, description, and nextStep", () => {
@@ -162,6 +210,31 @@ describe("HowItWorksContent", () => {
     expect(ctaLink).toHaveAttribute("href", expect.stringContaining("ideas"));
   });
 
+  it("renders a creator credit link that opens safely in a new tab", () => {
+    render(<HowItWorksContent />);
+
+    expect(screen.getByText(/HowItWorks\.creatorCredit/)).toBeInTheDocument();
+    const creatorLink = screen.getByRole("link", { name: "Gergo Balogh" });
+    expect(creatorLink).toHaveAttribute("href", "https://gergobalogh.me");
+    expect(creatorLink).toHaveAttribute("target", "_blank");
+    expect(creatorLink).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
+  it("tracks creator link clicks with Umami", () => {
+    render(<HowItWorksContent />);
+
+    const creatorLink = screen.getByRole("link", { name: "Gergo Balogh" });
+
+    act(() => {
+      creatorLink.click();
+    });
+
+    expect(trackEventMock).toHaveBeenCalledWith("creator_link_click", {
+      page: "how-it-works",
+      destination: "https://gergobalogh.me",
+    });
+  });
+
   it("renders all visible strings from the HowItWorks i18n namespace", () => {
     translationCalls.length = 0;
     render(<HowItWorksContent />);
@@ -176,6 +249,7 @@ describe("HowItWorksContent", () => {
       "forwardSection",
       "terminalSection",
       "cta",
+      "creatorCredit",
       "submittedDesc",
       "inVotingDesc",
       "selectedDesc",
@@ -224,6 +298,48 @@ describe("HowItWorksContent", () => {
     // The active stage indicator should reflect IN_VOTING
     const activeIndicator = screen.getByTestId("active-stage-indicator");
     expect(activeIndicator).toHaveAttribute("data-active-stage", "IN_VOTING");
+
+    const markers = screen.getAllByTestId("stage-marker");
+    expect(markers[0]).toHaveClass("bg-ink");
+    expect(markers[1]).toHaveClass("border-ink", "bg-paper");
+
+    const filledSegments = screen
+      .getAllByTestId("track-segment")
+      .filter((segment) => segment.classList.contains("bg-ink"));
+    expect(filledSegments).toHaveLength(1);
+  });
+
+  it("configures the observer to favor stage cards in the main reading area", () => {
+    render(<HowItWorksContent />);
+
+    expect(observerInstances[0].options).toMatchObject({
+      root: null,
+      rootMargin: "-30% 0px -45% 0px",
+      threshold: [0.35, 0.6],
+    });
+    expect(observeMock).toHaveBeenCalledTimes(FORWARD_STAGES.length);
+  });
+
+  it("passes mobile mode to PipelineTrack so the pipeline renders vertically", async () => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn().mockImplementation((query: string) => ({
+        matches: true,
+        media: query,
+        onchange: null,
+        addEventListener: addMediaListenerMock,
+        removeEventListener: removeMediaListenerMock,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }))
+    );
+
+    render(<HowItWorksContent />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("pipeline-track")).toHaveClass("min-h-72");
+    });
   });
 
   it("scrolls to the correct stage card when pipeline marker is clicked", () => {
@@ -249,37 +365,13 @@ describe("HowItWorksContent", () => {
     scrollIntoViewMock.mockRestore();
   });
 
-  it("toggles sticky state when sentinel element intersects viewport", () => {
+  it("keeps the pipeline sticky below the global header without a scroll sentinel", () => {
     render(<HowItWorksContent />);
 
-    // The sticky container should initially be sticky
     const stickyContainer = screen.getByTestId("sticky-pipeline-container");
     expect(stickyContainer).toHaveClass("sticky");
-
-    // Find the sentinel element
-    const sentinel = screen.getByTestId("sticky-sentinel");
-    expect(sentinel).toBeInTheDocument();
-
-    // The second observer is for the sentinel
-    expect(observerInstances.length).toBeGreaterThanOrEqual(2);
-    const sentinelObserver = observerInstances[1];
-
-    // When sentinel enters viewport, pipeline should unstick
-    act(() => {
-      sentinelObserver.callback(
-        [
-          {
-            target: sentinel,
-            isIntersecting: true,
-            intersectionRatio: 1,
-          } as IntersectionObserverEntry,
-        ],
-        {} as IntersectionObserver
-      );
-    });
-
-    // After sentinel intersects, sticky class should be removed
-    expect(stickyContainer).not.toHaveClass("sticky");
+    expect(stickyContainer).toHaveClass("top-20");
+    expect(screen.queryByTestId("sticky-sentinel")).not.toBeInTheDocument();
   });
 
   it("cleans up IntersectionObservers on unmount", () => {
@@ -300,10 +392,10 @@ describe("HowItWorksContent", () => {
       expect(card).toBeInTheDocument();
       // Stage card must have a consistent class that :target CSS can target
       expect(card!.classList.contains("stage-card")).toBe(true);
-      // Stage card must have scroll-margin-top class so sticky pipeline doesn't cover it
+      // Stage card must have scroll-margin-top class so sticky header + pipeline don't cover it
       // In jsdom Tailwind utilities aren't resolved to computed styles,
-      // so verify the class is present (scroll-mt-24 = 6rem offset)
-      expect(card!.classList.contains("scroll-mt-24")).toBe(true);
+      // so verify the class is present (scroll-mt-56 = 14rem offset)
+      expect(card!.classList.contains("scroll-mt-56")).toBe(true);
     }
   });
 

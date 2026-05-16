@@ -19,6 +19,7 @@ import { computePipelineStages, resolveExceptionType, findTerminalChange, parseM
 import { ExceptionState } from "@/components/ideas/exception-state";
 import { detectStalledIdea } from "@/lib/stalled-detector";
 import { useNotificationOptIn } from "@/hooks/use-notification-opt-in";
+import { trackEvent } from "@/lib/analytics";
 import type { Status } from "@prisma/client";
 import type { StatusChange } from "@/lib/types";
 import Image from "next/image";
@@ -81,7 +82,6 @@ export default function IdeaDetailPage() {
   const td = useTranslations("Districts");
   const ts = useTranslations("Statuses");
   const ta = useTranslations("Auth");
-  const tp = useTranslations("Pipeline");
   const ttl = useTranslations("Timeline");
   const tn = useTranslations("Notification");
   const { data: session } = useSession();
@@ -102,7 +102,12 @@ export default function IdeaDetailPage() {
   const [commentError, setCommentError] = useState("");
   const [notifyOnVote, setNotifyOnVote] = useState(false);
   const [votingConfig, setVotingConfig] = useState<VotingConfigData | null>(null);
-  const [lastSeenStatus, setLastSeenStatus] = useState<string | null>(null);
+  const [lastSeenStatus] = useState<string | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    return localStorage.getItem(`${id}:lastSeenStatus`);
+  });
 
   const refreshComments = async () => {
     try {
@@ -150,12 +155,6 @@ export default function IdeaDetailPage() {
     return () => { cancelled = true; };
   }, [id]);
 
-  // Read last-seen status from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(`${id}:lastSeenStatus`);
-    if (stored) setLastSeenStatus(stored);
-  }, [id]);
-
   // Update last-seen status in localStorage when idea loads
   useEffect(() => {
     if (idea?.status) {
@@ -165,6 +164,7 @@ export default function IdeaDetailPage() {
 
   const handleVote = async () => {
     if (!session?.user) {
+      trackEvent("sign_in");
       signIn();
       return;
     }
@@ -180,6 +180,7 @@ export default function IdeaDetailPage() {
         const data = await res.json();
         setSupported(true);
         setSupportCount(data.supportCount);
+        trackEvent("idea_vote", { ideaId: id });
       } else if (res.status === 409) {
         setSupported(true);
       } else if (res.status === 403) {
@@ -209,6 +210,7 @@ export default function IdeaDetailPage() {
       });
       if (res.ok) {
         setCommentText("");
+        trackEvent("comment_add", { ideaId: id });
         await refreshComments();
       } else {
         setCommentError(t("commentError"));
@@ -410,7 +412,10 @@ export default function IdeaDetailPage() {
       ) : (
         <div>
           <button
-            onClick={() => signIn()}
+            onClick={() => {
+              trackEvent("sign_in");
+              signIn();
+            }}
             className="inline-flex items-center rounded-sm bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:bg-ink/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-ink"
           >
             {ta("signInToVote")}

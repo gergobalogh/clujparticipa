@@ -4,6 +4,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 // --- Mocks ---
 
@@ -24,7 +26,7 @@ vi.mock("next-intl/server", () => ({
 vi.mock("@/components/ideas/how-it-works-content", () => ({
   HowItWorksContent: () => (
     <main
-      className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10"
+      className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8"
       data-testid="how-it-works-content"
     >
       <h1>HowItWorks.title</h1>
@@ -46,21 +48,19 @@ describe("HowItWorksPage", () => {
   });
 
   it("is a server component (no 'use client' directive in source)", () => {
-    const fs = require("fs");
-    const path = require("path");
-    const source = fs.readFileSync(
-      path.resolve(__dirname, "../page.tsx"),
+    const source = readFileSync(
+      resolve(__dirname, "../page.tsx"),
       "utf-8",
     );
     expect(source).not.toMatch(/"use client"/);
     expect(source).not.toMatch(/'use client'/);
   });
 
-  it("renders the max-w-3xl centered layout via HowItWorksContent", () => {
+  it("renders the redesigned centered layout via HowItWorksContent", () => {
     const { container } = render(<HowItWorksPage />);
     const main = container.querySelector("main");
     expect(main).toBeInTheDocument();
-    expect(main?.className).toContain("max-w-3xl");
+    expect(main?.className).toContain("max-w-5xl");
   });
 
   it("exports a generateMetadata function for SEO", () => {

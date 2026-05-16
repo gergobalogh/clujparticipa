@@ -10,9 +10,7 @@ Umami runs and pageviews are collected from the Next.js app.
 - Verify pageviews appear in Umami dashboard for all locale-prefixed routes
 
 ## OUT scope
-- Consent gate (script always loads for now — will be gated in slice 02)
 - Custom event tracking
-- Consent notice UI
 - Admin page tracking
 
 ## Learning hypothesis

@@ -321,6 +321,21 @@
     "signInToVote": "Autentifică-te cu Google sau Facebook pentru a vota",
     "loginRequiredNote": "Votarea necesită un cont Google sau Facebook."
   },
+  "AuthPage": {
+    "eyebrow": "Cont civic",
+    "title": "Autentificare în ClujParticipa",
+    "subtitle": "Folosiți un cont Google sau Facebook existent pentru a susține idei de pe mai multe dispozitive și pentru a păstra participarea legată de o singură identitate internă.",
+    "trustHeading": "Ce folosim",
+    "trustText": "Provider-ul transmite numele și adresa de email. ClujParticipa nu stochează parole sau token-uri de acces ale provider-ului.",
+    "prototypeHeading": "Statut de prototip",
+    "prototypeText": "Platforma rămâne un prototip de participare civică. Voturile de susținere nu sunt obligatorii și nu verifică eligibilitatea municipală.",
+    "panelTitle": "Alegeți provider-ul",
+    "panelSubtitle": "Doar OAuth, fără cont cu parolă de administrat.",
+    "googleButton": "Continuă cu Google",
+    "facebookButton": "Continuă cu Facebook",
+    "privacyNote": "Autentificarea este conectată la un hash intern de participant pentru a reduce votarea dublă de pe mai multe dispozitive.",
+    "backHome": "Înapoi acasă"
+  },
   "BugReport": {
     "title": "Raportează o problemă",
     "description": "Ai găsit o eroare sau o problemă pe acest site? Scrie-ne despre ea.",
@@ -439,6 +454,7 @@
     "terminalSection": "Rezultate",
     "cta": "Trimite o idee",
     "ctaBrowse": "Caută idei",
+    "creatorCredit": "Prototip creat de",
     "submittedDesc": "Ideea ta a fost primită și așteaptă revizuirea.",
     "inVotingDesc": "Comunitatea votează ideile eligibile.",
     "selectedDesc": "Ideea a fost selectată pentru implementare.",

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useCallback } from "react";
 import { IdeaListRow } from "@/components/ideas/idea-list-row";
+import { trackEvent } from "@/lib/analytics";
 
 type IdeaSummary = {
   id: string;
@@ -117,6 +118,16 @@ export default function IdeasPage() {
     fetchIdeas(next, true);
   };
 
+  const handleFilterChange = (
+    filter: "category" | "district" | "status",
+    value: string
+  ) => {
+    trackEvent("filter_change", { filter, value });
+    if (filter === "category") setCategory(value);
+    if (filter === "district") setDistrict(value);
+    if (filter === "status") setStatus(value);
+  };
+
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
       <h1 className="font-serif text-2xl font-bold text-ink sm:text-3xl">
@@ -128,7 +139,7 @@ export default function IdeasPage() {
         <select
           aria-label={t("filterCategory")}
           value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          onChange={(e) => handleFilterChange("category", e.target.value)}
           className="rounded-sm border border-ink/15 bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
         >
           <option value="">{t("allCategories")}</option>
@@ -142,7 +153,7 @@ export default function IdeasPage() {
         <select
           aria-label={t("filterDistrict")}
           value={district}
-          onChange={(e) => setDistrict(e.target.value)}
+          onChange={(e) => handleFilterChange("district", e.target.value)}
           className="rounded-sm border border-ink/15 bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
         >
           <option value="">{t("allDistricts")}</option>
@@ -156,7 +167,7 @@ export default function IdeasPage() {
         <select
           aria-label={t("filterStatus")}
           value={status}
-          onChange={(e) => setStatus(e.target.value)}
+          onChange={(e) => handleFilterChange("status", e.target.value)}
           className="rounded-sm border border-ink/15 bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink"
         >
           <option value="">{t("allStatuses")}</option>

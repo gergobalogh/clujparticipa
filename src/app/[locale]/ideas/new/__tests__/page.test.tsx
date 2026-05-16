@@ -12,6 +12,9 @@ import "@testing-library/jest-dom/vitest";
 
 // Capture calls to requestPermission for assertion
 const requestPermissionMock = vi.fn().mockResolvedValue("granted");
+const { trackEventMock } = vi.hoisted(() => ({
+  trackEventMock: vi.fn(),
+}));
 
 // Configurable mock state for useNotificationOptIn
 let mockNotificationPermission: "default" | "granted" | "denied" = "default";
@@ -112,6 +115,10 @@ vi.mock("@/components/ideas/image-upload", () => ({
   ImageUpload: () => null,
 }));
 
+vi.mock("@/lib/analytics", () => ({
+  trackEvent: trackEventMock,
+}));
+
 // ---------------------------------------------------------------------------
 // Import component AFTER mocks
 // ---------------------------------------------------------------------------
@@ -126,6 +133,7 @@ describe("NewIdeaPage - Notification opt-in after submission", () => {
   beforeEach(() => {
     requestPermissionMock.mockClear();
     requestPermissionMock.mockResolvedValue("granted");
+    trackEventMock.mockClear();
     mockNotificationPermission = "default";
     mockShowInAppFallback = false;
   });
@@ -169,6 +177,14 @@ describe("NewIdeaPage - Notification opt-in after submission", () => {
     // After successful submission, requestPermission should be called
     await waitFor(() => {
       expect(requestPermissionMock).toHaveBeenCalled();
+    });
+
+    expect(trackEventMock).toHaveBeenCalledWith("idea_submit", {
+      category: "INFRASTRUCTURE",
+      district: "MANASTUR",
+    });
+    await waitFor(() => {
+      expect(trackEventMock).toHaveBeenCalledWith("notification_opt_in");
     });
 
     vi.restoreAllMocks();
@@ -232,6 +248,7 @@ describe("NewIdeaPage - Notification API unavailable", () => {
   beforeEach(() => {
     requestPermissionMock.mockClear();
     requestPermissionMock.mockResolvedValue("denied");
+    trackEventMock.mockClear();
     mockNotificationPermission = "denied";
     mockShowInAppFallback = true;
   });

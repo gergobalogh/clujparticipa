@@ -23,50 +23,7 @@ Decision enabled: I can identify which pages are most/least visited and where to
 
 ---
 
-## US-02: Privacy consent notice
-
-**As a resident**, I want to see a clear, lightweight notice about analytics tracking when I first visit the platform, so I can make an informed choice about whether my browsing is tracked.
-
-**Job trace**: JOB-004 (trust platform privacy)
-
-### Acceptance criteria
-- [ ] On first visit (no `analytics-consent` in localStorage), a bottom bar appears with: privacy text + "Accept" button + "Decline" button
-- [ ] The notice states that analytics are privacy-friendly (no cookies, no PII, no cross-site tracking)
-- [ ] Clicking "Accept" stores `analytics-consent: accepted` in localStorage and enables tracking
-- [ ] Clicking "Decline" stores `analytics-consent: declined` in localStorage and tracking does NOT fire
-- [ ] Scrolling past the notice without clicking also counts as "declined" — no tracking fires
-- [ ] The notice does not block, overlay, or gate any page content — user can interact with the page immediately
-- [ ] On subsequent visits, the notice does NOT reappear (choice remembered)
-- [ ] All visible strings come from locale files (`ro.json`, `hu.json`, `en.json`)
-
-### Elevator Pitch
-Before: I visit the site and have no idea if my browsing is being tracked or by whom.
-After: visit site → see bottom bar "We use privacy-friendly analytics. No personal data is collected." → click Accept or Decline → tracking respects my choice.
-Decision enabled: I can choose whether to participate in analytics without losing any platform functionality.
-
----
-
-## US-03: Consent-gated tracking
-
-**As a resident**, I want tracking to only fire when I have given consent, so my browsing behavior is not collected without my knowledge.
-
-**Job trace**: JOB-004 (trust platform privacy)
-
-### Acceptance criteria
-- [ ] Umami script initialization is conditional: only loads when `analytics-consent === "accepted"` in localStorage
-- [ ] When consent is "declined" or absent, no network requests to the Umami server are made
-- [ ] When consent changes from "declined" to "accepted" (via privacy page toggle), tracking begins immediately without page reload
-- [ ] When consent changes from "accepted" to "declined", no further tracking events fire (existing data in Umami is not deleted — acceptable)
-- [ ] Verify: with browser devtools Network tab open and consent = "declined", zero requests to Umami URL are observed across any page navigation
-
-### Elevator Pitch
-Before: I worry that declining consent might not actually stop tracking, or that tracking happens before I consent.
-After: decline consent → open devtools Network tab → navigate to 3 pages → see zero requests to the analytics server.
-Decision enabled: I can trust that my privacy choice is technically enforced, not just a UI promise.
-
----
-
-## US-04: Custom event tracking for key actions
+## US-02: Custom event tracking for key actions
 
 **As an operator**, I want key user actions (submit idea, vote, comment, filter, sign in) tracked as named events, so I can build funnels and see where users drop off in the engagement journey.
 
@@ -74,7 +31,6 @@ Decision enabled: I can trust that my privacy choice is technically enforced, no
 
 ### Acceptance criteria
 - [ ] A `trackEvent(name, payload?)` helper exists in `src/lib/analytics.ts`
-- [ ] Helper checks consent before firing — no events without `analytics-consent === "accepted"`
 - [ ] Helper is a no-op when Umami script is not loaded (ad blocker, env vars missing) — no console errors
 - [ ] Events are tracked using Umami's `umami.track(name, payload)` API
 - [ ] Initial event taxonomy implemented:
@@ -94,28 +50,7 @@ Decision enabled: I can build a funnel from landing → submit → vote and iden
 
 ---
 
-## US-05: Privacy page consent management
-
-**As a resident**, I want to see my current consent status and change it from the privacy page, so I'm not locked into a choice I made on my first visit.
-
-**Job trace**: JOB-004 (trust platform privacy)
-
-### Acceptance criteria
-- [ ] Privacy page (`/{locale}/privacy`) shows a section: "Analytics" with current consent status (accepted/declined)
-- [ ] A toggle button allows changing consent from accepted → declined or declined → accepted
-- [ ] Changing consent updates localStorage and immediately enables or disables tracking
-- [ ] When consent changes, a `consent_changed` event fires (so the operator can see consent patterns in Umami)
-- [ ] The consent management section uses locale strings for all visible text
-- [ ] If consent is changed to "accepted", the Umami script loads dynamically without page reload
-
-### Elevator Pitch
-Before: I accepted analytics on my first visit but now want to opt out — I have no way to change my choice.
-After: visit `/privacy` → see "Analytics: accepted" → click "Decline" → tracking stops immediately.
-Decision enabled: I can change my mind about analytics participation at any time without contacting support.
-
----
-
-## US-06: Analytics configuration via environment variables
+## US-03: Analytics configuration via environment variables
 
 **As an operator**, I want to configure Umami connection via environment variables, so I can switch between self-hosted and cloud instances without code changes.
 

@@ -34,9 +34,7 @@ export function PipelineTrack({
 }: PipelineTrackProps): JSX.Element {
   const t = useTranslations("Statuses");
   const v = isMobile;
-  const effectiveStages = showcase
-    ? stages.map((s) => ({ ...s, reached: true, current: false }))
-    : stages;
+  const effectiveStages = stages;
   const rej = showcase ? false : exceptionState === "REJECTED";
   const rc = effectiveStages.filter((s) => s.reached || s.current).length;
   const intervals = effectiveStages.length > 1 ? effectiveStages.slice(0, -1) : effectiveStages;

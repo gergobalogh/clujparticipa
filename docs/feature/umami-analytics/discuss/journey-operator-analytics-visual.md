@@ -19,7 +19,6 @@
 
 Shared artifacts:
   ${umamiUrl} → Step 1 produces → consumed by Steps 2-6
-  ${consentStatus} → Step 2 produces → consumed by Steps 3-6
   ${dashboardUrl} → Step 3 produces → consumed by Steps 4-6
   ${funnelData} → Step 5 produces → consumed by Step 6
 ```
@@ -37,7 +36,7 @@ Shared artifacts:
 - **Action**: Add Umami tracking script to Next.js layout, visit site, check Umami dashboard for pageview
 - **Expected output**: First pageview appears in Umami within seconds
 - **Emotional state**: anxious → relieved (does it work?)
-- **Artifacts produced**: `${consentStatus}` (tracking works end-to-end)
+- **Artifacts produced**: —
 - **Artifacts consumed**: `${umamiUrl}`
 
 ### Step 3: Check dashboard
@@ -45,7 +44,7 @@ Shared artifacts:
 - **Expected output**: Real-time and historical pageview data with locale paths visible
 - **Emotional state**: curious (first time seeing real data)
 - **Artifacts produced**: `${dashboardUrl}` (bookmarked)
-- **Artifacts consumed**: `${umamiUrl}`, `${consentStatus}`
+- **Artifacts consumed**: `${umamiUrl}`
 
 ### Step 4: Spot problem
 - **Action**: Notice anomaly — e.g., high bounce rate on idea detail, low vote button clicks, nobody uses the map page
@@ -59,7 +58,7 @@ Shared artifacts:
 - **Expected output**: Funnel shows exact step where users drop off
 - **Emotional state**: digging → focused (narrowing the problem)
 - **Artifacts produced**: `${funnelData}`
-- **Artifacts consumed**: `${dashboardUrl}`, `${consentStatus}`
+- **Artifacts consumed**: `${dashboardUrl}`
 
 ### Step 6: Act on insight
 - **Action**: Make UX change based on data, tag it in Umami as a goal, measure improvement
@@ -73,5 +72,4 @@ Shared artifacts:
 | Error | Trigger | Recovery |
 |-------|---------|----------|
 | Umami server down | Deploy fails or container crashes | Fallback: tracking script is no-op, site works without analytics. Alert operator via uptime monitor. |
-| No data appears | Script loaded but events don't fire | Check: CORS, ad blockers, consent gate. Debug via browser devtools network tab. |
-| Consent blocking all data | Consent banner not shown or all users opt out | Verify consent component renders. Track anonymous pageviews even without consent (Umami's cookieless model may allow this — confirm with GDPR). |
+| No data appears | Script loaded but events don't fire | Check: CORS, ad blockers. Debug via browser devtools network tab. |

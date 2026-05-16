@@ -4,6 +4,7 @@ services:
       context: .
       args:
         - NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+        - NEXT_PUBLIC_UMAMI_URL=${NEXT_PUBLIC_UMAMI_URL}
     container_name: clujparticipa-app
     restart: unless-stopped
     ports:
@@ -20,6 +21,7 @@ services:
       - FACEBOOK_ID=${FACEBOOK_ID:-}
       - FACEBOOK_SECRET=${FACEBOOK_SECRET:-}
       - NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+      - NEXT_PUBLIC_UMAMI_URL=${NEXT_PUBLIC_UMAMI_URL}
       - PORT=3030
       - HOSTNAME=0.0.0.0
     depends_on:

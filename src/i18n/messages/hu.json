@@ -321,6 +321,21 @@
     "signInToVote": "Szavazáshoz jelentkezz be Google vagy Facebook fiókkal",
     "loginRequiredNote": "A szavazáshoz Google vagy Facebook fiók szükséges."
   },
+  "AuthPage": {
+    "eyebrow": "Polgári fiók",
+    "title": "Bejelentkezés a ClujParticipa felületre",
+    "subtitle": "Használjon meglévő Google vagy Facebook fiókot, hogy több eszközről is támogathasson ötleteket, egy belső résztvevői identitáshoz kötve.",
+    "trustHeading": "Mit használunk",
+    "trustText": "A szolgáltató a nevét és e-mail címét adja át. A ClujParticipa nem tárol szolgáltatói jelszavakat vagy hozzáférési tokeneket.",
+    "prototypeHeading": "Prototípus státusz",
+    "prototypeText": "Ez továbbra is polgári részvételi prototípus. A támogató szavazatok nem kötelező érvényűek, és nem ellenőrzik az önkormányzati jogosultságot.",
+    "panelTitle": "Válasszon szolgáltatót",
+    "panelSubtitle": "Csak OAuth, kezelendő jelszavas fiók nélkül.",
+    "googleButton": "Folytatás Google-fiókkal",
+    "facebookButton": "Folytatás Facebook-fiókkal",
+    "privacyNote": "A bejelentkezés egy belső résztvevői hash-hez kapcsolódik, hogy több eszközön is csökkenjen a dupla szavazás esélye.",
+    "backHome": "Vissza a főoldalra"
+  },
   "BugReport": {
     "title": "Hibabejelentés",
     "description": "Hibát vagy problémát találtál az oldalon? Írd meg nekünk.",
@@ -439,6 +454,7 @@
     "terminalSection": "Eredmények",
     "cta": "Küldd be ötleted",
     "ctaBrowse": "Ötletek böngészése",
+    "creatorCredit": "A prototípust készítette",
     "submittedDesc": "Ötleted beérkezett és felülvizsgálatra vár.",
     "inVotingDesc": "A közösség szavaz a jogosult ötletekről.",
     "selectedDesc": "Az ötlet kiválasztásra került megvalósításra.",

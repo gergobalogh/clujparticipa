@@ -3,6 +3,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 
 // ---------------------------------------------------------------------------
@@ -12,6 +13,10 @@ import "@testing-library/jest-dom/vitest";
 let mockNotificationPermission: "default" | "granted" | "denied" = "denied";
 let mockShowInAppFallback = true;
 let mockRequestPermission = vi.fn().mockResolvedValue("denied");
+const { trackEventMock, signInMock } = vi.hoisted(() => ({
+  trackEventMock: vi.fn(),
+  signInMock: vi.fn(),
+}));
 
 vi.mock("@/hooks/use-notification-opt-in", () => ({
   useNotificationOptIn: () => ({
@@ -122,9 +127,15 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 }));
 
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ children, ...props }: { children: React.ReactNode; href: string }) => (
+    <a {...props}>{children}</a>
+  ),
+}));
+
 vi.mock("next-auth/react", () => ({
   useSession: () => ({ data: null }),
-  signIn: () => {},
+  signIn: signInMock,
 }));
 
 vi.mock("@/components/ui/badge", () => ({
@@ -186,6 +197,10 @@ vi.mock("@/lib/stalled-detector", () => ({
   detectStalledIdea: () => ({ isStalled: false, daysSinceLastChange: 0, waitingForLabel: "" }),
 }));
 
+vi.mock("@/lib/analytics", () => ({
+  trackEvent: trackEventMock,
+}));
+
 // ---------------------------------------------------------------------------
 // Import component AFTER mocks
 // ---------------------------------------------------------------------------
@@ -245,6 +260,26 @@ function setupFetchMock(idea: Record<string, unknown> = MOCK_IDEA) {
   return fetchMock;
 }
 
+function setupFetchMockWithVote(idea: Record<string, unknown> = MOCK_IDEA) {
+  const fetchMock = vi.fn().mockImplementation((url: string, init?: RequestInit) => {
+    if (url.includes("/api/ideas/") && url.endsWith("/comments")) {
+      if (init?.method === "POST") {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ id: "comment-1" }) });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ comments: [] }) });
+    }
+    if (url.includes("/api/ideas/") && url.endsWith("/vote")) {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ supportCount: 6 }) });
+    }
+    if (url.includes("/api/voting-config")) {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ config: null }) });
+    }
+    return Promise.resolve({ ok: true, json: () => Promise.resolve(idea) });
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  return fetchMock;
+}
+
 // ---------------------------------------------------------------------------
 // Acceptance: In-app fallback indicator when permission denied
 // ---------------------------------------------------------------------------
@@ -252,6 +287,8 @@ function setupFetchMock(idea: Record<string, unknown> = MOCK_IDEA) {
 describe("IdeaDetailPage - Notification fallback when permission denied", () => {
   beforeEach(() => {
     localStorage.clear();
+    trackEventMock.mockClear();
+    signInMock.mockClear();
     mockNotificationPermission = "denied";
     mockShowInAppFallback = true;
     mockRequestPermission = vi.fn().mockResolvedValue("denied");
@@ -320,6 +357,8 @@ describe("IdeaDetailPage - Notification fallback when permission denied", () => 
 describe("IdeaDetailPage - Multiple status changes show latest only", () => {
   beforeEach(() => {
     localStorage.clear();
+    trackEventMock.mockClear();
+    signInMock.mockClear();
     mockNotificationPermission = "denied";
     mockShowInAppFallback = true;
     mockRequestPermission = vi.fn().mockResolvedValue("denied");
@@ -358,6 +397,54 @@ describe("IdeaDetailPage - Multiple status changes show latest only", () => {
       const fallback = screen.getByTestId("notification-fallback");
       expect(fallback).toBeInTheDocument();
       expect(fallback.textContent).toContain("In voting");
+    });
+  });
+});
+
+describe("IdeaDetailPage - analytics events", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    trackEventMock.mockClear();
+    signInMock.mockClear();
+    mockNotificationPermission = "granted";
+    mockShowInAppFallback = false;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("tracks sign_in before redirecting unauthenticated voting users", async () => {
+    const user = userEvent.setup();
+    setupFetchMock();
+
+    render(<IdeaDetailPage />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Broken sidewalk near school").length).toBeGreaterThan(0);
+    });
+
+    await user.click(screen.getAllByRole("button", { name: "Sign in to vote" })[0]);
+
+    expect(trackEventMock).toHaveBeenCalledWith("sign_in");
+    expect(signInMock).toHaveBeenCalled();
+  });
+
+  it("tracks top-level comments after a successful submit", async () => {
+    const user = userEvent.setup();
+    setupFetchMockWithVote();
+
+    render(<IdeaDetailPage />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Broken sidewalk near school").length).toBeGreaterThan(0);
+    });
+
+    await user.type(screen.getByPlaceholderText("Write a comment..."), "Please fix this soon");
+    await user.click(screen.getByRole("button", { name: "Submit" }));
+
+    await waitFor(() => {
+      expect(trackEventMock).toHaveBeenCalledWith("comment_add", { ideaId: "idea-123" });
     });
   });
 });

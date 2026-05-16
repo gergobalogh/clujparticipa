@@ -16,7 +16,7 @@ steps:
     action: Add tracking script, visit site, check dashboard for pageview
     expected_output: First pageview appears in Umami within seconds
     emotional_state: anxious_relieved
-    artifacts_produced: ["${consentStatus}"]
+    artifacts_produced: []
     artifacts_consumed: ["${umamiUrl}"]
   - id: s3-check
     name: Check dashboard
@@ -24,7 +24,7 @@ steps:
     expected_output: Real-time and historical pageview data with locale paths
     emotional_state: curious
     artifacts_produced: ["${dashboardUrl}"]
-    artifacts_consumed: ["${umamiUrl}", "${consentStatus}"]
+    artifacts_consumed: ["${umamiUrl}"]
   - id: s4-spot
     name: Spot problem
     action: Notice anomaly in engagement metrics
@@ -38,7 +38,7 @@ steps:
     expected_output: Funnel shows exact drop-off step
     emotional_state: digging_focused
     artifacts_produced: ["${funnelData}"]
-    artifacts_consumed: ["${dashboardUrl}", "${consentStatus}"]
+    artifacts_consumed: ["${dashboardUrl}"]
   - id: s6-act
     name: Act on insight
     action: Make UX change based on data, tag as goal, measure improvement
@@ -54,8 +54,4 @@ error_paths:
   - id: e2-no-data
     name: No data appears
     trigger: Script loaded but events don't fire
-    recovery: Check CORS, ad blockers, consent gate. Debug via browser devtools.
-  - id: e3-consent-block
-    name: Consent blocking all data
-    trigger: All users opt out or consent component broken
-    recovery: Verify consent component renders. Consider anonymous pageview under GDPR.
+    recovery: Check CORS, ad blockers. Debug via browser devtools.

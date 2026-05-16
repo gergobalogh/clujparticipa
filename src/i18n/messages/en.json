@@ -330,6 +330,21 @@
     "signInToVote": "Sign in with Google or Facebook to vote",
     "loginRequiredNote": "Voting requires a Google or Facebook account."
   },
+  "AuthPage": {
+    "eyebrow": "Civic account",
+    "title": "Sign in to ClujParticipa",
+    "subtitle": "Use an existing Google or Facebook account to support ideas across devices and keep your participation tied to one internal participant identity.",
+    "trustHeading": "What we use",
+    "trustText": "The provider shares your name and email address. ClujParticipa does not store provider passwords or access tokens.",
+    "prototypeHeading": "Prototype status",
+    "prototypeText": "This remains a civic participation prototype. Support votes are non-binding and do not verify municipal eligibility.",
+    "panelTitle": "Choose a provider",
+    "panelSubtitle": "OAuth only, no password account to manage.",
+    "googleButton": "Continue with Google",
+    "facebookButton": "Continue with Facebook",
+    "privacyNote": "Your login is connected to an internal participant hash to reduce duplicate voting across devices.",
+    "backHome": "Back to home"
+  },
   "BugReport": {
     "title": "Report a bug",
     "description": "Found an error or issue on this site? Let us know.",
@@ -448,6 +463,7 @@
     "terminalSection": "Outcomes",
     "cta": "Submit your idea",
     "ctaBrowse": "Browse ideas",
+    "creatorCredit": "Prototype created by",
     "submittedDesc": "Your idea is received and awaits review.",
     "inVotingDesc": "The community votes on eligible ideas.",
     "selectedDesc": "The idea is chosen for implementation.",

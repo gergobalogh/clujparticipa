@@ -27,8 +27,15 @@ vi.mock("next/navigation", () => ({
   RedirectType: { push: 0, replace: 1 },
 }));
 
+const { scriptProps } = vi.hoisted(() => ({
+  scriptProps: [] as Array<Record<string, unknown>>,
+}));
+
 vi.mock("next/script", () => ({
-  default: () => null,
+  default: (props: Record<string, unknown>) => {
+    scriptProps.push(props);
+    return null;
+  },
 }));
 
 // Track which fonts are requested and their CSS variable assignments
@@ -76,14 +83,8 @@ vi.mock("@/i18n/routing", () => ({
 // --- Tests ---
 
 describe("LocaleLayout -- Font wiring (Step 02-01)", () => {
-  let LocaleLayout: React.ComponentType<{
-    children: React.ReactNode;
-    params: Promise<{ locale: string }>;
-  }>;
-
   beforeAll(async () => {
-    const mod = await import("../layout");
-    LocaleLayout = mod.default;
+    await import("../layout");
   });
 
   it("registers Playfair_Display font with --font-playfair variable", () => {
@@ -126,6 +127,19 @@ describe("LocaleLayout -- Font wiring (Step 02-01)", () => {
   it("does NOT register Geist sans", () => {
     const geist = fontCalls.find((c) => c.name === "Geist");
     expect(geist).toBeUndefined();
+  });
+});
+
+describe("LocaleLayout -- Umami analytics config", () => {
+  it("normalizes the configured Umami base URL to script.js", async () => {
+    const mod = await import("../layout");
+
+    expect(mod.getUmamiScriptSrc("https://analytics.example.com")).toBe(
+      "https://analytics.example.com/script.js"
+    );
+    expect(mod.getUmamiScriptSrc("https://analytics.example.com///")).toBe(
+      "https://analytics.example.com/script.js"
+    );
   });
 });
 

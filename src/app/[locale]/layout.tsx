@@ -29,6 +29,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export function getUmamiScriptSrc(umamiUrl: string): string {
+  return `${umamiUrl.replace(/\/+$/, "")}/script.js`;
+}
+
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
@@ -58,6 +62,8 @@ async function LocaleLayoutContent({
 
   setRequestLocale(locale);
   const messages = await getMessages();
+  const umamiUrl = process.env.NEXT_PUBLIC_UMAMI_URL;
+  const umamiWebsiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
 
   return (
     <html
@@ -65,12 +71,13 @@ async function LocaleLayoutContent({
       className={`${inter.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-paper text-ink">
-        <Script
-          async
-          src="/stats.js"
-          data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
-          strategy="afterInteractive"
-        />
+        {umamiUrl && umamiWebsiteId && (
+          <Script
+            src={getUmamiScriptSrc(umamiUrl)}
+            data-website-id={umamiWebsiteId}
+            strategy="afterInteractive"
+          />
+        )}
         <NextIntlClientProvider locale={locale} messages={messages}>
           <SessionProvider>
             <Header />

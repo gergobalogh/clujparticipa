@@ -1,8 +1,10 @@
 "use client";
 
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useState, useRef, useEffect } from "react";
+import { Link } from "@/i18n/navigation";
+import { trackEvent } from "@/lib/analytics";
 
 export function UserMenu() {
   const { data: session } = useSession();
@@ -62,11 +64,12 @@ export function UserMenu() {
   }
 
   return (
-    <button
-      onClick={() => signIn()}
-      className="rounded-sm px-3 py-1.5 text-sm font-medium text-ink-muted hover:text-ink hover:bg-paper-muted transition cursor-pointer"
+    <Link
+      href="/login"
+      onClick={() => trackEvent("sign_in")}
+      className="rounded-sm px-3 py-1.5 text-sm font-medium text-ink-muted hover:text-ink hover:bg-paper-muted transition"
     >
       {t("signIn")}
-    </button>
+    </Link>
   );
 }

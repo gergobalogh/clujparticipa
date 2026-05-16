@@ -10,6 +10,7 @@ const EXPECTED_KEYS = [
   "terminalSection",
   "cta",
   "ctaBrowse",
+  "creatorCredit",
   "submittedDesc",
   "inVotingDesc",
   "selectedDesc",
@@ -23,8 +24,6 @@ const EXPECTED_KEYS = [
   "nextStep",
 ] as const;
 
-type ExpectedKey = (typeof EXPECTED_KEYS)[number];
-
 const locales: Record<string, Record<string, unknown>> = {
   en,
   hu,
@@ -32,7 +31,7 @@ const locales: Record<string, Record<string, unknown>> = {
 };
 
 describe("HowItWorks i18n namespace", () => {
-  it("has all 17 keys in all 3 locale files", () => {
+  it("has all 18 keys in all 3 locale files", () => {
     for (const [localeName, messages] of Object.entries(locales)) {
       expect(
         messages,
@@ -62,14 +61,14 @@ describe("HowItWorks i18n namespace", () => {
     }
   });
 
-  it("does not have extra keys beyond the 17 expected", () => {
+  it("does not have extra keys beyond the 18 expected", () => {
     for (const [localeName, messages] of Object.entries(locales)) {
       const howItWorks = messages["HowItWorks"] as Record<string, unknown>;
       const actualKeys = Object.keys(howItWorks).sort();
       const expectedSorted = [...EXPECTED_KEYS].sort();
       expect(
         actualKeys,
-        `${localeName}.json HowItWorks should have exactly 17 keys, no extras`
+        `${localeName}.json HowItWorks should have exactly 18 keys, no extras`
       ).toEqual(expectedSorted);
     }
   });

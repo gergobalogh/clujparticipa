@@ -1,11 +1,10 @@
-# Slice 03: Page-Level Custom Events
+# Slice 02: Page-Level Custom Events
 
 ## Goal
 Key user actions are tracked as named events in Umami, enabling funnel analysis and behavioral insights.
 
 ## IN scope
 - `trackEvent(name, payload?)` helper function in `src/lib/analytics.ts`
-- Helper checks `${consentStatus}` before firing — no events without consent
 - Event taxonomy (initial set):
   - `idea_submit` — idea creation form submitted successfully
   - `idea_vote` — vote/support button clicked
@@ -28,8 +27,8 @@ Disproves: "custom events will be too noisy to be useful" if events are clearly 
 Confirms: event naming convention is maintainable — a new developer can add an event without reading this doc.
 
 ## Acceptance criteria
-- [ ] `trackEvent()` helper exists, calls Umami's `umami.track()` API when consent is accepted
-- [ ] `trackEvent()` is a no-op when consent is declined or undecided — no events fire
+- [ ] `trackEvent()` helper exists, calls Umami's `umami.track()` API
+- [ ] `trackEvent()` is a no-op when Umami script is not loaded (ad blocker, env vars missing) — no console errors
 - [ ] Submitting an idea fires `idea_submit` event with payload `{ category, district }`
 - [ ] Voting on an idea fires `idea_vote` event with payload `{ ideaId }`
 - [ ] Adding a comment fires `comment_add` event with payload `{ ideaId }`
@@ -37,17 +36,15 @@ Confirms: event naming convention is maintainable — a new developer can add an
 - [ ] Signing in fires `sign_in` event (no payload)
 - [ ] Accepting notification permission fires `notification_opt_in` event
 - [ ] All events appear in Umami events tab within 10 seconds
-- [ ] Helper handles Umami not loaded (ad blocker) gracefully — no console errors
 
 ## Dependencies
 - Slice 01 (Umami running)
-- Slice 02 (consent gate — events must respect consent)
 
 ## Effort estimate
 ~6 hours
 
 ## Reference class
-Custom event tracking with Umami. Standard pattern: wrapper function + consent check.
+Custom event tracking with Umami. Standard pattern: wrapper function.
 
 ## Pre-slice SPIKE
 None needed — Umami's `track()` API is well-documented.
