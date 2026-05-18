@@ -89,7 +89,7 @@ export function Header() {
           })}
         </nav>
 
-        <div className="flex items-center justify-end gap-2">
+        <div className="col-start-3 flex items-center justify-end gap-2">
           <UserMenu />
 
           {/* Mobile menu button */}

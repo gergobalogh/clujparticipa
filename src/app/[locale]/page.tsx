@@ -158,7 +158,7 @@ export default function LocaleHomePage() {
         {/* Sidebar: idea list */}
         <motion.aside
           data-testid="sidebar"
-          className="w-full md:w-[400px] shrink-0 flex flex-col overflow-y-auto overflow-x-hidden max-h-[80vh]"
+          className="w-full md:w-[400px] shrink-0 flex flex-col"
           initial={prefersReducedMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
