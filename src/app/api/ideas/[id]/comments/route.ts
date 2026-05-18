@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { validateParticipantToken } from "@/lib/participant";
 import { getAuthSession, resolveParticipantHash } from "@/lib/auth-participant";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { moderateText } from "@/lib/openai-moderation";
+import { callOpenAIModeration } from "@/lib/openai-moderation-adapter";
 import { z } from "zod";
 
 // ── GET /api/ideas/[id]/comments ── list visible comments ──
@@ -136,15 +138,45 @@ export async function POST(
     );
   }
 
+  // Moderate comment text before persisting
+  let moderationResult: { flagged: boolean; categories: string[] };
+  try {
+    moderationResult = await moderateText(text, callOpenAIModeration);
+  } catch (error: unknown) {
+    console.warn("comment-moderation-fail-open", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    moderationResult = { flagged: false, categories: [] };
+  }
+
+  const commentStatus = moderationResult.flagged ? "FLAGGED" : "VISIBLE";
+
   const comment = await prisma.comment.create({
     data: {
       ideaId: id,
       participantHash,
       text,
       parentId: parentId ?? null,
-      status: "VISIBLE",
+      status: commentStatus,
     },
   });
+
+  if (moderationResult.flagged) {
+    await prisma.moderationEvent.create({
+      data: {
+        targetType: "COMMENT",
+        targetId: comment.id,
+        action: "AUTO_FLAG",
+        reason: `auto_flag:${moderationResult.categories.join(",")}`,
+        changedBy: "SYSTEM",
+      },
+    });
+
+    return NextResponse.json(
+      { ...comment, message: "Your comment is under review" },
+      { status: 202 }
+    );
+  }
 
   return NextResponse.json(comment, { status: 201 });
 }

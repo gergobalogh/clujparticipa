@@ -72,7 +72,7 @@ describe("Comment auto-moderation", () => {
   afterEach(async () => {
     await truncateAll(testPrisma);
     _resetBuckets();
-    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(async () => {

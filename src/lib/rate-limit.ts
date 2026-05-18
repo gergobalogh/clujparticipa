@@ -101,7 +101,7 @@ export const RATE_LIMITS = {
   /** For voting */
   vote: { maxRequests: 20, windowMs: 60 * 1000 },
   /** For commenting */
-  comment: { maxRequests: 10, windowMs: 60 * 1000 },
+  comment: { maxRequests: 5, windowMs: 60 * 1000 },
   /** For listing (more generous) */
   read: { maxRequests: 60, windowMs: 60 * 1000 },
   /** For bug reports */
