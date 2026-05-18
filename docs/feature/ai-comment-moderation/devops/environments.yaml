@@ -1,0 +1,88 @@
+# Environments — ai-comment-moderation
+# Target environments, coexistence matrix, platform coverage, deployment assumptions
+
+environments:
+  local-dev:
+    host: developer-machine
+    docker_compose: true  # app + postgres; pgbouncer optional
+    services: [app, postgres]
+    env_vars:
+      OPENAI_API_KEY: set-in-.env  # optional; probe skips if missing
+    prisma: migrate-dev
+    purpose: development, manual testing
+    deploy_method: npm-run-dev
+
+  production:
+    host: single-vps
+    docker_compose: true  # app + pgbouncer + postgres
+    services: [app, pgbouncer, postgres]
+    env_vars:
+      OPENAI_API_KEY: required  # must be set before deployment
+    prisma: migrate-deploy  # via scripts/build-and-deploy.sh
+    purpose: live traffic
+    deploy_method: scripts/build-and-deploy.sh
+    url: https://cluj.gbfcj.my
+    app_port: 3030
+
+coexistence_matrix:
+  comment_statuses:
+    before: [VISIBLE, HIDDEN]
+    after: [VISIBLE, HIDDEN, FLAGGED]
+    migration: additive-enum
+    backward_compatible: true
+
+  moderation_actions:
+    before: [HIDE, RESTORE, STATUS_CHANGE]
+    after: [HIDE, RESTORE, STATUS_CHANGE, AUTO_FLAG, APPROVE]
+    migration: additive-enum
+    backward_compatible: true
+
+  comment_post_response:
+    before: "always HTTP 201"
+    after: "HTTP 201 (clean), HTTP 202 (flagged), HTTP 201 (fail-open)"
+    backward_compatible: true  # 202 body same shape as 201
+
+  admin_patch_actions:
+    before: [HIDE, RESTORE]
+    after: [HIDE, RESTORE, APPROVE]
+    migration: additive
+    backward_compatible: true
+
+  get_comments_feed:
+    before: "filters status=VISIBLE"
+    after: "filters status=VISIBLE (FLAGGED auto-excluded)"
+    backward_compatible: true
+    code_change: none  # existing filter already excludes non-VISIBLE
+
+  docker_compose_topology:
+    before: [app, pgbouncer, postgres]
+    after: [app, pgbouncer, postgres]
+    change: none
+
+  npm_dependencies:
+    added: [openai]
+    removed: []
+
+  env_vars:
+    added: [OPENAI_API_KEY]
+    removed: []
+
+platform_coverage:
+  os: linux
+  container_runtime: docker-compose
+  app_framework: next.js-app-router
+  database: postgresql-16
+  orm: prisma
+  reverse_proxy: none  # direct port exposure
+  ssl: handled-upstream  # Cloudflare or similar terminates TLS
+
+deployment_assumptions:
+  - Single VPS deployment target
+  - Manual deploy via scripts/build-and-deploy.sh (no CI/CD)
+  - Recreate strategy (stop-and-replace, ~30-60s downtime)
+  - Additive-only Prisma migrations (zero data loss)
+  - OPENAI_API_KEY must be pre-configured on VPS before deployment
+  - Previous app image is not automatically tagged (manual rollback via git checkout)
+  - No staging environment (prototype)
+  - No automated health checks (manual verification post-deploy)
+  - Structured JSON logs via console.warn (no external log aggregation)

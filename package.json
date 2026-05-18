@@ -12,6 +12,7 @@
     "db:validate": "prisma validate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "seed:images": "node scripts/upload-seed-images.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:unit": "vitest run src/lib",

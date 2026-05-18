@@ -87,35 +87,23 @@ export function HowItWorksContent(): JSX.Element {
   }, []);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-
-        const stage = visibleEntries[0]?.target.id.toUpperCase() as
-          | Status
-          | undefined;
-
-        if (stage && PIPELINE_STAGES.includes(stage)) {
-          setActiveStage(stage);
+    // Active = last card whose top edge has crossed the viewport midpoint,
+    // so whichever stage is in the center of the screen is highlighted.
+    const handleScroll = () => {
+      const mid = window.innerHeight / 2;
+      let current = PIPELINE_STAGES[0] as Status;
+      for (const status of PIPELINE_STAGES) {
+        const el = cardRefs.current.get(status);
+        if (!el) continue;
+        if (el.getBoundingClientRect().top <= mid) {
+          current = status as Status;
         }
-      },
-      {
-        root: null,
-        rootMargin: "-30% 0px -45% 0px",
-        threshold: [0.35, 0.6],
       }
-    );
+      setActiveStage(current);
+    };
 
-    PIPELINE_STAGES.forEach((status) => {
-      const element = cardRefs.current.get(status);
-      if (element) {
-        observer.observe(element);
-      }
-    });
-
-    return () => observer.disconnect();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleStageClick = (status: Status) => {
@@ -150,57 +138,121 @@ export function HowItWorksContent(): JSX.Element {
       </header>
 
       <section className="mt-10">
-        <div
-          data-testid="sticky-pipeline-container"
-          className="sticky top-20 z-10 border-y border-gray-200 bg-paper/95 py-4 backdrop-blur sm:py-5"
-        >
-          <div
-            data-testid="active-stage-indicator"
-            data-active-stage={activeStage}
-          >
-            <PipelineTrack
-              stages={showcaseStages}
-              showcase={true}
-              isMobile={isMobilePipeline}
-              onStageClick={handleStageClick}
-            />
-          </div>
-        </div>
-
-        <div className="mt-12 grid gap-8 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
-          <div>
-            <h2 className="text-2xl font-semibold text-ink">
+        {isMobilePipeline ? (
+          // Mobile: 2-column inline layout — pipeline on left, descriptions on right
+          <div className="mt-6">
+            <h2 className="mb-6 text-2xl font-semibold text-ink">
               {t("forwardSection")}
             </h2>
-          </div>
+            {(() => {
+              const activeIndex = PIPELINE_STAGES.indexOf(activeStage as Status);
+              return PIPELINE_STAGES.map((status, index) => {
+                const descKey = STAGE_DESC_KEYS[status];
+                const nextStage = NEXT_STAGE_MAP[status];
+                const isActive = status === activeStage;
+                const isCompleted = index < activeIndex;
+                const isLast = index === PIPELINE_STAGES.length - 1;
 
-          <div className="space-y-10">
-            {PIPELINE_STAGES.map((status) => {
-              const descKey = STAGE_DESC_KEYS[status];
-              const nextStage = NEXT_STAGE_MAP[status];
-              return (
-                <div
-                  key={status}
-                  id={status.toLowerCase()}
-                  ref={setCardRef(status)}
-                  className="stage-card flex min-h-[40vh] scroll-mt-56 flex-col justify-center rounded-lg border border-gray-200 bg-white p-6 shadow-sm sm:p-8"
-                >
-                  <Badge variant={statusToBadgeVariant(status)}>
-                    {s(status)}
-                  </Badge>
-                  <p className="mt-4 max-w-2xl text-lg leading-8 text-gray-700">
-                    {t(descKey)}
-                  </p>
-                  {nextStage && (
-                    <p className="mt-5 text-sm text-gray-500">
-                      {t("nextStep", { stage: s(nextStage) })}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
+                return (
+                  <div
+                    key={status}
+                    id={status.toLowerCase()}
+                    ref={setCardRef(status)}
+                    className="stage-card flex scroll-mt-20 gap-4"
+                  >
+                    {/* Left ~30%: dot + connector line */}
+                    <div className="flex w-[30%] flex-col items-center pt-1">
+                      <div
+                        className={`shrink-0 rounded-full ${
+                          isActive
+                            ? "h-4 w-4 border-[3px] border-ink bg-paper"
+                            : isCompleted
+                              ? "h-3 w-3 bg-ink"
+                              : "h-3 w-3 border-2 border-gray-300 bg-paper"
+                        }`}
+                      />
+                      {!isLast && (
+                        <div
+                          className={`mt-1 w-0.5 grow ${isCompleted ? "bg-ink" : "bg-gray-200"}`}
+                        />
+                      )}
+                    </div>
+
+                    {/* Right ~70%: badge + description */}
+                    <div className={`w-[70%] ${isLast ? "" : "pb-8"}`}>
+                      <Badge variant={statusToBadgeVariant(status)}>
+                        {s(status)}
+                      </Badge>
+                      <p className="mt-3 text-sm leading-6 text-gray-700">
+                        {t(descKey)}
+                      </p>
+                      {nextStage && (
+                        <p className="mt-2 text-xs text-gray-500">
+                          {t("nextStep", { stage: s(nextStage) })}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              });
+            })()}
           </div>
-        </div>
+        ) : (
+          // Desktop: sticky pipeline track + card grid
+          <>
+            <div
+              data-testid="sticky-pipeline-container"
+              className="sticky top-20 z-10 border-y border-gray-200 bg-paper/95 py-4 backdrop-blur sm:py-5"
+            >
+              <div
+                data-testid="active-stage-indicator"
+                data-active-stage={activeStage}
+              >
+                <PipelineTrack
+                  stages={showcaseStages}
+                  showcase={true}
+                  isMobile={false}
+                  onStageClick={handleStageClick}
+                />
+              </div>
+            </div>
+
+            <div className="mt-12 grid gap-8 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
+              <div>
+                <h2 className="text-2xl font-semibold text-ink">
+                  {t("forwardSection")}
+                </h2>
+              </div>
+
+              <div className="space-y-10">
+                {PIPELINE_STAGES.map((status) => {
+                  const descKey = STAGE_DESC_KEYS[status];
+                  const nextStage = NEXT_STAGE_MAP[status];
+                  return (
+                    <div
+                      key={status}
+                      id={status.toLowerCase()}
+                      ref={setCardRef(status)}
+                      className="stage-card scroll-mt-56 rounded-lg border border-gray-200 bg-white p-6 shadow-sm sm:p-8"
+                    >
+                      <Badge variant={statusToBadgeVariant(status)}>
+                        {s(status)}
+                      </Badge>
+                      <p className="mt-4 max-w-2xl text-lg leading-8 text-gray-700">
+                        {t(descKey)}
+                      </p>
+                      {nextStage && (
+                        <p className="mt-5 text-sm text-gray-500">
+                          {t("nextStep", { stage: s(nextStage) })}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
       </section>
 
       <section className="mt-16 grid gap-8 border-t border-gray-200 pt-12 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">

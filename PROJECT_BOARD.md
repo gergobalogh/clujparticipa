@@ -119,6 +119,11 @@
 - [x] Rejected ideas sorted to bottom of list with public rejection note
   - DoD: Ideas list page renders `REJECTED` ideas after all non-rejected ideas regardless of active sort order; `REJECTED` ideas display a "Not eligible" badge translated in all three locales; the admin status-change UI prompts for a required public note when transitioning to `REJECTED`; the rejection note is displayed on the idea detail page and in the status timeline; the list page includes a "Show / hide rejected" filter toggle that defaults to visible; `npm run lint`, `npm run type-check`, and `npm run build` pass
 
+## Phase 11 - Utility Features
+
+- [ ] Full-text search on ideas (title + description)
+  - DoD: Ideas list page and home page have a search input; `GET /api/ideas` accepts a `q` query parameter; results are filtered by `ILIKE` match on title and description across all locales; empty query returns unfiltered results; search works alongside existing category/district/status filters; i18n placeholder text exists in RO/HU/EN; `npm run lint`, `npm run type-check`, and `npm run build` pass
+
 ---
 
 ## Decisions Log

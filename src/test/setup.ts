@@ -13,3 +13,4 @@ process.env.GOOGLE_ID ??= "test-google-id";
 process.env.GOOGLE_SECRET ??= "test-google-secret";
 process.env.FACEBOOK_ID ??= "test-fb-id";
 process.env.FACEBOOK_SECRET ??= "test-fb-secret";
+process.env.OPENAI_API_KEY = "test-openai-api-key";

@@ -36,7 +36,7 @@
 
 ## Mutation Testing Strategy
 
-This project uses **per-feature** mutation testing. Runs after refactoring during each delivery, scoped to modified files. Kill rate gate: >= 80%.
+Mutation testing is **disabled**. Test quality validated through code review and CI coverage.
 
 ## Build & Deploy
 

@@ -64,7 +64,6 @@
     "description": "Civic participation prototype for Cluj-Napoca. Submit neighborhood ideas, discover them on the map, add support, comment, and follow each idea's progress through the pipeline to completion.",
     "submitIdea": "Submit an idea",
     "browseIdeas": "Browse ideas",
-    "openMap": "Open map",
     "statsTitle": "Current Status",
     "totalIdeas": "Ideas submitted",
     "totalVotes": "Support votes",
@@ -81,8 +80,8 @@
     "votingOpen": "Open",
     "votingClosed": "Closed",
     "unavailable": "unavailable",
-    "liveBadge": "LIVE",
-    "sendIdea": "Submit an idea"
+    "sendIdea": "Submit an idea",
+    "viewFullMap": "View full map"
   },
   "Ideas": {
     "title": "Ideas",
@@ -332,13 +331,11 @@
   },
   "AuthPage": {
     "eyebrow": "Civic account",
-    "title": "Sign in to ClujParticipa",
     "subtitle": "Use an existing Google or Facebook account to support ideas across devices and keep your participation tied to one internal participant identity.",
     "trustHeading": "What we use",
     "trustText": "The provider shares your name and email address. ClujParticipa does not store provider passwords or access tokens.",
     "prototypeHeading": "Prototype status",
     "prototypeText": "This remains a civic participation prototype. Support votes are non-binding and do not verify municipal eligibility.",
-    "panelTitle": "Choose a provider",
     "panelSubtitle": "OAuth only, no password account to manage.",
     "googleButton": "Continue with Google",
     "facebookButton": "Continue with Facebook",
@@ -361,7 +358,6 @@
   },
   "Results": {
     "title": "Voting results",
-    "description": "Official results of the participatory voting process.",
     "selectedHeading": "Selected ideas",
     "allVotesHeading": "All votes",
     "noResults": "No ideas in the voting process yet.",

@@ -111,14 +111,15 @@ const TERMINAL_DESC_KEYS: Record<string, string> = {
 describe("HowItWorksContent", () => {
   // --- ACCEPTANCE TESTS ---
 
-  it("renders a roomier max-w-5xl page layout with taller stage cards", () => {
+  it("renders a max-w-5xl page layout with compact stage cards", () => {
     const { container } = render(<HowItWorksContent />);
 
     const main = container.querySelector("main");
     expect(main).toHaveClass("max-w-5xl", "py-10");
 
     const submittedCard = document.getElementById("submitted");
-    expect(submittedCard).toHaveClass("min-h-[40vh]", "p-6", "sm:p-8");
+    expect(submittedCard).toHaveClass("p-6", "sm:p-8");
+    expect(submittedCard).not.toHaveClass("min-h-[40vh]");
   });
 
   it("renders PipelineTrack with only the first stage active on page load", () => {
@@ -271,31 +272,31 @@ describe("HowItWorksContent", () => {
 
   // --- UNIT TESTS ---
 
-  it("updates activeStage when IntersectionObserver detects a stage card entering viewport", () => {
+  it("updates activeStage when scroll moves an IN_VOTING card past the sticky header", () => {
     render(<HowItWorksContent />);
 
-    // The first observer is for stage cards
-    expect(observerInstances.length).toBeGreaterThanOrEqual(1);
-    const cardObserver = observerInstances[0];
-
-    // Simulate IN_VOTING card entering viewport
-    const inVotingCard = document.getElementById("in_voting");
-    expect(inVotingCard).toBeInTheDocument();
+    // jsdom innerHeight = 768, midpoint = 384.
+    // SUBMITTED and IN_VOTING above midpoint, rest below — so IN_VOTING is active.
+    const tops: Record<string, number> = {
+      submitted: 100,
+      in_voting: 300,
+      selected: 500,
+      accepted: 600,
+      in_progress: 700,
+      completed: 800,
+    };
+    for (const [id, top] of Object.entries(tops)) {
+      const el = document.getElementById(id);
+      if (el) {
+        vi.spyOn(el, "getBoundingClientRect").mockReturnValue({ top } as DOMRect);
+      }
+    }
 
     act(() => {
-      cardObserver.callback(
-        [
-          {
-            target: inVotingCard!,
-            isIntersecting: true,
-            intersectionRatio: 0.5,
-          } as IntersectionObserverEntry,
-        ],
-        {} as IntersectionObserver
-      );
+      window.dispatchEvent(new Event("scroll"));
     });
 
-    // The active stage indicator should reflect IN_VOTING
+    // IN_VOTING is the last stage whose top (300) <= viewport midpoint (384)
     const activeIndicator = screen.getByTestId("active-stage-indicator");
     expect(activeIndicator).toHaveAttribute("data-active-stage", "IN_VOTING");
 
@@ -309,18 +310,17 @@ describe("HowItWorksContent", () => {
     expect(filledSegments).toHaveLength(1);
   });
 
-  it("configures the observer to favor stage cards in the main reading area", () => {
+  it("registers a passive scroll listener for stage tracking", () => {
+    const addEventListenerSpy = vi.spyOn(window, "addEventListener");
     render(<HowItWorksContent />);
-
-    expect(observerInstances[0].options).toMatchObject({
-      root: null,
-      rootMargin: "-30% 0px -45% 0px",
-      threshold: [0.35, 0.6],
-    });
-    expect(observeMock).toHaveBeenCalledTimes(FORWARD_STAGES.length);
+    expect(addEventListenerSpy).toHaveBeenCalledWith(
+      "scroll",
+      expect.any(Function),
+      { passive: true }
+    );
   });
 
-  it("passes mobile mode to PipelineTrack so the pipeline renders vertically", async () => {
+  it("renders 2-column inline layout on mobile instead of PipelineTrack", async () => {
     vi.stubGlobal(
       "matchMedia",
       vi.fn().mockImplementation((query: string) => ({
@@ -338,8 +338,16 @@ describe("HowItWorksContent", () => {
     render(<HowItWorksContent />);
 
     await waitFor(() => {
-      expect(screen.getByTestId("pipeline-track")).toHaveClass("min-h-72");
+      expect(screen.queryByTestId("pipeline-track")).not.toBeInTheDocument();
     });
+
+    // Each stage has a row with the correct id and a badge
+    for (const stage of FORWARD_STAGES) {
+      const row = document.getElementById(stage.toLowerCase());
+      expect(row).toBeInTheDocument();
+      const badges = row!.querySelectorAll("[role=status]");
+      expect(badges.length).toBeGreaterThanOrEqual(1);
+    }
   });
 
   it("scrolls to the correct stage card when pipeline marker is clicked", () => {
@@ -374,12 +382,16 @@ describe("HowItWorksContent", () => {
     expect(screen.queryByTestId("sticky-sentinel")).not.toBeInTheDocument();
   });
 
-  it("cleans up IntersectionObservers on unmount", () => {
+  it("cleans up scroll listener on unmount", () => {
+    const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
     const { unmount } = render(<HowItWorksContent />);
 
     unmount();
 
-    expect(disconnectMock).toHaveBeenCalled();
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      "scroll",
+      expect.any(Function)
+    );
   });
 
   // --- ACCEPTANCE TEST: Hash navigation and :target highlight ---

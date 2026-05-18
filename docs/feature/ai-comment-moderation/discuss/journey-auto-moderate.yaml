@@ -1,0 +1,61 @@
+schema_version: "1.0"
+id: auto-moderate-comment
+name: Comment Auto-Moderated by AI
+persona_id: maria-manastur
+job_id: "JOB-008"
+steps:
+  - id: s1-write
+    name: Write comment
+    action: Type comment text in comment form
+    expected_output: Text input field populated
+    emotional_state: motivated
+    artifacts_produced: ["${commentText}"]
+    artifacts_consumed: []
+  - id: s2-submit
+    name: Submit comment
+    action: Click post comment button
+    expected_output: POST /api/ideas/[id]/comments with text and participant token
+    emotional_state: confident
+    artifacts_produced: ["${commentPayload}"]
+    artifacts_consumed: ["${commentText}"]
+  - id: s3-screen
+    name: AI screens content
+    action: Server calls OpenAI Moderation API with comment text
+    expected_output: Moderation result with category scores and flagged boolean
+    emotional_state: waiting
+    artifacts_produced: ["${moderationResult}"]
+    artifacts_consumed: ["${commentText}"]
+  - id: s4a-visible
+    name: Clean comment appears
+    action: Moderation returns clean, comment saved as VISIBLE
+    expected_output: Comment visible in thread, other residents can see it
+    emotional_state: satisfied
+    artifacts_produced: ["${commentId}"]
+    artifacts_consumed: ["${moderationResult}"]
+  - id: s4b-flagged
+    name: Toxic comment flagged
+    action: Moderation returns flagged, comment saved as FLAGGED
+    expected_output: Response message "Your comment is under review", comment not visible publicly
+    emotional_state: concerned
+    artifacts_produced: ["${commentId}", "${flaggedCategories}"]
+    artifacts_consumed: ["${moderationResult}"]
+  - id: s5-admin-review
+    name: Admin reviews flagged comment
+    action: Admin opens flagged comments queue, reads comment and flagged categories
+    expected_output: Admin approves (→ VISIBLE) or hides (→ HIDDEN) with reason
+    emotional_state: resolved
+    artifacts_produced: ["${adminDecision}"]
+    artifacts_consumed: ["${commentId}", "${flaggedCategories}"]
+error_paths:
+  - id: e1-api-fail
+    name: OpenAI API unavailable
+    trigger: API call times out or returns 5xx
+    recovery: Fail open — save comment as VISIBLE, log error for admin review. Do not block comment creation.
+  - id: e2-false-positive
+    name: Legitimate comment flagged
+    trigger: OpenAI flags civic criticism or heated but non-abusive debate
+    recovery: Admin reviews and approves. Comment becomes VISIBLE with ModerationEvent trail.
+  - id: e3-missed-toxic
+    name: Toxic comment passes screening
+    trigger: OpenAI returns clean but content is actually toxic (false negative)
+    recovery: Admin manual moderation remains available. Resident can report comment (future: flag-to-admin).

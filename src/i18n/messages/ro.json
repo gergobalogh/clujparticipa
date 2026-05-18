@@ -55,7 +55,6 @@
     "description": "Prototip de participare civică pentru Cluj-Napoca. Trimite propuneri de cartier, descoperă-le pe hartă, susține, comentează și urmărește parcursul fiecărei idei spre finalizare.",
     "submitIdea": "Trimite o idee",
     "browseIdeas": "Caută idei",
-    "openMap": "Deschide harta",
     "statsTitle": "Situație curentă",
     "totalIdeas": "Idei trimise",
     "totalVotes": "Voturi de susținere",
@@ -72,8 +71,8 @@
     "votingOpen": "Deschisă",
     "votingClosed": "Închisă",
     "unavailable": "indisponibil",
-    "liveBadge": "LIVE",
-    "sendIdea": "Trimite o idee"
+    "sendIdea": "Trimite o idee",
+    "viewFullMap": "Vezi harta completă"
   },
   "Ideas": {
     "title": "Idei",
@@ -323,13 +322,11 @@
   },
   "AuthPage": {
     "eyebrow": "Cont civic",
-    "title": "Autentificare în ClujParticipa",
     "subtitle": "Folosiți un cont Google sau Facebook existent pentru a susține idei de pe mai multe dispozitive și pentru a păstra participarea legată de o singură identitate internă.",
     "trustHeading": "Ce folosim",
     "trustText": "Provider-ul transmite numele și adresa de email. ClujParticipa nu stochează parole sau token-uri de acces ale provider-ului.",
     "prototypeHeading": "Statut de prototip",
     "prototypeText": "Platforma rămâne un prototip de participare civică. Voturile de susținere nu sunt obligatorii și nu verifică eligibilitatea municipală.",
-    "panelTitle": "Alegeți provider-ul",
     "panelSubtitle": "Doar OAuth, fără cont cu parolă de administrat.",
     "googleButton": "Continuă cu Google",
     "facebookButton": "Continuă cu Facebook",
@@ -352,7 +349,6 @@
   },
   "Results": {
     "title": "Rezultate votare",
-    "description": "Rezultatele oficiale ale procesului de votare participativ.",
     "selectedHeading": "Idei selectate",
     "allVotesHeading": "Toate voturile",
     "noResults": "Nicio idee în procesul de votare încă.",

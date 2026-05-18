@@ -9,6 +9,7 @@ graph TB
     App -->|SQL| DB[(PostgreSQL)]
     App -->|API| Resend[Resend Email]
     App -->|API| Cloudflare[Cloudflare Images]
+    App -->|API| OpenAI[OpenAI Moderation API]
     App -->|Tiles| OSM[OpenStreetMap]
     Resident -.->|Browser API| Notifications[Browser Notifications]
 ```
@@ -17,6 +18,7 @@ graph TB
 - PostgreSQL 16 — primary data store
 - Resend — transactional email (status change notifications, existing)
 - Cloudflare Images — image storage and CDN (existing)
+- OpenAI Moderation API — text toxicity screening for comments (new, inbound)
 - OpenStreetMap — map tiles via Leaflet (existing)
 - Browser Notification API — push notifications (new, outbound only)
 
@@ -58,12 +60,14 @@ graph TB
             PipelineComputation[pipeline-computation.ts<br/>Stage Transforms]
             StalledDetector[stalled-detector.ts<br/>Stalled Detection]
             ActorResolver[actor-role-resolver.ts<br/>Role Resolution]
+            ModerationLogic[openai-moderation.ts<br/>Text Moderation]
         end
     end
 
     NextJS -->|Prisma| DB[(PostgreSQL)]
     NextJS -->|HTTP| Resend[Resend]
     NextJS -->|HTTP| Cloudflare[Cloudflare Images]
+    NextJS -->|HTTPS| OpenAI[OpenAI Moderation API]
     Pipeline -->|fetch| StatusChangesAPI
     Pipeline --> PipelineStages
     Pipeline --> PipelineComputation
@@ -102,6 +106,7 @@ graph TB
 │  Prisma (PostgreSQL)                                  │
 │  Resend (email)                                       │
 │  Cloudflare Images                                    │
+│  OpenAI Moderation API (text screening)               │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -117,6 +122,7 @@ graph TB
 | UI presentation | EditorialIdeaCard, LiveBadge, SidebarCta, StatusChangeTimeline, MapView | pipeline visual, pipeline domain, i18n messages |
 | Data access | Prisma queries, API route handlers | Domain (status types), Prisma schema |
 | Notifications | useNotificationOptIn hook, browser API probe | Browser Notification API (outbound) |
+| Comment moderation | openai-moderation.ts (domain), openai-moderation-adapter.ts (adapter), POST comments route (modified), admin PATCH route (modified) | Domain (ModerationResult type), Prisma (ModerationEvent), OpenAI SDK |
 
 ### Paradigm: Functional Composition
 
@@ -255,3 +261,99 @@ The pipeline transitions from an 8-status enum (SUBMITTED, UNDER_REVIEW, ELIGIBL
 **Changed assumptions from prior DESIGN wave:**
 - D2 (MERGED/RETURNED via note prefix) -- superseded: MERGED and NEEDS_REVISION are real statuses now
 - D7 (no new API endpoints or data models) -- superseded: new cron endpoint, withdraw endpoint, mergedIntoIdeaId column
+
+### Social Sharing Architecture
+
+**Feature**: social-sharing — WhatsApp/Facebook share buttons + OG meta tags + dynamic OG placeholder images
+
+**Key architectural change**: The idea detail page (`src/app/[locale]/ideas/[id]/page.tsx`) must be restructured from a `"use client"` component (735 lines) to a **server component shell + client island** pattern. This is required because `generateMetadata` (for OG tags) can only be exported from server components in Next.js App Router.
+
+**Restructuring plan**:
+
+| Before | After |
+|--------|-------|
+| Single `"use client"` page component | Server component (page.tsx) + `IdeaDetailClient` (client island) |
+| Client-side `fetch("/api/ideas/${id}")` | Server-side Prisma query in page.tsx |
+| No `generateMetadata` | `generateMetadata` exports OG title/description/image/url |
+| All `useState` in one file | Interactive state moves to `IdeaDetailClient` |
+| Comments/voting-config fetched in `useEffect` | Same (client-side fetch remains for interactive data) |
+
+**New components**:
+
+| Component | Path | Role |
+|-----------|------|------|
+| IdeaDetailClient | `src/components/ideas/idea-detail-client.tsx` | Client island: all interactive UI (voting, comments, replies, share) |
+| IdeaShareRow | `src/components/ideas/idea-share-row.tsx` | Share button row: WhatsApp + Facebook + copy-link |
+| Toaster | `src/components/ui/toaster.tsx` | Sonner toast wrapper for "Link copied" notification |
+| OG image route | `src/app/api/og/ideas/[id]/route.ts` | Dynamic OG placeholder image via `next/og` ImageResponse |
+| copyToClipboard | `src/lib/clipboard.ts` | Clipboard write utility (navigator.clipboard + fallback) |
+
+**Extended components**:
+
+| Component | Change |
+|-----------|--------|
+| `src/lib/analytics.ts` | Add `"idea_share"` to `AnalyticsEventName` union |
+| `src/lib/category-colors.ts` | Add `categoryOgColors` hex mapping for ImageResponse |
+| `src/i18n/messages/{ro,hu,en}.json` | Add `"Share"` namespace |
+| `src/app/[locale]/layout.tsx` | Add `<Toaster />` from sonner |
+
+**External integrations**:
+
+| Integration | Protocol | Purpose |
+|-------------|----------|---------|
+| WhatsApp Web | `window.open("https://wa.me/?text=...")` | One-tap share with pre-filled text |
+| Facebook | `window.open("https://www.facebook.com/sharer/sharer.php?u=...")` | One-tap share via sharer.php |
+| Clipboard API | `navigator.clipboard.writeText()` | Copy-link fallback |
+| Umami | `trackEvent("idea_share", { channel, ideaId })` | Share attribution |
+| Social crawlers | HTTP GET → OG meta tags | Rich link previews |
+
+**ADR-001 (social-sharing)**: Server component shell for idea detail page — see `docs/feature/social-sharing/feature-delta.md`
+
+### AI Comment Moderation Architecture
+
+**Feature**: ai-comment-moderation -- automatic toxicity screening on comment creation via OpenAI Moderation API, with fail-open resilience and full audit trail.
+
+**Quality attribute priorities**: Latency (<2s added) > Reliability (fail-open, 100% comment creation during outage) > Auditability (full ModerationEvent trail) > Maintainability (extend existing patterns).
+
+**C4 System Context update**: OpenAI Moderation API added as external system. Inbound HTTPS call from Next.js container. Labeled "Screens text via" in diagram.
+
+**Architecture decision**: Extend existing comment POST and admin PATCH routes. No new routes. One new domain function (`moderateText` in `src/lib/openai-moderation.ts`). One new driven adapter (`callOpenAIModeration` in `src/lib/openai-moderation-adapter.ts`). Both follow functional composition paradigm (ADR-001).
+
+**Data model changes** (additive migration, zero downtime):
+
+| Model | Change |
+|-------|--------|
+| `CommentStatus` enum | Add `FLAGGED` |
+| `ModerationAction` enum | Add `AUTO_FLAG`, `APPROVE` |
+
+**Flow on comment creation** (`POST /api/ideas/[id]/comments`):
+
+```
+resident POSTs comment
+  -> existing validation, auth, rate-limit (unchanged)
+  -> moderateText(text)
+       -> callOpenAIModeration(text) via adapter
+            -> OpenAI API (5s timeout)
+       -> returns { flagged, categories }
+  -> flagged?  yes -> save with status=FLAGGED, create AUTO_FLAG ModerationEvent, return 202
+               no  -> save with status=VISIBLE, return 201 (existing behavior)
+               error -> save with status=VISIBLE, log warning, return 201 (fail-open)
+```
+
+**Flow on admin review** (`PATCH /api/admin/comments/[id]`):
+
+```
+admin PATCHes flagged comment
+  -> existing auth check (unchanged)
+  -> FLAGGED -> VISIBLE: action=APPROVE, create ModerationEvent
+  -> FLAGGED -> HIDDEN: action=HIDE, create ModerationEvent
+  -> existing VISIBLE/HIDDEN transitions: unchanged
+```
+
+**Probe contract** (Earned Trust):
+
+`probeOpenAI()` in adapter file. Validates OPENAI_API_KEY at startup. Exercises one real API call. Non-blocking on failure (consistent with fail-open). Three enforcement layers: subtype (TypeScript interface), structural (AST hook checking for probe export), behavioral (CI gold-test with mocked API scenarios).
+
+**External integration annotation**: Contract tests recommended for OpenAI Moderation API -- consumer-driven contracts to detect breaking changes (e.g., category renames, response schema changes). MVP mitigation: integration test with recorded response fixture in CI.
+
+**Architectural enforcement**: Existing `tsc --noEmit` + `eslint` in CI. For this feature: add AST pre-commit hook scanning adapter file for `probeOpenAI` export. See ADR-005 for full rationale.

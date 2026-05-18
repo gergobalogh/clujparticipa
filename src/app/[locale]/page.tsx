@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { EditorialIdeaCard } from "@/components/ideas/editorial-idea-card";
 import { SidebarCta } from "@/components/ideas/sidebar-cta";
-import { LiveBadge } from "@/components/ui/live-badge";
 import { HomeMapPreview } from "@/components/map/home-map-preview";
 import { computeCompletedCount, resolveZeroState } from "@/lib/home-stats";
 import type { IdeaMapData } from "@/components/map/map-view";
@@ -168,10 +167,6 @@ export default function LocaleHomePage() {
               <h2 className="font-serif italic text-ink">
                 {t("recentIdeas")}
               </h2>
-              <LiveBadge
-                votingOpen={votingConfig?.isOpen ?? false}
-                totalIdeas={stats?.totalIdeas ?? 0}
-              />
             </div>
             {stats && stats.recentIdeas.length > 0 && (
               <Link
@@ -229,16 +224,13 @@ export default function LocaleHomePage() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
         >
-          <div className="border-b border-ink/10 pb-2">
-            <h2 className="font-serif text-ink">
-              {t("openMap")}
-            </h2>
-          </div>
-          <div className="mt-2 h-[360px] md:h-full">
-            <Link href="/map" className="block group h-full">
-              <HomeMapPreview ideas={mapIdeas} />
-            </Link>
-          </div>
+          <HomeMapPreview ideas={mapIdeas} />
+          <Link
+            href="/map"
+            className="mt-2 inline-block text-xs font-medium text-civic-blue hover:text-ink transition"
+          >
+            {t("viewFullMap")} &rarr;
+          </Link>
         </motion.section>
       </div>
     </main>

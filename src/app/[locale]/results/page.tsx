@@ -37,7 +37,6 @@ export default async function ResultsPage() {
       <h1 className="font-serif text-2xl font-bold text-ink sm:text-3xl">
         {t("title")}
       </h1>
-      <p className="mt-2 text-sm text-ink-muted">{t("description")}</p>
 
       {votingConfig && (
         <div className="mt-4 rounded-sm border border-ink/10 bg-paper-muted px-4 py-3">

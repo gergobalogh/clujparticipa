@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { createHash } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -10,6 +11,10 @@ function participantHash(seed) {
 }
 
 const ADMIN = "clujparticipa-team";
+const seedImageManifestPath = new URL("../public/seed/manifest.json", import.meta.url);
+const seedImageManifest = existsSync(seedImageManifestPath)
+  ? JSON.parse(readFileSync(seedImageManifestPath, "utf8"))
+  : {};
 
 const seedImages = [
   { path: "https://imagedelivery.net/placeholder/seed-1/public", alt: "Demo image", width: 800, height: 600, mimeType: "image/png", sizeBytes: 204800 },
@@ -362,6 +367,76 @@ const ideas = [
     votes: 5,
     comments: [],
   },
+  {
+    seedKey: "manastur-trasee-scolare-protejate",
+    title: "Trasee pietonale protejate pentru școlile din Mănăștur",
+    description:
+      "Amenajarea unor trasee pietonale sigure către școlile din Mănăștur, cu treceri de pietoni supraînălțate, zone de 30 km/h, trotuare lărgite și un sistem de tip \"oprește la distanță + mers protejat\". Părinții ar opri la 1-2 străzi de școală, iar copiii ar parcurge în siguranță ultimii 100-300 de metri pe jos. Astfel, zona din fața școlilor poate deveni în mare parte pietonală, fără a încerca să înghesuim sute de mașini direct la porți, pe străzi deja înguste.",
+    category: "SAFETY",
+    district: "MANASTUR",
+    status: "SUBMITTED",
+    latitude: 46.7526,
+    longitude: 23.5487,
+    statusChanges: [
+      {
+        fromStatus: null,
+        toStatus: "SUBMITTED",
+        note: "Propunere depusă pentru cartierul Mănăștur. Urmează evaluarea inițială a traseelor școlare și a punctelor de oprire la distanță.",
+        changedBy: ADMIN,
+      },
+    ],
+    votes: 14,
+    comments: [
+      {
+        text: "În fața școlilor e aglomerație în fiecare dimineață. O zonă de oprire la distanță ar face intrarea mult mai sigură pentru copii.",
+        participantSeed: "c9-1",
+        status: "VISIBLE",
+      },
+      {
+        text: "Important să fie incluse treceri supraînălțate și limită reală de 30 km/h, nu doar indicatoare.",
+        participantSeed: "c9-2",
+        status: "VISIBLE",
+      },
+    ],
+  },
+  {
+    seedKey: "canalul-morii-master-plan",
+    title: "Master Plan prin Master Process pentru coridorul pietonal Canalul Morii",
+    description:
+      "Realizarea unui proces public de planificare pentru transformarea Canalului Morii într-un coridor pietonal și verde pe cât mai multe tronsoane între Plopilor și Iris, de la Someșul Mic spre zonele traversate de canal. Propunerea pornește de la campania grupului civic Verde pe Canalul Morii și implică studenți la arhitectură, locuitori, specialiști și administrația locală. Scopul este un master plan construit printr-un master process: cartarea traseului, identificarea blocajelor, prioritizarea intervențiilor mici și stabilirea unor reguli coerente pentru spațiu public, acces pietonal, vegetație, mobilier urban și legături cu cartierele.",
+    category: "ENVIRONMENT",
+    district: "CENTRU",
+    status: "UNDER_REVIEW",
+    latitude: 46.7731,
+    longitude: 23.5942,
+    statusChanges: [
+      {
+        fromStatus: null,
+        toStatus: "SUBMITTED",
+        note: "Propunere depusă pentru valorificarea Canalului Morii ca traseu pietonal și verde.",
+        changedBy: ADMIN,
+      },
+      {
+        fromStatus: "SUBMITTED",
+        toStatus: "UNDER_REVIEW",
+        note: "În evaluare pentru clarificarea tronsoanelor prioritare, a proprietății terenurilor și a cadrului de colaborare cu locuitorii și mediul universitar.",
+        changedBy: ADMIN,
+      },
+    ],
+    votes: 21,
+    comments: [
+      {
+        text: "Canalul Morii poate lega cartierele printr-un traseu plăcut, nu doar prin intervenții izolate.",
+        participantSeed: "c10-1",
+        status: "VISIBLE",
+      },
+      {
+        text: "E important ca locuitorii de pe traseu să fie consultați din prima etapă, altfel planul rămâne doar pe hârtie.",
+        participantSeed: "c10-2",
+        status: "VISIBLE",
+      },
+    ],
+  },
 ];
 
 async function main() {
@@ -374,7 +449,7 @@ async function main() {
   const createdIdeaIds = [];
 
   for (const [index, idea] of ideas.entries()) {
-    const { statusChanges, votes, comments, ...ideaData } = idea;
+    const { seedKey, statusChanges, votes, comments, ...ideaData } = idea;
 
     // For idea 5 (MERGED), we need to set mergedIntoIdeaId after idea 0 is created
     const createData = { ...ideaData };
@@ -424,7 +499,20 @@ async function main() {
     }
 
     // Attach seed images
-    if (ideaImageMap[index]) {
+    const manifestImages = seedImageManifest[seedKey ?? `idea-${index}`];
+    if (manifestImages?.length) {
+      const imageRecords = manifestImages.map((image, order) => ({
+        url: image.url,
+        alt: image.alt ?? created.title,
+        width: image.width ?? null,
+        height: image.height ?? null,
+        mimeType: image.mimeType,
+        sizeBytes: image.sizeBytes,
+        order,
+        ideaId: created.id,
+      }));
+      await prisma.ideaImage.createMany({ data: imageRecords });
+    } else if (ideaImageMap[index]) {
       const imageRecords = ideaImageMap[index].map((imgIdx, order) => ({
         url: seedImages[imgIdx].path,
         alt: seedImages[imgIdx].alt,

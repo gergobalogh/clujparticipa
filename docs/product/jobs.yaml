@@ -118,7 +118,143 @@ jobs:
     features:
       - "umami-analytics"
 
+  - id: "JOB-006"
+    statement: "When I find an idea I believe in, I want to spread the word to my community, so I can rally support and increase its chances of being selected."
+    abstraction_level: "physical"
+    type: "functional"
+    context: "Civic ideas spread through personal networks — WhatsApp groups, Facebook community groups, neighborhood chats. Sharing is the growth engine."
+    emotional_job: "When I share a civic idea, I want to feel like an effective advocate whose action matters, not someone shouting into the void with a broken link."
+    social_job: "When I share, I want to be seen as a constructive community member, not a spammer. A rich preview makes the link look credible and professional."
+    outcomes:
+      - id: "O10"
+        statement: "Minimize the effort to share a civic idea with a personal network"
+        type: "ease"
+        importance: 8
+        satisfaction: 1
+        score: 15
+        status: "under-served"
+      - id: "O11"
+        statement: "Minimize the likelihood of a shared link being ignored because it has no preview"
+        type: "likelihood_of_result"
+        importance: 8
+        satisfaction: 1
+        score: 15
+        status: "under-served"
+    features:
+      - "social-sharing"
+
+  - id: "JOB-007"
+    statement: "When someone shares a civic idea link with me, I want to see at a glance what the idea is about and whether it's worth clicking, so I don't waste time on irrelevant content."
+    abstraction_level: "physical"
+    type: "functional"
+    context: "Recipients judge links by their preview card. Blank links get ignored; rich previews earn the click."
+    emotional_job: "When I see a rich preview, I feel the platform is legitimate. When I see a bare URL, I assume spam."
+    social_job: "When I click through from a compelling preview, I'm more likely to share it further — good previews compound sharing behavior."
+    outcomes:
+      - id: "O12"
+        statement: "Minimize the time for a recipient to understand what a shared idea is about before clicking"
+        type: "speed"
+        importance: 7
+        satisfaction: 1
+        score: 12
+        status: "under-served"
+      - id: "O13"
+        statement: "Minimize the likelihood of a recipient dismissing a shared link as spam because it has no preview"
+        type: "likelihood_of_result"
+        importance: 7
+        satisfaction: 1
+        score: 12
+        status: "under-served"
+    features:
+      - "social-sharing"
+
+  - id: "JOB-008"
+    statement: "When a comment is posted, I want the platform to screen it for toxicity automatically, so toxic content is never publicly visible for hours and I can trust the discussion space is safe 24/7."
+    abstraction_level: "physical"
+    type: "functional"
+    context: "Civic participation prototype; toxic content destroys trust faster than any other failure mode; manual moderation doesn't scale for a pilot"
+    emotional_job: "When I see a comment section, I want to feel that someone is watching out for abuse, so I don't feel anxious about encountering harassment on a civic platform."
+    social_job: "When I tell neighbors about the platform, I want to say 'it keeps things civil automatically,' so I'm recommending a safe space rather than an unmoderated free-for-all."
+    outcomes:
+      - id: "O14"
+        statement: "Minimize time toxic content is publicly visible"
+        type: "speed"
+        importance: 9
+        satisfaction: 1
+        score: 72
+        status: "critically-under-served"
+      - id: "O15"
+        statement: "Minimize unmoderated coverage gaps (nights/weekends)"
+        type: "likelihood_of_result"
+        importance: 9
+        satisfaction: 1
+        score: 72
+        status: "critically-under-served"
+    features:
+      - "ai-comment-moderation"
+
+  - id: "JOB-009"
+    statement: "When my pilot gets more traffic, I want to trust that every comment is screened consistently, so I don't have to read every single comment myself or worry that something slipped through overnight."
+    abstraction_level: "physical"
+    type: "functional"
+    context: "Scaling moderation beyond manual review; admin cannot be online 24/7"
+    emotional_job: "When I wake up and check the platform, I want to feel confident that no toxic content has been sitting publicly for hours."
+    social_job: "When I report to the coalition, I want to show that moderation is automated and consistent, so I'm seen as a responsible platform operator."
+    outcomes:
+      - id: "O16"
+        statement: "Minimize admin effort to review all comments"
+        type: "ease"
+        importance: 8
+        satisfaction: 2
+        score: 48
+        status: "under-served"
+    features:
+      - "ai-comment-moderation"
+
+  - id: "JOB-010"
+    statement: "When my comment is flagged by the AI moderator, I want to understand why and have a path to contest it, so a false positive doesn't permanently silence my contribution."
+    abstraction_level: "physical"
+    type: "functional"
+    context: "False positives are inevitable with AI moderation; residents need transparency and recourse"
+    emotional_job: "When my comment is held for review, I want to feel respected and heard, not arbitrarily censored by a machine."
+    social_job: "When I see that flagged comments get human review, I feel the platform values my participation even when the algorithm is uncertain."
+    outcomes:
+      - id: "O17"
+        statement: "Minimize likelihood of false positives silencing legitimate speech"
+        type: "likelihood_of_result"
+        importance: 7
+        satisfaction: 3
+        score: 28
+        status: "under-served"
+    features:
+      - "ai-comment-moderation"
+
 changelog:
+  - date: "2026-05-18"
+    action: "created"
+    job_id: "JOB-008"
+    feature_id: "ai-comment-moderation"
+    source: "DISCUSS wave — JTBD analysis for ai-comment-moderation"
+  - date: "2026-05-18"
+    action: "created"
+    job_id: "JOB-009"
+    feature_id: "ai-comment-moderation"
+    source: "DISCUSS wave — JTBD analysis for ai-comment-moderation"
+  - date: "2026-05-18"
+    action: "created"
+    job_id: "JOB-010"
+    feature_id: "ai-comment-moderation"
+    source: "DISCUSS wave — JTBD analysis for ai-comment-moderation"
+  - date: "2026-05-18"
+    action: "created"
+    job_id: "JOB-006"
+    feature_id: "social-sharing"
+    source: "DISCUSS wave — JTBD analysis for social-sharing feature"
+  - date: "2026-05-18"
+    action: "created"
+    job_id: "JOB-007"
+    feature_id: "social-sharing"
+    source: "DISCUSS wave — JTBD analysis for social-sharing feature"
   - date: "2026-05-14"
     action: "created"
     job_id: "JOB-001"

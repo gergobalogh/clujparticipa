@@ -34,57 +34,49 @@ function makeStages(currentStatus: string): PipelineStage[] {
 const sevenStages = makeStages("IN_VOTING");
 
 describe("PipelineTrack", () => {
-  it("renders a continuous track bar with all 7 stage markers", () => {
+  it("renders all 7 stage markers", () => {
     render(<PipelineTrack stages={sevenStages} />);
-
-    const baseBar = screen.getByTestId("track-base");
-    expect(baseBar).toBeInTheDocument();
-    expect(baseBar).toHaveClass("bg-gray-200");
 
     const markers = screen.getAllByTestId("stage-marker");
     expect(markers).toHaveLength(7);
   });
 
-  it("alternates stage labels above and below the track on desktop", () => {
+  it("renders all stage labels", () => {
     render(<PipelineTrack stages={sevenStages} />);
 
     const labels = screen.getAllByTestId("stage-label");
-    const aboveLabels = labels.filter((el) =>
-      el.classList.contains("bottom-5")
-    );
-    const belowLabels = labels.filter((el) =>
-      el.classList.contains("top-5")
-    );
-    expect(aboveLabels).toHaveLength(4);
-    expect(belowLabels).toHaveLength(3);
+    expect(labels).toHaveLength(7);
   });
 
-  it("renders all labels on one side in vertical mobile mode", () => {
-    render(<PipelineTrack stages={sevenStages} isMobile={true} />);
-
-    const trackContainer = screen.getByTestId("pipeline-track");
-    expect(trackContainer).toHaveClass("min-h-72");
-
-    const labels = screen.getAllByTestId("stage-label");
-    const rightSideLabels = labels.filter((el) =>
-      el.classList.contains("left-5")
-    );
-    expect(rightSideLabels).toHaveLength(7);
-  });
-
-  it("renders colored overlay segments for reached stages", () => {
+  it("renders connector segments between stages", () => {
     render(<PipelineTrack stages={sevenStages} />);
-
-    const overlay = screen.getByTestId("track-overlay");
-    expect(overlay).toBeInTheDocument();
 
     const segments = screen.getAllByTestId("track-segment");
     expect(segments.length).toBeGreaterThan(0);
+  });
 
+  it("renders colored connector segments for reached stages", () => {
+    render(<PipelineTrack stages={sevenStages} />);
+
+    const segments = screen.getAllByTestId("track-segment");
     const coloredSegments = segments.filter(
       (s) => !s.classList.contains("bg-gray-200")
     );
     expect(coloredSegments.length).toBeGreaterThan(0);
+  });
+
+  it("renders vertical layout in mobile mode", () => {
+    render(<PipelineTrack stages={sevenStages} isMobile={true} />);
+
+    const trackContainer = screen.getByTestId("pipeline-track");
+    expect(trackContainer).toHaveClass("min-h-72");
+  });
+
+  it("renders all labels in mobile mode", () => {
+    render(<PipelineTrack stages={sevenStages} isMobile={true} />);
+
+    const labels = screen.getAllByTestId("stage-label");
+    expect(labels).toHaveLength(7);
   });
 
   it("renders StalledIndicator below the track when stalled", () => {
@@ -155,13 +147,6 @@ describe("PipelineTrack", () => {
     expect(futureMarkers.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders horizontal track layout by default", () => {
-    render(<PipelineTrack stages={sevenStages} />);
-
-    const trackContainer = screen.getByTestId("pipeline-track");
-    expect(trackContainer).toHaveClass("h-28");
-  });
-
   it("accepts PipelineStage array without modification", () => {
     const stages: PipelineStage[] = makeStages("ELIGIBLE");
     render(<PipelineTrack stages={stages} />);
@@ -226,7 +211,6 @@ describe("PipelineTrack", () => {
       render(<PipelineTrack stages={sevenStages} />);
       const markersWithoutShowcase = screen.getAllByTestId("stage-marker");
 
-      // Verify the standard behavior is preserved: future markers exist
       const futureMarkers = markersWithoutShowcase.filter(
         (m) =>
           m.classList.contains("border-gray-300") &&
@@ -234,7 +218,6 @@ describe("PipelineTrack", () => {
       );
       expect(futureMarkers.length).toBeGreaterThanOrEqual(1);
 
-      // No anchors rendered in non-showcase mode
       expect(screen.queryAllByTestId("stage-anchor")).toHaveLength(0);
     });
   });

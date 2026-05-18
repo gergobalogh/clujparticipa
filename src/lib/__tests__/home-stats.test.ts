@@ -62,7 +62,6 @@ describe("Locale key completeness for Home namespace", () => {
     "description",
     "submitIdea",
     "browseIdeas",
-    "openMap",
     "totalIdeas",
     "totalVotes",
     "totalComments",
