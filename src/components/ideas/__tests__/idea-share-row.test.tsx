@@ -1,3 +1,6 @@
+/**
+ * @vitest-environment jsdom
+ */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
@@ -42,7 +45,9 @@ describe("IdeaShareRow", () => {
     expect(window.open).toHaveBeenCalled();
     const callUrl = (window.open as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
     expect(callUrl).toContain("wa.me");
-    expect(callUrl).toContain("utm_source=whatsapp");
+    // The share URL is encoded inside the text query param, so decode before asserting
+    const decoded = decodeURIComponent(callUrl);
+    expect(decoded).toContain("utm_source=whatsapp");
   });
 
   it("opens Facebook sharer URL when Facebook button is clicked", () => {
@@ -51,7 +56,9 @@ describe("IdeaShareRow", () => {
     expect(window.open).toHaveBeenCalled();
     const callUrl = (window.open as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
     expect(callUrl).toContain("facebook.com/sharer");
-    expect(callUrl).toContain("utm_source=facebook");
+    // The share URL is encoded inside the u query param, so decode before asserting
+    const decoded = decodeURIComponent(callUrl);
+    expect(decoded).toContain("utm_source=facebook");
   });
 
   it("copies link to clipboard when copy button is clicked", async () => {

@@ -20,6 +20,8 @@ import { ExceptionState } from "@/components/ideas/exception-state";
 import { detectStalledIdea } from "@/lib/stalled-detector";
 import { useNotificationOptIn } from "@/hooks/use-notification-opt-in";
 import { trackEvent } from "@/lib/analytics";
+import { IdeaShareRow } from "@/components/ideas/idea-share-row";
+import { useLocale } from "next-intl";
 import type { Status } from "@prisma/client";
 import type { StatusChange } from "@/lib/types";
 import Image from "next/image";
@@ -90,6 +92,7 @@ export default function IdeaDetailClient({ idea }: IdeaDetailClientProps) {
   const tn = useTranslations("Notification");
   const { data: session } = useSession();
   const { id } = useParams<{ id: string }>();
+  const locale = useLocale();
   const { showInAppFallback } = useNotificationOptIn();
 
   const [comments, setComments] = useState<Comment[]>([]);
@@ -442,6 +445,16 @@ export default function IdeaDetailClient({ idea }: IdeaDetailClientProps) {
           {t("learnAboutProcess")}
         </Link>
 
+        <div className="mt-4">
+          <IdeaShareRow
+            ideaId={idea.id}
+            title={idea.title}
+            category={idea.category}
+            district={idea.district}
+            locale={locale}
+          />
+        </div>
+
         {/* Vote section on mobile near top */}
         {voteSection && <div className="mt-4">{voteSection}</div>}
       </div>
@@ -484,6 +497,16 @@ export default function IdeaDetailClient({ idea }: IdeaDetailClientProps) {
             >
               {t("learnAboutProcess")}
             </Link>
+
+            <div className="mt-4">
+              <IdeaShareRow
+                ideaId={idea.id}
+                title={idea.title}
+                category={idea.category}
+                district={idea.district}
+                locale={locale}
+              />
+            </div>
           </div>
 
           {idea.images && idea.images.length > 0 && (
