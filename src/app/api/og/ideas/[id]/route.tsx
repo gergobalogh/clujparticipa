@@ -37,7 +37,7 @@ export async function GET(
   const backgroundColor = resolveCategoryOgColor(idea.category);
   const displayTitle = truncateOgTitle(idea.title);
 
-  const t = await getTranslations("Categories", { locale });
+  const t = await getTranslations({ namespace: "Categories", locale });
   const categoryLabel = t(idea.category as Parameters<typeof t>[0]);
 
   return new ImageResponse(
@@ -64,7 +64,7 @@ export async function GET(
             justifyContent: "center",
             lineHeight: 1.3,
             maxWidth: 1080,
-            maxLine: 2,
+            maxLines: 2,
           }}
         >
           {displayTitle}

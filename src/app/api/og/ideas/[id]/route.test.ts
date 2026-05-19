@@ -88,7 +88,7 @@ describe("OG Image Route /api/og/ideas/[id]", () => {
     const res = await GET(req, { params: Promise.resolve({ id: "idea-1" }) });
 
     expect(res.status).toBe(200);
-    expect(mockGetTranslations).toHaveBeenCalledWith("Categories", { locale: "ro" });
+    expect(mockGetTranslations).toHaveBeenCalledWith({ namespace: "Categories", locale: "ro" });
     expect(translateFn).toHaveBeenCalledWith("TRANSPORT");
   });
 });
