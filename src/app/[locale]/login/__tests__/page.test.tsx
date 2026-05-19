@@ -11,8 +11,6 @@ const { signInMock } = vi.hoisted(() => ({
 }));
 
 const messages: Record<string, string> = {
-  eyebrow: "Civic account",
-  title: "Sign in to ClujParticipa",
   subtitle: "Use an existing account to support ideas across devices.",
   trustHeading: "What we use",
   trustText: "Only basic profile details are shared by the provider.",

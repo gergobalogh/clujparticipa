@@ -59,8 +59,7 @@
     "dataDeletionText": "You can request the deletion of your personal data at any time. Facebook users can trigger automatic deletion from their Facebook settings. All users can also request deletion by email. See the data deletion page for details."
   },
   "Home": {
-    "eyebrow": "Participatory Budgeting",
-    "title": "ClujParticipa",
+    "title": "Participatory Budgeting",
     "description": "Propose improvements for Cluj-Napoca. Submit an idea, discover them on the map, and follow their progress to completion.",
     "submitIdea": "Submit an idea",
     "browseIdeas": "Browse ideas",
@@ -340,7 +339,6 @@
     "loginRequiredNote": "Voting requires a Google or Facebook account."
   },
   "AuthPage": {
-    "eyebrow": "Civic account",
     "subtitle": "Use an existing Google or Facebook account to support ideas across devices and keep your participation tied to one internal participant identity.",
     "trustHeading": "What we use",
     "trustText": "The provider shares your name and email address. ClujParticipa does not store provider passwords or access tokens.",

@@ -36,8 +36,9 @@ const DISTRICTS = [
 ];
 
 const STATUSES = [
-  "SUBMITTED", "UNDER_REVIEW", "ELIGIBLE", "IN_VOTING",
-  "SELECTED", "IN_PROGRESS", "COMPLETED", "REJECTED",
+  "SUBMITTED", "IN_VOTING", "SELECTED", "ACCEPTED",
+  "IN_PROGRESS", "COMPLETED", "REJECTED", "NEEDS_REVISION",
+  "MERGED", "WITHDRAWN",
 ];
 
 const SORT_OPTIONS = ["newest", "oldest", "mostVotes"] as const;

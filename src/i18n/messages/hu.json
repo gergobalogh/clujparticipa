@@ -50,9 +50,8 @@
     "dataDeletionText": "Személyes adatai törlését bármikor kérheti. A Facebook-felhasználók a Facebook beállításaikból indíthatnak automatikus törlést. Minden felhasználó e-mailben is kérheti a törlést. Részletekért lásd az adattörlési oldalt."
   },
   "Home": {
-    "eyebrow": "Közösségi Költségvetés",
-    "title": "ClujParticipa",
-    "description": "Alakítsd Kolozsvárt! Küldj be ötletet, fedezd fel a térképen, és kövesd nyomon a megvalósulásukat.",
+    "title": "Közösségi Költségvetés",
+    "description": "Küldj be. Fedezd fel a térképen. Kövesd nyomon, ahogy valóra válik.",
     "submitIdea": "Ötlet beküldése",
     "browseIdeas": "Ötletek böngészése",
     "statsTitle": "Jelenlegi helyzet",
@@ -331,7 +330,6 @@
     "loginRequiredNote": "A szavazáshoz Google vagy Facebook fiók szükséges."
   },
   "AuthPage": {
-    "eyebrow": "Polgári fiók",
     "subtitle": "Használjon meglévő Google vagy Facebook fiókot, hogy több eszközről is támogathasson ötleteket, egy belső résztvevői identitáshoz kötve.",
     "trustHeading": "Mit használunk",
     "trustText": "A szolgáltató a nevét és e-mail címét adja át. A ClujParticipa nem tárol szolgáltatói jelszavakat vagy hozzáférési tokeneket.",

@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveParticipantHash, getAuthSession } from "@/lib/auth-participant";
 import { validateParticipantToken } from "@/lib/participant";
+import { VOTE_ELIGIBLE_STATUSES } from "@/lib/transitions";
 
 const WITHDRAW_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
-const WITHDRAWABLE_STATUSES = ["SUBMITTED", "IN_VOTING"] as const;
 
 export async function POST(
   request: NextRequest,
@@ -80,7 +80,7 @@ export async function POST(
   }
 
   // Verify the idea is in a withdrawable status
-  if (!WITHDRAWABLE_STATUSES.includes(idea.status as (typeof WITHDRAWABLE_STATUSES)[number])) {
+  if (!VOTE_ELIGIBLE_STATUSES.includes(idea.status as (typeof VOTE_ELIGIBLE_STATUSES)[number])) {
     return NextResponse.json(
       { error: "Idea cannot be withdrawn in its current status" },
       { status: 403 }

@@ -50,9 +50,8 @@
     "dataDeletionText": "Puteți solicita ștergerea datelor personale oricând. Utilizatorii Facebook pot declanșa ștergerea automată din setările Facebook. Toți utilizatorii pot solicita ștergerea și prin email. Consultați pagina de ștergere a datelor pentru detalii."
   },
   "Home": {
-    "eyebrow": "Bugetare Participativă",
-    "title": "ClujParticipa",
-    "description": "Propune îmbunătățiri pentru Cluj-Napoca. Trimite o idee, descoperă-le pe hartă și urmărește parcursul lor spre finalizare.",
+    "title": "Bugetare Participativă",
+    "description": "Propune. Descoperă pe hartă. Urmărește — de la idee la finalizare.",
     "submitIdea": "Trimite o idee",
     "browseIdeas": "Caută idei",
     "statsTitle": "Situație curentă",
@@ -331,7 +330,6 @@
     "loginRequiredNote": "Votarea necesită un cont Google sau Facebook."
   },
   "AuthPage": {
-    "eyebrow": "Cont civic",
     "subtitle": "Folosiți un cont Google sau Facebook existent pentru a susține idei de pe mai multe dispozitive și pentru a păstra participarea legată de o singură identitate internă.",
     "trustHeading": "Ce folosim",
     "trustText": "Provider-ul transmite numele și adresa de email. ClujParticipa nu stochează parole sau token-uri de acces ale provider-ului.",
