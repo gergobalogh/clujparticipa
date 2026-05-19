@@ -33,9 +33,8 @@ describe("categoryOgColors — hex color mapping for ImageResponse", () => {
     );
   });
 
-  it("TRANSPORT maps to a cyan-family hex color", async () => {
+  it("TRANSPORT maps to cyan hex color #06B6D4", async () => {
     const { categoryOgColors } = await import("@/lib/category-colors");
-    // Tailwind cyan-700 is roughly #0e7490
-    expect(categoryOgColors.TRANSPORT).toMatch(/^#0e7490$/i);
+    expect(categoryOgColors.TRANSPORT).toBe("#06B6D4");
   });
 });

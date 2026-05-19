@@ -33,3 +33,22 @@ export function resolveCategoryCardColor(category: string): string {
 export function resolveCategoryListColor(category: string): string {
   return categoryListColors[category] ?? categoryListColors.OTHER;
 }
+
+/** Hex color mapping for ImageResponse (OG image generation).
+ *  Tailwind classes cannot be used server-side in ImageResponse,
+ *  so raw hex values are needed instead. */
+export const categoryOgColors: Record<string, string> = {
+  INFRASTRUCTURE: "#F97316",
+  EDUCATION: "#3B82F6",
+  ENVIRONMENT: "#14B8A6",
+  CULTURE: "#7C3AED",
+  SAFETY: "#DC2626",
+  TRANSPORT: "#06B6D4",
+  HEALTH: "#EC4899",
+  OTHER: "#6B7280",
+};
+
+/** Resolve a category to its OG hex color, falling back to OTHER. */
+export function resolveCategoryOgColor(category: string): string {
+  return categoryOgColors[category] ?? categoryOgColors.OTHER;
+}
