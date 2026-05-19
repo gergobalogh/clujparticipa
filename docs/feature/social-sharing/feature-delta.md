@@ -501,3 +501,81 @@ Strategy C — Real local. All driven ports (clipboard, window.open, toast, OG m
 | DISCUSS#D5 | Dynamic OG placeholder via ImageResponse | DDD-5 | OG image route must handle ideas with zero images by generating a placeholder |
 | DESIGN#DDD-3 | Sonner for toast notifications | DDD-3 | Toaster component added to locale layout; toast assertion in share button test |
 | DESIGN#DDD-8 | Category hex colors for ImageResponse | DDD-8 | categoryOgColors mapping must exist with hex values for all 8 categories |
+
+---
+
+## Wave: DELIVER / [REF] Implementation Summary
+
+Social-sharing feature implemented: idea detail page restructured as server component shell with `generateMetadata` emitting OG tags (title, description, URL, image); dynamic OG placeholder image route at `/api/og/ideas/[id]` using `next/og` ImageResponse with category-colored backgrounds and translated labels; `IdeaShareRow` client component with WhatsApp/Facebook share intent URLs, copy-link with clipboard API and fallback, UTM tracking on all shared URLs, and Umami analytics events; Sonner toast notifications; full i18n coverage in RO/HU/EN.
+
+---
+
+## Wave: DELIVER / [REF] Files Modified
+
+**Production:**
+- `src/app/[locale]/ideas/[id]/page.tsx` — restructured from `"use client"` to server shell + `generateMetadata`
+- `src/components/ideas/idea-detail-client.tsx` — new client island with all interactive UI + `IdeaShareRow`
+- `src/components/ideas/idea-share-row.tsx` — new share button row (WhatsApp, Facebook, copy-link)
+- `src/components/ui/toaster.tsx` — new Sonner wrapper
+- `src/app/api/og/ideas/[id]/route.tsx` — new OG image route with ImageResponse
+- `src/app/[locale]/layout.tsx` — extended with `<Toaster />`
+- `src/lib/clipboard.ts` — new copyToClipboard utility with execCommand fallback
+- `src/lib/og-metadata.ts` — new buildOgDescription with truncation
+- `src/lib/og-image-helpers.ts` — new truncateOgTitle helper
+- `src/lib/category-colors.ts` — extended with categoryOgColors hex mapping
+- `src/lib/analytics.ts` — extended with "idea_share" event name
+- `src/i18n/messages/ro.json` — extended with Share namespace
+- `src/i18n/messages/hu.json` — extended with Share namespace
+- `src/i18n/messages/en.json` — extended with Share namespace
+- `package.json` — added sonner dependency
+
+**Tests:**
+- `src/app/[locale]/ideas/[id]/__tests__/og-metadata.test.ts` — OG metadata acceptance tests
+- `src/app/[locale]/ideas/[id]/__tests__/page.test.tsx` — updated for IdeaDetailClient
+- `src/app/api/og/ideas/[id]/route.test.ts` — OG image route tests
+- `src/components/ideas/__tests__/idea-share-row.test.tsx` — share button tests
+- `src/lib/__tests__/clipboard.test.ts` — clipboard utility tests
+- `src/lib/__tests__/category-og-colors.test.ts` — hex color mapping tests
+- `src/lib/__tests__/analytics-idea-share.test.ts` — analytics event tests
+- `src/lib/__tests__/og-image-helpers.test.ts` — title truncation tests
+- `src/lib/__tests__/og-metadata.test.ts` — description truncation tests
+
+---
+
+## Wave: DELIVER / [REF] Scenarios Green Count
+
+48 of 48 tests passing (2026-05-19T05:32:08Z)
+
+---
+
+## Wave: DELIVER / [REF] DoD Check
+
+1. ✓ All user stories trace to job stories (JOB-006, JOB-007)
+2. ✓ All acceptance criteria are testable without ambiguity
+3. ✓ Stories are independent
+4. ✓ No open technical questions blocking stories
+5. ✓ UX journey map exists with emotional arc and error paths
+6. ✓ Outcome KPIs defined with numeric targets
+7. ✓ No contradictions with prior wave evidence
+8. ✓ Slice briefs exist with learning hypotheses
+9. ✓ Story map backbone covers all activities
+
+---
+
+## Wave: DELIVER / [REF] Quality Gates
+
+- Roadmap: approved (3 phases, 11 steps)
+- TDD: 8 steps COMMIT/PASS (3 steps consolidated into 03-01)
+- Refactoring: L1-L6 pass — em-dash convention, locale in URLs, distinct Facebook icon
+- Adversarial review: 1 blocker + 2 high + 2 medium defects found and fixed
+- Mutation testing: disabled per project configuration
+- Integrity verification: PASS (all 11 steps have complete DES traces)
+
+---
+
+## Wave: DELIVER / [REF] Pre-requisites
+
+- DISTILL scenarios S1-S28 all covered by test files
+- DESIGN component decomposition fully implemented (no unauthorized new files)
+- `sonner` package installed
+- `NEXT_PUBLIC_APP_URL` env var required for absolute OG image URLs
