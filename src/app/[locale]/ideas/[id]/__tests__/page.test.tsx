@@ -205,7 +205,7 @@ vi.mock("@/lib/analytics", () => ({
 // Import component AFTER mocks
 // ---------------------------------------------------------------------------
 
-import IdeaDetailPage from "../page";
+import IdeaDetailClient from "@/components/ideas/idea-detail-client";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -246,7 +246,9 @@ const MOCK_IDEA = {
   progressUpdates: [],
 };
 
-function setupFetchMock(idea: Record<string, unknown> = MOCK_IDEA) {
+// The client island no longer fetches idea data -- it receives it as props.
+// It still fetches comments and voting-config client-side.
+function setupClientFetchMock() {
   const fetchMock = vi.fn().mockImplementation((url: string) => {
     if (url.includes("/api/ideas/") && url.endsWith("/comments")) {
       return Promise.resolve({ ok: true, json: () => Promise.resolve({ comments: [] }) });
@@ -254,13 +256,13 @@ function setupFetchMock(idea: Record<string, unknown> = MOCK_IDEA) {
     if (url.includes("/api/voting-config")) {
       return Promise.resolve({ ok: true, json: () => Promise.resolve({ config: null }) });
     }
-    return Promise.resolve({ ok: true, json: () => Promise.resolve(idea) });
+    return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
   });
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
 }
 
-function setupFetchMockWithVote(idea: Record<string, unknown> = MOCK_IDEA) {
+function setupClientFetchMockWithVote() {
   const fetchMock = vi.fn().mockImplementation((url: string, init?: RequestInit) => {
     if (url.includes("/api/ideas/") && url.endsWith("/comments")) {
       if (init?.method === "POST") {
@@ -274,7 +276,7 @@ function setupFetchMockWithVote(idea: Record<string, unknown> = MOCK_IDEA) {
     if (url.includes("/api/voting-config")) {
       return Promise.resolve({ ok: true, json: () => Promise.resolve({ config: null }) });
     }
-    return Promise.resolve({ ok: true, json: () => Promise.resolve(idea) });
+    return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
   });
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
@@ -284,7 +286,7 @@ function setupFetchMockWithVote(idea: Record<string, unknown> = MOCK_IDEA) {
 // Acceptance: In-app fallback indicator when permission denied
 // ---------------------------------------------------------------------------
 
-describe("IdeaDetailPage - Notification fallback when permission denied", () => {
+describe("IdeaDetailClient - Notification fallback when permission denied", () => {
   beforeEach(() => {
     localStorage.clear();
     trackEventMock.mockClear();
@@ -302,12 +304,13 @@ describe("IdeaDetailPage - Notification fallback when permission denied", () => 
     // Mark the idea as last seen with status SUBMITTED (older status)
     localStorage.setItem("idea-123:lastSeenStatus", "SUBMITTED");
 
-    // Now the idea has moved to UNDER_REVIEW
-    setupFetchMock({ ...MOCK_IDEA, status: "UNDER_REVIEW" });
+    // Idea has moved to UNDER_REVIEW -- pass this as props
+    setupClientFetchMock();
 
-    render(<IdeaDetailPage />);
+    const ideaWithChangedStatus = { ...MOCK_IDEA, status: "UNDER_REVIEW" };
+    render(<IdeaDetailClient idea={ideaWithChangedStatus} />);
 
-    // Wait for the idea to load (title appears in mobile + desktop, so use AllBy)
+    // Wait for the idea title to appear (mobile + desktop)
     await waitFor(() => {
       expect(screen.getAllByText("Broken sidewalk near school").length).toBeGreaterThan(0);
     });
@@ -321,12 +324,13 @@ describe("IdeaDetailPage - Notification fallback when permission denied", () => 
   it("does not show in-app indicator when permission is granted", async () => {
     localStorage.setItem("idea-123:lastSeenStatus", "SUBMITTED");
 
-    setupFetchMock({ ...MOCK_IDEA, status: "UNDER_REVIEW" });
+    setupClientFetchMock();
 
     mockNotificationPermission = "granted";
     mockShowInAppFallback = false;
 
-    render(<IdeaDetailPage />);
+    const ideaWithChangedStatus = { ...MOCK_IDEA, status: "UNDER_REVIEW" };
+    render(<IdeaDetailClient idea={ideaWithChangedStatus} />);
 
     await waitFor(() => {
       expect(screen.getAllByText("Broken sidewalk near school").length).toBeGreaterThan(0);
@@ -338,9 +342,9 @@ describe("IdeaDetailPage - Notification fallback when permission denied", () => 
   it("does not show in-app indicator when status has not changed since last visit", async () => {
     localStorage.setItem("idea-123:lastSeenStatus", "UNDER_REVIEW");
 
-    setupFetchMock({ ...MOCK_IDEA, status: "UNDER_REVIEW" });
+    setupClientFetchMock();
 
-    render(<IdeaDetailPage />);
+    render(<IdeaDetailClient idea={MOCK_IDEA} />);
 
     await waitFor(() => {
       expect(screen.getAllByText("Broken sidewalk near school").length).toBeGreaterThan(0);
@@ -354,7 +358,7 @@ describe("IdeaDetailPage - Notification fallback when permission denied", () => 
 // Acceptance: Multiple status changes show latest only
 // ---------------------------------------------------------------------------
 
-describe("IdeaDetailPage - Multiple status changes show latest only", () => {
+describe("IdeaDetailClient - Multiple status changes show latest only", () => {
   beforeEach(() => {
     localStorage.clear();
     trackEventMock.mockClear();
@@ -384,9 +388,9 @@ describe("IdeaDetailPage - Multiple status changes show latest only", () => {
       ],
     };
 
-    setupFetchMock(multiChangeIdea);
+    setupClientFetchMock();
 
-    render(<IdeaDetailPage />);
+    render(<IdeaDetailClient idea={multiChangeIdea} />);
 
     await waitFor(() => {
       expect(screen.getAllByText("Broken sidewalk near school").length).toBeGreaterThan(0);
@@ -401,7 +405,7 @@ describe("IdeaDetailPage - Multiple status changes show latest only", () => {
   });
 });
 
-describe("IdeaDetailPage - analytics events", () => {
+describe("IdeaDetailClient - analytics events", () => {
   beforeEach(() => {
     localStorage.clear();
     trackEventMock.mockClear();
@@ -416,9 +420,9 @@ describe("IdeaDetailPage - analytics events", () => {
 
   it("tracks sign_in before redirecting unauthenticated voting users", async () => {
     const user = userEvent.setup();
-    setupFetchMock();
+    setupClientFetchMock();
 
-    render(<IdeaDetailPage />);
+    render(<IdeaDetailClient idea={MOCK_IDEA} />);
 
     await waitFor(() => {
       expect(screen.getAllByText("Broken sidewalk near school").length).toBeGreaterThan(0);
@@ -432,9 +436,9 @@ describe("IdeaDetailPage - analytics events", () => {
 
   it("tracks top-level comments after a successful submit", async () => {
     const user = userEvent.setup();
-    setupFetchMockWithVote();
+    setupClientFetchMockWithVote();
 
-    render(<IdeaDetailPage />);
+    render(<IdeaDetailClient idea={MOCK_IDEA} />);
 
     await waitFor(() => {
       expect(screen.getAllByText("Broken sidewalk near school").length).toBeGreaterThan(0);

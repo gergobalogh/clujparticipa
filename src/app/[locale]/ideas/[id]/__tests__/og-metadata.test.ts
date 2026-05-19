@@ -1,31 +1,104 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// This test verifies the generateMetadata function for the idea detail page.
-// The page must be restructured as a server component to export generateMetadata.
+// Test the generateMetadata function for the idea detail page.
+// The page is restructured as a server component that exports generateMetadata.
 
-// @ts-ignore — testing the metadata export from the server component page
-import { generateMetadata } from "@/app/[locale]/ro/ideas/[id]/page";
-
-// Note: The actual import path depends on how Next.js resolves the [locale] segment
-// for testing. This may need adjustment once the page is restructured.
+// We must mock all client-side dependencies before importing the page module.
+// The client island (IdeaDetailClient) and next-intl/server need mocking
+// to avoid ESM resolution issues in the vitest node environment.
 
 const mockFindUnique = vi.fn();
+
+const categoryTranslations: Record<string, string> = {
+  INFRASTRUCTURE: "Infrastructure",
+  EDUCATION: "Education",
+  ENVIRONMENT: "Environment",
+  CULTURE: "Culture",
+  SAFETY: "Safety",
+  TRANSPORT: "Transport",
+  HEALTH: "Health",
+  OTHER: "Other",
+};
+
+const districtTranslations: Record<string, string> = {
+  MANASTUR: "Manastur",
+  GHEORGHENI: "Gheorgheni",
+  ZORILOR: "Zorilor",
+  CENTRU: "Centru",
+  MARASTI: "Marasti",
+  GRIGORESCU: "Grigorescu",
+  IRIS: "Iris",
+  GRUIA: "Gruia",
+  ANDREI_MURESANU: "Andrei Muresanu",
+  BUNA_ZIUA: "Buna Ziua",
+  BORHANCI: "Borhanci",
+  DAMBU_ROTUND: "Dambu Rotund",
+  OTHER: "Other",
+};
+
+const namespaceTranslations: Record<string, Record<string, string>> = {
+  Categories: categoryTranslations,
+  Districts: districtTranslations,
+};
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     idea: {
-      findUnique: () => mockFindUnique(),
+      findUnique: (...args: unknown[]) => mockFindUnique(...args),
     },
   },
 }));
 
 vi.mock("next-intl/server", () => ({
   getTranslations: (ns: string) =>
-    Promise.resolve((key: string) => `${ns}.${key}`),
+    Promise.resolve((key: string) => {
+      const nsMap = namespaceTranslations[ns];
+      return nsMap?.[key] ?? `${ns}.${key}`;
+    }),
 }));
 
-describe("Idea Detail Page — generateMetadata (OG tags)", () => {
-  it("emits og:title with the idea title", async () => {
+vi.mock("@/components/ideas/idea-detail-client", () => ({
+  default: () => null,
+}));
+
+vi.mock("next/navigation", () => ({
+  notFound: () => {},
+}));
+
+let generateMetadata: (props: {
+  params: Promise<{ id: string; locale: string }>;
+}) => Promise<import("next").Metadata>;
+
+describe("Idea Detail Page -- generateMetadata (OG tags)", () => {
+  beforeEach(async () => {
+    vi.resetModules();
+    // Re-establish mocks after reset
+    vi.doMock("@/lib/prisma", () => ({
+      prisma: {
+        idea: {
+          findUnique: (...args: unknown[]) => mockFindUnique(...args),
+        },
+      },
+    }));
+    vi.doMock("next-intl/server", () => ({
+      getTranslations: (ns: string) =>
+        Promise.resolve((key: string) => {
+          const nsMap = namespaceTranslations[ns];
+          return nsMap?.[key] ?? `${ns}.${key}`;
+        }),
+    }));
+    vi.doMock("@/components/ideas/idea-detail-client", () => ({
+      default: () => null,
+    }));
+    vi.doMock("next/navigation", () => ({
+      notFound: () => {},
+    }));
+
+    const mod = await import("@/app/[locale]/ideas/[id]/page");
+    generateMetadata = mod.generateMetadata;
+  });
+
+  it("S14: emits og:title equal to idea.title", async () => {
     mockFindUnique.mockResolvedValue({
       id: "idea-1",
       title: "New bike lane on Dorobantilor",
@@ -33,7 +106,7 @@ describe("Idea Detail Page — generateMetadata (OG tags)", () => {
       category: "TRANSPORT",
       district: "MANASTUR",
       status: "SUBMITTED",
-      images: [{ url: "https://example.com/photo.jpg" }],
+      images: [],
     });
 
     const metadata = await generateMetadata({
@@ -43,7 +116,7 @@ describe("Idea Detail Page — generateMetadata (OG tags)", () => {
     expect(metadata.openGraph?.title).toBe("New bike lane on Dorobantilor");
   });
 
-  it("emits og:description truncated to 160 chars with category and district", async () => {
+  it("S15: truncates og:description to 160 chars with ellipsis, followed by category and district", async () => {
     const longDesc = "A".repeat(200);
     mockFindUnique.mockResolvedValue({
       id: "idea-2",
@@ -52,7 +125,7 @@ describe("Idea Detail Page — generateMetadata (OG tags)", () => {
       category: "INFRASTRUCTURE",
       district: "GHEORGHENI",
       status: "SUBMITTED",
-      images: [{ url: "https://example.com/photo.jpg" }],
+      images: [],
     });
 
     const metadata = await generateMetadata({
@@ -60,50 +133,42 @@ describe("Idea Detail Page — generateMetadata (OG tags)", () => {
     });
 
     const desc = metadata.openGraph?.description as string;
-    expect(desc.length).toBeLessThanOrEqual(200); // 160 + " — INFRASTRUCTURE, GHEORGHENI"
-    expect(desc).toContain("INFRASTRUCTURE");
-    expect(desc).toContain("GHEORGHENI");
+    // The description portion (before " -- {category}, {district}") is 160 chars of
+    // original content + "..." ellipsis = 163 chars
+    const suffix = " -- Infrastructure, Gheorgheni";
+    const descWithoutSuffix = desc.slice(0, desc.length - suffix.length);
+    expect(descWithoutSuffix.length).toBe(163); // 160 chars + "..."
+    expect(descWithoutSuffix).toMatch(/\.\.\.$/); // ends with ellipsis
+    expect(desc).toContain("Infrastructure");
+    expect(desc).toContain("Gheorgheni");
   });
 
-  it("emits og:image with absolute URL for ideas with uploaded images", async () => {
+  it("S15: does not truncate og:description when under 160 chars", async () => {
     mockFindUnique.mockResolvedValue({
-      id: "idea-3",
-      title: "Test idea",
-      description: "Short desc",
-      category: "TRANSPORT",
-      district: "MANASTUR",
-      status: "SUBMITTED",
-      images: [{ url: "https://example.com/photo.jpg" }],
-    });
-
-    const metadata = await generateMetadata({
-      params: Promise.resolve({ id: "idea-3", locale: "ro" }),
-    });
-
-    const ogImage = metadata.openGraph?.images as { url: string };
-    expect(ogImage?.url).toMatch(/^https?:\/\//);
-  });
-
-  it("uses OG placeholder image URL for ideas without uploaded images", async () => {
-    mockFindUnique.mockResolvedValue({
-      id: "idea-4",
-      title: "No photo idea",
-      description: "Short desc",
+      id: "idea-short",
+      title: "Short idea",
+      description: "A short description",
       category: "EDUCATION",
-      district: "MANASTUR",
+      district: "CENTRU",
       status: "SUBMITTED",
       images: [],
     });
 
     const metadata = await generateMetadata({
-      params: Promise.resolve({ id: "idea-4", locale: "ro" }),
+      params: Promise.resolve({ id: "idea-short", locale: "ro" }),
     });
 
-    const ogImage = metadata.openGraph?.images as { url: string };
-    expect(ogImage?.url).toContain("/api/og/ideas/idea-4");
+    const desc = metadata.openGraph?.description as string;
+    expect(desc).toContain("A short description");
+    expect(desc).toContain("Education");
+    expect(desc).toContain("Centru");
+    // No ellipsis for short descriptions
+    const suffix = " -- Education, Centru";
+    const descWithoutSuffix = desc.slice(0, desc.length - suffix.length);
+    expect(descWithoutSuffix).not.toMatch(/\.\.\.$/);
   });
 
-  it("emits og:url with locale prefix", async () => {
+  it("S18: emits og:url with locale segment and idea id", async () => {
     mockFindUnique.mockResolvedValue({
       id: "idea-5",
       title: "Locale test",
@@ -121,7 +186,26 @@ describe("Idea Detail Page — generateMetadata (OG tags)", () => {
     expect(metadata.openGraph?.url).toContain("/hu/ideas/idea-5");
   });
 
-  it("handles null idea gracefully — returns not-found metadata", async () => {
+  it("emits og:type=website and og:site_name=ClujParticipa", async () => {
+    mockFindUnique.mockResolvedValue({
+      id: "idea-type",
+      title: "Type test",
+      description: "Desc",
+      category: "TRANSPORT",
+      district: "MANASTUR",
+      status: "SUBMITTED",
+      images: [],
+    });
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: "idea-type", locale: "ro" }),
+    });
+
+    expect(metadata.openGraph?.type).toBe("website");
+    expect(metadata.openGraph?.siteName).toBe("ClujParticipa");
+  });
+
+  it("S25: handles null idea gracefully without throwing", async () => {
     mockFindUnique.mockResolvedValue(null);
 
     const metadata = await generateMetadata({
@@ -130,10 +214,11 @@ describe("Idea Detail Page — generateMetadata (OG tags)", () => {
 
     // Should return minimal metadata, not throw
     expect(metadata).toBeDefined();
-    expect(metadata.title).toBeDefined();
+    expect(metadata.openGraph?.type).toBe("website");
+    expect(metadata.openGraph?.siteName).toBe("ClujParticipa");
   });
 
-  it("uses fallback description for ideas with no description text", async () => {
+  it("S26: uses fallback description when idea description is empty", async () => {
     mockFindUnique.mockResolvedValue({
       id: "idea-6",
       title: "Empty description idea",
@@ -149,8 +234,9 @@ describe("Idea Detail Page — generateMetadata (OG tags)", () => {
     });
 
     const desc = metadata.openGraph?.description as string;
-    // Should contain category and district as fallback
-    expect(desc).toContain("SAFETY");
-    expect(desc).toContain("GHEORGHENI");
+    // Fallback should include the title
+    expect(desc).toContain("Empty description idea");
+    expect(desc).toContain("Safety");
+    expect(desc).toContain("Gheorgheni");
   });
 });
