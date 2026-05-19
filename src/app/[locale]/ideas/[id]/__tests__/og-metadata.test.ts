@@ -239,4 +239,57 @@ describe("Idea Detail Page -- generateMetadata (OG tags)", () => {
     expect(desc).toContain("Safety");
     expect(desc).toContain("Gheorgheni");
   });
+
+  it("S16: emits og:image with absolute URL when idea has uploaded images", async () => {
+    process.env.NEXT_PUBLIC_APP_URL = "https://test.clujparticipa.ro";
+    mockFindUnique.mockResolvedValue({
+      id: "idea-img",
+      title: "Idea with image",
+      description: "Has an image",
+      category: "ENVIRONMENT",
+      district: "MANASTUR",
+      status: "SUBMITTED",
+      images: [
+        { id: "img-1", url: "/uploads/park-bench.jpg", order: 0 },
+        { id: "img-2", url: "/uploads/park-overview.jpg", order: 1 },
+      ],
+    });
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: "idea-img", locale: "ro" }),
+    });
+
+    // og:image should be the first image as an absolute URL
+    expect(metadata.openGraph?.images).toBeDefined();
+    const ogImages = metadata.openGraph?.images;
+    // Next.js Metadata accepts string or array; we expect the first image URL
+    const firstImageUrl = Array.isArray(ogImages)
+      ? (ogImages[0] as { url: string }).url ?? ogImages[0]
+      : ogImages;
+    expect(firstImageUrl).toBe("https://test.clujparticipa.ro/uploads/park-bench.jpg");
+
+    delete process.env.NEXT_PUBLIC_APP_URL;
+  });
+
+  it("S16: omits og:image when idea has no images", async () => {
+    process.env.NEXT_PUBLIC_APP_URL = "https://test.clujparticipa.ro";
+    mockFindUnique.mockResolvedValue({
+      id: "idea-noimg",
+      title: "Idea without image",
+      description: "No images here",
+      category: "EDUCATION",
+      district: "CENTRU",
+      status: "SUBMITTED",
+      images: [],
+    });
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: "idea-noimg", locale: "ro" }),
+    });
+
+    // og:image should be omitted -- not present, not undefined with a broken URL
+    expect(metadata.openGraph?.images).toBeUndefined();
+
+    delete process.env.NEXT_PUBLIC_APP_URL;
+  });
 });

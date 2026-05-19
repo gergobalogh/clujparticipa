@@ -36,6 +36,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const category = t(idea.category as Parameters<typeof t>[0]);
   const district = td(idea.district as Parameters<typeof td>[0]);
 
+  const ogImage = idea.images.length > 0
+    ? `${appUrl}${idea.images[0].url}`
+    : undefined;
+
   return {
     title: idea.title,
     openGraph: {
@@ -49,6 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: `${appUrl}/${locale}/ideas/${id}`,
       type: "website",
       siteName: "ClujParticipa",
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
     },
   };
 }
