@@ -22,5 +22,5 @@ export const buildOgDescription = ({
 }: BuildOgDescriptionInput): string => {
   const baseText = isEmptyOrWhitespace(description) ? title : description;
   const truncated = truncateDescription(baseText);
-  return `${truncated} -- ${category}, ${district}`;
+  return `${truncated} — ${category}, ${district}`;
 };

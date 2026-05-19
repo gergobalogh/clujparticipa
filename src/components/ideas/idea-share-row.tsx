@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Share2 } from "lucide-react";
+import { Copy, ExternalLink, Share2 } from "lucide-react";
 import { copyToClipboard } from "@/lib/clipboard";
 import { trackEvent } from "@/lib/analytics";
 import { useTranslations } from "next-intl";
@@ -14,13 +14,13 @@ type IdeaShareRowProps = {
   locale: string;
 };
 
-function buildShareUrl(ideaId: string, source: string): string {
+function buildShareUrl(ideaId: string, source: string, locale: string): string {
   const base = typeof window !== "undefined" ? window.location.origin : "";
-  return `${base}/ideas/${ideaId}?utm_source=${source}`;
+  return `${base}/${locale}/ideas/${ideaId}?utm_source=${source}`;
 }
 
 function buildWhatsAppUrl(ideaTitle: string, shareUrl: string, ctaText: string): string {
-  const text = `${ideaTitle} -- ${ctaText} ${shareUrl}`;
+  const text = `${ideaTitle} — ${ctaText} ${shareUrl}`;
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
 
@@ -37,9 +37,9 @@ export function IdeaShareRow({
 }: IdeaShareRowProps) {
   const t = useTranslations("Share");
 
-  const copyUrl = buildShareUrl(ideaId, "copy");
-  const whatsappUrl = buildWhatsAppUrl(title, buildShareUrl(ideaId, "whatsapp"), t("ctaText"));
-  const facebookUrl = buildFacebookUrl(buildShareUrl(ideaId, "facebook"));
+  const copyUrl = buildShareUrl(ideaId, "copy", locale);
+  const whatsappUrl = buildWhatsAppUrl(title, buildShareUrl(ideaId, "whatsapp", locale), t("ctaText"));
+  const facebookUrl = buildFacebookUrl(buildShareUrl(ideaId, "facebook", locale));
 
   const handleCopy = async () => {
     await copyToClipboard(copyUrl);
@@ -50,7 +50,7 @@ export function IdeaShareRow({
   const handleWhatsApp = () => {
     const opened = window.open(whatsappUrl, "_blank");
     if (!opened) {
-      copyToClipboard(buildShareUrl(ideaId, "whatsapp"));
+      copyToClipboard(buildShareUrl(ideaId, "whatsapp", locale));
     }
   };
 
@@ -74,7 +74,7 @@ export function IdeaShareRow({
         aria-label={t("shareOnFacebook")}
         className="inline-flex items-center justify-center min-h-11 min-w-11 rounded-sm border border-ink/10 bg-paper text-ink transition hover:bg-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-ink"
       >
-        <Share2 className="h-5 w-5" />
+        <ExternalLink className="h-5 w-5" />
       </button>
       <button
         type="button"

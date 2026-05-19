@@ -133,9 +133,9 @@ describe("Idea Detail Page -- generateMetadata (OG tags)", () => {
     });
 
     const desc = metadata.openGraph?.description as string;
-    // The description portion (before " -- {category}, {district}") is 160 chars of
+    // The description portion (before " — {category}, {district}") is 160 chars of
     // original content + "..." ellipsis = 163 chars
-    const suffix = " -- Infrastructure, Gheorgheni";
+    const suffix = " — Infrastructure, Gheorgheni";
     const descWithoutSuffix = desc.slice(0, desc.length - suffix.length);
     expect(descWithoutSuffix.length).toBe(163); // 160 chars + "..."
     expect(descWithoutSuffix).toMatch(/\.\.\.$/); // ends with ellipsis
@@ -163,7 +163,7 @@ describe("Idea Detail Page -- generateMetadata (OG tags)", () => {
     expect(desc).toContain("Education");
     expect(desc).toContain("Centru");
     // No ellipsis for short descriptions
-    const suffix = " -- Education, Centru";
+    const suffix = " — Education, Centru";
     const descWithoutSuffix = desc.slice(0, desc.length - suffix.length);
     expect(descWithoutSuffix).not.toMatch(/\.\.\.$/);
   });

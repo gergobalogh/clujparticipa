@@ -11,7 +11,7 @@ describe("buildOgDescription", () => {
       district: "Gheorgheni",
     });
 
-    const suffix = " -- Infrastructure, Gheorgheni";
+    const suffix = " — Infrastructure, Gheorgheni";
     const descWithoutSuffix = result.slice(0, result.length - suffix.length);
     expect(descWithoutSuffix.length).toBe(163); // 160 + "..."
     expect(descWithoutSuffix).toMatch(/\.\.\.$/);
@@ -67,7 +67,7 @@ describe("buildOgDescription", () => {
       district: "Gruia",
     });
 
-    const suffix = " -- Health, Gruia";
+    const suffix = " — Health, Gruia";
     const descWithoutSuffix = result.slice(0, result.length - suffix.length);
     expect(descWithoutSuffix.length).toBe(160);
     expect(descWithoutSuffix).not.toMatch(/\.\.\.$/);
@@ -82,7 +82,7 @@ describe("buildOgDescription", () => {
       district: "Zorilor",
     });
 
-    const suffix = " -- Culture, Zorilor";
+    const suffix = " — Culture, Zorilor";
     const descWithoutSuffix = result.slice(0, result.length - suffix.length);
     expect(descWithoutSuffix.length).toBe(163); // 160 + "..."
     expect(descWithoutSuffix).toMatch(/\.\.\.$/);
