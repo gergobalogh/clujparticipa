@@ -5,7 +5,8 @@ export type AnalyticsEventName =
   | "filter_change"
   | "sign_in"
   | "notification_opt_in"
-  | "creator_link_click";
+  | "creator_link_click"
+  | "idea_share";
 
 export type AnalyticsPayload = Record<string, string | number | boolean | null>;
 
