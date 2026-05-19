@@ -28,6 +28,7 @@ const ideaImageMap = {
   2: [4, 5],
   3: [6],
   4: [0],
+  5: [1],
 };
 
 const ideas = [
@@ -267,6 +268,37 @@ const ideas = [
       {
         text: "Viena face asta pe Ringstrasse, Paris pe malurile Senei. De ce nu și Cluj pe Someș?",
         participantSeed: "c5-1",
+        status: "VISIBLE",
+      },
+    ],
+  },
+  {
+    title: "Centrul Cultural New York Szálló / New York Szálló Kulturális Központ",
+    description:
+      "RO\nProblemă: clădirea emblematică New York Szálló din Piața Unirii stă goală și se degradează de ani de zile, deși centrul orașului are nevoie de un spațiu cultural public, accesibil mai multor comunități și organizații culturale.\n\nContext: Transtelex a relatat pe 10 mai 2026 că Primăria Cluj-Napoca ar putea cumpăra fostul New York Szálló și că viceprimarul Oláh Emese a confirmat că municipalitatea ar trebui să își exercite dreptul de preempțiune. În 2020, fracțiunea locală UDMR propusese achiziția clădirii și transformarea ei într-un centru cultural. Consiliul Local a susținut deja proiecte culturale maghiare, inclusiv alocarea a 15.000 RON pentru Asociația Karácsony Sándor Társaság la ședința din 20 martie 2026, iar organizații precum Asociația Amicii Operei Maghiare și Asociația Zilele Culturale Maghiare apar ca beneficiari recunoscuți de consiliu. Aceste exemple arată cerere reală pentru programare culturală, dar clădirea New York rămâne blocată.\n\nPropunere: Primăria să cumpere clădirea New York Szálló din Piața Unirii 1 și să o transforme într-un centru cultural municipal deschis tuturor: spații de expoziție, bibliotecă și sală de lectură multilingvă, sală de evenimente pentru festivaluri locale, concerte, dezbateri, ateliere și programare culturală pe tot parcursul anului, inclusiv pentru Zilele Culturale Maghiare.\n\nHU\nProbléma: a Főtéren álló ikonikus New York Szálló épülete évek óta üresen áll és romlik, miközben a belvárosnak szüksége van egy nyitott, közösségi kulturális térre, amely több kolozsvári közösséget és kulturális szervezetet is ki tud szolgálni.\n\nHáttér: a Transtelex 2026. május 10-én arról írt, hogy a kolozsvári önkormányzat megvásárolhatná az egykori New York Szálló főtéri épületét, Oláh Emese alpolgármester pedig megerősítette, hogy a városnak élnie kellene elővásárlási jogával. Az RMDSZ helyi frakciója már 2020-ban javasolta az épület megvásárlását és kulturális központtá alakítását. A helyi tanács korábban magyar kulturális programokat is támogatott, például 15 000 lejt ítélt meg a Karácsony Sándor Társaságnak a 2026. március 20-i ülésen, és olyan szervezetek is szerepelnek elismert kedvezményezettként, mint az Amicii Operei Maghiare Egyesület és a Kolozsvári Magyar Napok Egyesület. Ez valós kulturális igényt jelez, de a New York épület ügye továbbra sem haladt előre.\n\nJavaslat: a város vásárolja meg a Piața Unirii 1. szám alatti New York Szálló épületét, és alakítsa át mindenki számára nyitott önkormányzati kulturális központtá: kiállítóterekkel, többnyelvű könyvtárral és olvasóteremmel, rendezvényteremmel helyi fesztiválok, koncertek, viták, műhelyek és egész éves kulturális programok számára, beleértve a Kolozsvári Magyar Napok eseményeit is.",
+    category: "CULTURE",
+    district: "CENTRU",
+    status: "SUBMITTED",
+    latitude: 46.77042,
+    longitude: 23.58963,
+    statusChanges: [
+      {
+        fromStatus: null,
+        toStatus: "SUBMITTED",
+        note: "Propunere bilingvă depusă pentru achiziția și conversia clădirii New York Szálló într-un centru cultural municipal general.",
+        changedBy: ADMIN,
+      },
+    ],
+    votes: 26,
+    comments: [
+      {
+        text: "Susțin ideea dacă spațiul rămâne deschis tuturor comunităților și include programare culturală diversă, nu doar evenimente ocazionale.",
+        participantSeed: "c6-1",
+        status: "VISIBLE",
+      },
+      {
+        text: "Fontos, hogy az épület ne maradjon üresen tovább, hanem egész évben használható kulturális helyszín legyen.",
+        participantSeed: "c6-2",
         status: "VISIBLE",
       },
     ],
