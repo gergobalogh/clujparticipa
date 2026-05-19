@@ -1,59 +1,65 @@
 id: homepage-visit
 name: Visitor Lands on Editorial Homepage
 persona: first-time-visitor
-jobs: [scanner, explorer, trust-seeker]
+jobs: [J-HOME, J-HOME-RETURN]
 entry: "/ (locale homepage)"
 
 steps:
   - id: s1-land
     action: Land on homepage
-    output: Split layout with sidebar + map, editorial typography
+    output: Short action-oriented headline + description (≤20 words), stats strip, split layout with sidebar + map, editorial typography
     emotion_delta: +2
     artifacts: [ideas, stats]
 
-  - id: s2-live-badge
+  - id: s2-stats-strip
+    action: Scan stats strip
+    output: Total ideas + completed count visible (trust proof)
+    emotion_delta: +1
+    artifacts: [stats]
+
+  - id: s3-live-badge
     action: Notice LIVE badge
     output: Pulsing badge next to idea feed heading
     emotion_delta: +2
     artifacts: [votingConfig]
 
-  - id: s3-scan-feed
+  - id: s4-scan-feed
     action: Scan idea feed in sidebar
     output: 3-5 latest ideas with neighborhood, status, support
     emotion_delta: +1
     artifacts: [ideas]
 
-  - id: s4-map-pins
+  - id: s5-map-pins
     action: Notice animated map pins
     output: Colored pulsing pins at idea locations
     emotion_delta: +1
     artifacts: [ideas]
 
-  - id: s5-hover-pin
+  - id: s6-hover-pin
     action: Hover over a pin
     output: Tooltip with location name
     emotion_delta: +1
     artifacts: [ideas]
 
-  - id: s6-click-idea
+  - id: s7-click-idea
     action: Click an idea in sidebar
     output: Navigate to idea detail page
     emotion_delta: +1
     artifacts: []
 
-  - id: s7-see-cta
-    action: Return to homepage, see CTA
-    output: "Trimite Ideea Ta" button at sidebar bottom
+  - id: s8-see-cta
+    action: See primary CTA
+    output: "Submit your idea" button at sidebar bottom
     emotion_delta: +1
     artifacts: []
 
 error_paths:
   - step: s1-land
     failure: Stats API fails
-    recovery: No LIVE badge, ideas-only sidebar
-  - step: s3-scan-feed
+    recovery: No stats strip, no LIVE badge, ideas-only sidebar
+  - step: s4-scan-feed
     failure: Ideas API empty
-    recovery: Empty-state message, CTA moves up
-  - step: s5-hover-pin
+    recovery: Actionable empty-state message ("Be the first to propose an improvement"), CTA moves up
+  - step: s6-hover-pin
     failure: Map fails to load
     recovery: Static SVG map placeholder

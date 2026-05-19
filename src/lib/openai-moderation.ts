@@ -1,5 +1,3 @@
-export const __SCAFFOLD__ = true;
-
 export type ModerationResult = { flagged: boolean; categories: string[] };
 
 export type ModerationPort = (
@@ -12,5 +10,12 @@ export async function moderateText(
   callModeration: ModerationPort,
   signal?: AbortSignal
 ): Promise<ModerationResult> {
-  throw new Error("Not yet implemented -- RED scaffold");
+  try {
+    return await callModeration(text, signal);
+  } catch (error: unknown) {
+    console.warn("openai-moderation-fail-open", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return { flagged: false, categories: [] };
+  }
 }

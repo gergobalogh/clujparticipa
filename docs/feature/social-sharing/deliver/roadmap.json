@@ -1,0 +1,187 @@
+{
+  "roadmap": {
+    "project_id": "social-sharing",
+    "created_at": "2026-05-19T04:15:27Z",
+    "total_steps": 11,
+    "phases": 3,
+    "goal": "Add WhatsApp/Facebook share buttons, copy-link, OG meta tags, and dynamic OG placeholder images to idea detail pages"
+  },
+  "phases": [
+    {
+      "id": "01",
+      "name": "OG Meta Tags and Placeholder Image",
+      "description": "Foundation layer: create OG image route stub as walking skeleton, add category hex color mapping, restructure idea detail page as server component shell with generateMetadata, then fill in full OG image route and wire placeholder into metadata for ideas without photos",
+      "steps": [
+        {
+          "id": "01-01",
+          "name": "OG image route walking skeleton",
+          "criteria": "route handler returns 200 PNG for existing idea ID",
+          "test_file": "src/app/api/og/ideas/[id]/route.test.ts",
+          "scenario_name": "S10",
+          "files_to_modify": [
+            "src/app/api/og/ideas/[id]/route.ts"
+          ],
+          "deps": []
+        },
+        {
+          "id": "01-02",
+          "name": "categoryOgColors hex mapping with fallback",
+          "criteria": "all categories mapped to hex, TRANSPORT=cyan, OTHER fallback for unknown",
+          "test_file": "src/lib/__tests__/category-og-colors.test.ts",
+          "scenario_name": "S20, S21, S28",
+          "files_to_modify": [
+            "src/lib/category-colors.ts"
+          ],
+          "deps": []
+        },
+        {
+          "id": "01-03",
+          "name": "generateMetadata emits og:title, og:url, og:description",
+          "criteria": "og:title, og:description truncated 160 chars, og:url with locale, null idea graceful, empty description fallback",
+          "test_file": "src/app/[locale]/ideas/[id]/__tests__/og-metadata.test.ts",
+          "scenario_name": "S14, S15, S18, S25, S26",
+          "files_to_modify": [
+            "src/app/[locale]/ideas/[id]/page.tsx",
+            "src/components/ideas/idea-detail-client.tsx"
+          ],
+          "deps": []
+        },
+        {
+          "id": "01-04",
+          "name": "generateMetadata emits og:image for ideas with images",
+          "criteria": "og:image absolute URL for ideas with images, og:image omitted when no images",
+          "test_file": "src/app/[locale]/ideas/[id]/__tests__/og-metadata.test.ts",
+          "scenario_name": "S16",
+          "files_to_modify": [
+            "src/app/[locale]/ideas/[id]/page.tsx"
+          ],
+          "deps": ["01-03"]
+        },
+        {
+          "id": "01-05",
+          "name": "Full OG image route implementation and wire placeholder",
+          "criteria": "category color background, 404 for missing idea, title truncation, 500 on Prisma error, placeholder og:image for ideas without images",
+          "test_file": "src/app/api/og/ideas/[id]/route.test.ts",
+          "scenario_name": "S11, S12, S13, S24, S17",
+          "files_to_modify": [
+            "src/app/api/og/ideas/[id]/route.ts",
+            "src/app/[locale]/ideas/[id]/page.tsx"
+          ],
+          "deps": ["01-01", "01-02", "01-04"]
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Copy Link and Analytics Foundation",
+      "description": "Build clipboard utility, extend analytics with idea_share event type, create Toaster component, and add share i18n strings",
+      "steps": [
+        {
+          "id": "02-01",
+          "name": "copyToClipboard utility with fallback",
+          "criteria": "writes text returns true, returns false when unavailable, returns false on write failure",
+          "test_file": "src/lib/__tests__/clipboard.test.ts",
+          "scenario_name": "S1, S2, S3",
+          "files_to_modify": [
+            "src/lib/clipboard.ts"
+          ],
+          "deps": []
+        },
+        {
+          "id": "02-02",
+          "name": "Analytics event type idea_share",
+          "criteria": "trackEvent accepts idea_share with channel payload, accepts channel=whatsapp",
+          "test_file": "src/lib/__tests__/analytics-idea-share.test.ts",
+          "scenario_name": "S19, S27",
+          "files_to_modify": [
+            "src/lib/analytics.ts"
+          ],
+          "deps": []
+        },
+        {
+          "id": "02-03",
+          "name": "Toaster component and share i18n strings",
+          "criteria": "Toaster renders sonner, mounted in layout, share i18n keys in ro/hu/en",
+          "test_file": null,
+          "scenario_name": null,
+          "files_to_modify": [
+            "src/components/ui/toaster.tsx",
+            "src/app/[locale]/layout.tsx",
+            "src/i18n/messages/ro.json",
+            "src/i18n/messages/hu.json",
+            "src/i18n/messages/en.json",
+            "package.json"
+          ],
+          "deps": []
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "name": "Share Buttons UI",
+      "description": "Build IdeaShareRow component with WhatsApp, Facebook, and copy buttons including accessible labels, hit targets, popup-blocked fallback, and analytics tracking",
+      "steps": [
+        {
+          "id": "03-01",
+          "name": "IdeaShareRow walking skeleton renders all buttons",
+          "criteria": "renders WhatsApp, Facebook, copy buttons, copy writes utm_source=copy URL, 44x44px hit targets",
+          "test_file": "src/components/ideas/__tests__/idea-share-row.test.tsx",
+          "scenario_name": "S4, S7, S8",
+          "files_to_modify": [
+            "src/components/ideas/idea-share-row.tsx",
+            "src/components/ideas/idea-detail-client.tsx"
+          ],
+          "deps": ["02-01", "02-02", "02-03"]
+        },
+        {
+          "id": "03-02",
+          "name": "WhatsApp and Facebook intent URLs with UTM",
+          "criteria": "WhatsApp opens wa.me with utm_source=whatsapp, Facebook opens sharer.php with utm_source=facebook, share text includes title",
+          "test_file": "src/components/ideas/__tests__/idea-share-row.test.tsx",
+          "scenario_name": "S5, S6, S9",
+          "files_to_modify": [
+            "src/components/ideas/idea-share-row.tsx"
+          ],
+          "deps": ["03-01"]
+        },
+        {
+          "id": "03-03",
+          "name": "Accessibility, i18n labels, popup fallback",
+          "criteria": "popup-blocked fallback to copy-link, aria-label i18n labels for all buttons",
+          "test_file": "src/components/ideas/__tests__/idea-share-row.test.tsx",
+          "scenario_name": "S22, S23",
+          "files_to_modify": [
+            "src/components/ideas/idea-share-row.tsx"
+          ],
+          "deps": ["03-02"]
+        }
+      ]
+    }
+  ],
+  "implementation_scope": {
+    "source_directories": [
+      "src/app/[locale]/ideas/[id]/",
+      "src/app/api/og/ideas/",
+      "src/components/ideas/",
+      "src/components/ui/",
+      "src/lib/",
+      "src/i18n/messages/"
+    ],
+    "test_directories": [
+      "src/app/[locale]/ideas/[id]/__tests__/",
+      "src/app/api/og/ideas/[id]/",
+      "src/components/ideas/__tests__/",
+      "src/lib/__tests__/"
+    ],
+    "excluded_patterns": [
+      "__scaffold__",
+      "*.d.ts",
+      "node_modules/**"
+    ]
+  },
+  "validation": {
+    "status": "pending",
+    "reviewer": "TODO",
+    "approved_at": "TODO"
+  }
+}

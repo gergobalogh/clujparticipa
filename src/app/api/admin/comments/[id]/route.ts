@@ -48,6 +48,13 @@ export async function PATCH(
 
   const { status: newStatus, reason } = parsed.data;
 
+  if (newStatus === "FLAGGED") {
+    return NextResponse.json(
+      { error: "FLAGGED status can only be set by the auto-moderation system" },
+      { status: 400 }
+    );
+  }
+
   if (newStatus === comment.status) {
     return NextResponse.json(
       { error: `Comment is already ${comment.status.toLowerCase()}` },
@@ -55,7 +62,12 @@ export async function PATCH(
     );
   }
 
-  const action = newStatus === "HIDDEN" ? "HIDE" : "RESTORE";
+  const action =
+    comment.status === "FLAGGED" && newStatus === "VISIBLE"
+      ? "APPROVE"
+      : newStatus === "HIDDEN"
+        ? "HIDE"
+        : "RESTORE";
 
   const updated = await prisma.$transaction(async (tx) => {
     const updatedComment = await tx.comment.update({

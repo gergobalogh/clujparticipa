@@ -33,6 +33,16 @@ type CommentSummary = {
   createdAt: string;
 };
 
+type FlaggedComment = {
+  id: string;
+  text: string;
+  status: string;
+  ideaId: string;
+  ideaTitle: string;
+  flaggedCategories: string[];
+  createdAt: string;
+};
+
 type IdeaImageDetail = {
   url: string;
   alt: string | null;
@@ -63,7 +73,7 @@ export default function AdminPage() {
   const [secret, setSecret] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
   const [authError, setAuthError] = useState(false);
-  const [tab, setTab] = useState<"ideas" | "comments" | "voting">("ideas");
+  const [tab, setTab] = useState<"ideas" | "comments" | "flagged" | "voting">("ideas");
 
   const [ideas, setIdeas] = useState<IdeaSummary[]>([]);
   const [comments, setComments] = useState<CommentSummary[]>([]);
@@ -80,6 +90,14 @@ export default function AdminPage() {
   const [modCommentId, setModCommentId] = useState<string | null>(null);
   const [modReason, setModReason] = useState("");
   const [commentMsg, setCommentMsg] = useState("");
+
+  // Flagged comments state
+  const [flaggedComments, setFlaggedComments] = useState<FlaggedComment[]>([]);
+  const [flaggedCount, setFlaggedCount] = useState(0);
+  const [loadingFlagged, setLoadingFlagged] = useState(false);
+  const [flaggedActionId, setFlaggedActionId] = useState<string | null>(null);
+  const [flaggedReason, setFlaggedReason] = useState("");
+  const [flaggedMsg, setFlaggedMsg] = useState("");
 
   const [editingImages, setEditingImages] = useState<IdeaImageDetail[]>([]);
   const [editingImageLoading, setEditingImageLoading] = useState(false);
@@ -179,11 +197,30 @@ export default function AdminPage() {
     } catch {}
   }, []);
 
+  const getAdminSecret = () => secret || localStorage.getItem("admin-secret") || "";
+
+  const fetchFlagged = useCallback(async () => {
+    requestAnimationFrame(() => setLoadingFlagged(true));
+    try {
+      const res = await fetch("/api/admin/comments/flagged", {
+        headers: { "x-admin-secret": getAdminSecret() },
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setFlaggedComments(data.comments ?? []);
+      setFlaggedCount(data.count ?? 0);
+    } catch {} finally {
+      setLoadingFlagged(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (authenticated && tab === "ideas") requestAnimationFrame(() => fetchIdeas());
     if (authenticated && tab === "comments") requestAnimationFrame(() => fetchComments());
+    if (authenticated && tab === "flagged") requestAnimationFrame(() => fetchFlagged());
     if (authenticated && tab === "voting") requestAnimationFrame(() => fetchVotingConfig());
-  }, [authenticated, tab, fetchIdeas, fetchComments, fetchVotingConfig]);
+    if (authenticated) requestAnimationFrame(() => fetchFlagged());
+  }, [authenticated, tab, fetchIdeas, fetchComments, fetchFlagged, fetchVotingConfig]);
 
   const openIdeaEditor = useCallback(async (ideaId: string) => {
     setEditingIdea(ideaId);
@@ -243,8 +280,6 @@ export default function AdminPage() {
     }
   }, [ideas]);
 
-  const getAdminSecret = () => secret || localStorage.getItem("admin-secret") || "";
-
   const handleLogin = () => {
     setAuthError(false);
     localStorage.setItem("admin-secret", secret);
@@ -257,6 +292,8 @@ export default function AdminPage() {
     setAuthenticated(false);
     setIdeas([]);
     setComments([]);
+    setFlaggedComments([]);
+    setFlaggedCount(0);
   };
 
   const executeStatusChange = async (
@@ -333,6 +370,32 @@ export default function AdminPage() {
       }
     } catch {
       setCommentMsg("Error");
+    }
+  };
+
+  const handleFlaggedAction = async (commentId: string, action: "VISIBLE" | "HIDDEN") => {
+    if (!flaggedReason) return;
+    setFlaggedMsg("");
+    try {
+      const res = await fetch(`/api/admin/comments/${commentId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-secret": getAdminSecret(),
+        },
+        body: JSON.stringify({ status: action, reason: flaggedReason }),
+      });
+      if (res.ok) {
+        setFlaggedMsg(t("commentModerated"));
+        setFlaggedActionId(null);
+        setFlaggedReason("");
+        fetchFlagged();
+      } else {
+        const data = await res.json();
+        setFlaggedMsg(data.error || "Error");
+      }
+    } catch {
+      setFlaggedMsg("Error");
     }
   };
 
@@ -505,6 +568,21 @@ export default function AdminPage() {
           }`}
         >
           {t("commentsTab")}
+        </button>
+        <button
+          onClick={() => setTab("flagged")}
+          className={`relative px-4 py-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-ink ${
+            tab === "flagged"
+              ? "border-b-2 border-ink text-ink"
+              : "text-ink-muted hover:text-ink"
+          }`}
+        >
+          {t("flaggedTab")}
+          {flaggedCount > 0 && (
+            <span className="ml-1.5 inline-flex items-center rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+              {t("flaggedCount", { count: flaggedCount })}
+            </span>
+          )}
         </button>
         <button
           onClick={() => setTab("voting")}
@@ -878,6 +956,89 @@ export default function AdminPage() {
               ))}
               {comments.length === 0 && (
                 <p className="text-sm text-ink-muted">{t("noCommentsFound")}</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === "flagged" && (
+        <div className="mt-4">
+          {flaggedMsg && (
+            <p role="status" className={`mb-3 text-sm ${flaggedMsg === t("commentModerated") ? "text-green-700" : "text-red-600"}`}>
+              {flaggedMsg}
+            </p>
+          )}
+          {loadingFlagged ? (
+            <div className="flex items-center gap-2 text-sm text-ink-muted" aria-busy="true" role="status">
+              {t("loadingFlagged")}
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {flaggedComments.map((comment) => (
+                <div
+                  key={comment.id}
+                  className="rounded-sm border border-ink/10 px-4 py-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm text-ink line-clamp-3">{comment.text}</p>
+                    <Badge variant="rejected">FLAGGED</Badge>
+                  </div>
+                  <div className="mt-1 text-xs text-ink-muted">
+                    {t("flaggedIdeaTitle")}: {comment.ideaTitle} &middot; {new Date(comment.createdAt).toLocaleDateString()}
+                  </div>
+                  {comment.flaggedCategories.length > 0 && (
+                    <div className="mt-1 text-xs text-ink-muted">
+                      {t("flaggedCategories")}: {comment.flaggedCategories.join(", ")}
+                    </div>
+                  )}
+
+                  {flaggedActionId === comment.id ? (
+                    <div className="mt-2 flex items-center gap-2">
+                      <input
+                        aria-label={t("moderationReasonLabel")}
+                        value={flaggedReason}
+                        onChange={(e) => setFlaggedReason(e.target.value)}
+                        placeholder={t("flaggedApproveReasonPlaceholder")}
+                        className="w-56 rounded-sm border border-ink/15 px-2 py-1 text-xs"
+                      />
+                      <button
+                        onClick={() => handleFlaggedAction(comment.id, "VISIBLE")}
+                        disabled={!flaggedReason}
+                        className="rounded-sm bg-green-600 px-2 py-1 text-xs text-white hover:bg-green-700 disabled:opacity-50"
+                      >
+                        {t("flaggedApprove")}
+                      </button>
+                      <button
+                        onClick={() => handleFlaggedAction(comment.id, "HIDDEN")}
+                        disabled={!flaggedReason}
+                        className="rounded-sm bg-red-600 px-2 py-1 text-xs text-white hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {t("flaggedHide")}
+                      </button>
+                      <button
+                        onClick={() => { setFlaggedActionId(null); setFlaggedReason(""); }}
+                        aria-label="Cancel"
+                        className="text-xs text-ink-muted hover:text-ink"
+                      >
+                        &#10005;
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        onClick={() => setFlaggedActionId(comment.id)}
+                        className="text-xs font-medium text-civic-blue hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-ink"
+                      >
+                        {t("flaggedApprove")} / {t("flaggedHide")}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+              {flaggedComments.length === 0 && (
+                <p className="text-sm text-ink-muted">{t("flaggedNoItems")}</p>
               )}
             </div>
           )}

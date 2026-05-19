@@ -229,6 +229,60 @@ jobs:
     features:
       - "ai-comment-moderation"
 
+  - id: "JOB-011"
+    statement: "When I land on a civic platform for the first time, I want to understand what it does, that it's alive, and what I can do within 10 seconds, so I can decide whether to stay and participate or leave."
+    abstraction_level: "physical"
+    type: "functional"
+    context: "Homepage is the first and often only touchpoint; low institutional trust in Romanian civic tech"
+    emotional_job: "When I land on the homepage, I want to feel immediate recognition — 'this is real, this is active, I can act' — not confusion or skepticism."
+    social_job: "When I tell a neighbor about this platform, I want to say 'it looks legit and people are using it' with confidence."
+    outcomes:
+      - id: "O18"
+        statement: "Minimize time for a new visitor to understand platform purpose and decide to act"
+        type: "speed"
+        importance: 9
+        satisfaction: 3
+        score: 54
+        status: "critically-under-served"
+    features:
+      - "page-goals-and-copy"
+
+  - id: "JOB-012"
+    statement: "When I have a neighborhood problem, I want to submit my idea and feel that it matters and will be tracked, so I overcome the anxiety of shouting into the void."
+    abstraction_level: "physical"
+    type: "functional"
+    context: "Submission anxiety is the #1 drop-off risk; form copy determines whether frustration becomes action"
+    emotional_job: "When I submit an idea, I want to feel heard — that my contribution enters a real process, not a black hole."
+    social_job: "When I tell neighbors I submitted an idea, I want to point to a tracking page, not just say 'I filled out a form'."
+    outcomes:
+      - id: "O19"
+        statement: "Minimize the likelihood of a resident abandoning submission because it feels like bureaucracy"
+        type: "likelihood_of_result"
+        importance: 9
+        satisfaction: 4
+        score: 45
+        status: "critically-under-served"
+    features:
+      - "page-goals-and-copy"
+
+  - id: "JOB-013"
+    statement: "When I want to see whether participation produces outcomes, I want results framed as community achievement, so I feel my engagement mattered and the process is fair."
+    abstraction_level: "physical"
+    type: "functional"
+    context: "Results page is the trust payoff; if it feels like a spreadsheet, participation feels futile"
+    emotional_job: "When I see results, I want to feel validated — 'my vote counted, things actually happened' — not skeptical."
+    social_job: "When I share results, I want to say 'look what our community chose' — not 'here's a data table'."
+    outcomes:
+      - id: "O20"
+        statement: "Minimize the likelihood of a resident dismissing results as irrelevant because they lack framing"
+        type: "likelihood_of_result"
+        importance: 7
+        satisfaction: 3
+        score: 28
+        status: "under-served"
+    features:
+      - "page-goals-and-copy"
+
 changelog:
   - date: "2026-05-18"
     action: "created"
@@ -260,3 +314,18 @@ changelog:
     job_id: "JOB-001"
     feature_id: "clujparticipa-redesign"
     source: "DIVERGE wave — JTBD analysis from CONCEPT.md"
+  - date: "2026-05-19"
+    action: "created"
+    job_id: "JOB-011"
+    feature_id: "page-goals-and-copy"
+    source: "DISCUSS wave — JTBD analysis for page-goals-and-copy"
+  - date: "2026-05-19"
+    action: "created"
+    job_id: "JOB-012"
+    feature_id: "page-goals-and-copy"
+    source: "DISCUSS wave — JTBD analysis for page-goals-and-copy"
+  - date: "2026-05-19"
+    action: "created"
+    job_id: "JOB-013"
+    feature_id: "page-goals-and-copy"
+    source: "DISCUSS wave — JTBD analysis for page-goals-and-copy"

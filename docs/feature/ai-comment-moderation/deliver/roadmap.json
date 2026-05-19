@@ -1,0 +1,160 @@
+{
+  "roadmap": "AI comment moderation — OpenAI Moderation API integration with fail-open, auto-flag, and admin review queue",
+  "phases": [
+    {
+      "id": "01",
+      "name": "Auto-flag and Moderation Pipeline",
+      "description": "Add FLAGGED status, wire OpenAI Moderation API into comment creation, record audit events, extend admin review, add i18n feedback, and build admin flagged queue UI",
+      "steps": [
+        {
+          "step_id": "01-01",
+          "name": "Prisma schema migration — FLAGGED, AUTO_FLAG, APPROVE",
+          "description": "Add FLAGGED to CommentStatus enum and AUTO_FLAG + APPROVE to ModerationAction enum in prisma/schema.prisma. Run prisma migrate dev. Additive-only migration (ALTER TYPE ADD VALUE). Zero downtime, no data loss. Previous app version tolerates new enum values at runtime.",
+          "acceptance_criteria": [
+            "FLAGGED exists in CommentStatus enum alongside VISIBLE and HIDDEN",
+            "AUTO_FLAG exists in ModerationAction enum alongside HIDE, RESTORE, STATUS_CHANGE",
+            "APPROVE exists in ModerationAction enum alongside HIDE, RESTORE, STATUS_CHANGE, AUTO_FLAG",
+            "prisma migrate dev succeeds without data loss",
+            "Migration SQL contains only ALTER TYPE ADD VALUE statements (additive-only)",
+            "npm run build passes after schema change"
+          ],
+          "test_file": null,
+          "scenario_name": null,
+          "files_to_modify": [
+            "prisma/schema.prisma"
+          ],
+          "dependencies": [],
+          "estimated_hours": 0.5
+        },
+        {
+          "step_id": "01-02",
+          "name": "OpenAI moderation adapter — callOpenAIModeration + probeOpenAI",
+          "description": "Implement callOpenAIModeration and probeOpenAI in src/lib/openai-moderation-adapter.ts. Install openai npm package. callOpenAIModeration uses AbortController with 5s timeout and maxRetries=0. probeOpenAI makes one real moderation call at startup; non-blocking — logs warning on missing/invalid key or call failure, does not crash startup. Returns ModerationResult { flagged, categories }.",
+          "acceptance_criteria": [
+            "callOpenAIModeration sends text to OpenAI Moderation API with 5s AbortController timeout",
+            "callOpenAIModeration uses openai SDK with maxRetries=0 (no SDK-level retries)",
+            "callOpenAIModeration returns ModerationResult { flagged: boolean, categories: string[] } on success",
+            "callOpenAIModeration throws on API error or timeout",
+            "probeOpenAI makes one real moderation call and returns true on success",
+            "probeOpenAI returns false and logs warning when OPENAI_API_KEY is missing",
+            "probeOpenAI returns false and logs warning when API call fails or times out",
+            "probeOpenAI does not crash the application on any failure",
+            "openai npm package is in package.json dependencies (Apache-2.0 license)"
+          ],
+          "test_file": "src/app/api/ideas/[id]/comments/__tests__/moderation.test.ts",
+          "scenario_name": "Scenarios 4-6 (fail-open paths: timeout, 5xx error, missing API key)",
+          "files_to_modify": [
+            "src/lib/openai-moderation-adapter.ts",
+            "package.json"
+          ],
+          "dependencies": ["01-01"],
+          "estimated_hours": 2
+        },
+        {
+          "step_id": "01-03",
+          "name": "Domain function moderateText",
+          "description": "Implement moderateText in src/lib/openai-moderation.ts. Pure function receiving the adapter as a parameter (dependency injection per D6). Try/catch with fail-open: on adapter error, returns ModerationResult { flagged: false, categories: [] } and logs warning. Defines ModerationPort type for compile-time subtype enforcement at composition root boundary.",
+          "acceptance_criteria": [
+            "moderateText is a pure function receiving text and adapter as parameters",
+            "moderateText calls the adapter and returns ModerationResult on success",
+            "moderateText catches adapter errors and returns { flagged: false, categories: [] } (fail-open)",
+            "moderateText logs a structured warning on adapter error (error message + context)",
+            "ModerationPort type is exported for compile-time enforcement",
+            "moderateText does not import the openai SDK or the adapter module directly"
+          ],
+          "test_file": "src/app/api/ideas/[id]/comments/__tests__/moderation.test.ts",
+          "scenario_name": "WS-1 (clean comment VISIBLE with HTTP 201), WS-2 (toxic comment FLAGGED with HTTP 202)",
+          "files_to_modify": [
+            "src/lib/openai-moderation.ts"
+          ],
+          "dependencies": ["01-02"],
+          "estimated_hours": 1
+        },
+        {
+          "step_id": "01-04",
+          "name": "Wire moderation into comment POST route",
+          "description": "Modify src/app/api/ideas/[id]/comments/route.ts to call moderateText before prisma.comment.create. Import callOpenAIModeration adapter and pass it to moderateText. Branch on result: flagged -> status=FLAGGED + HTTP 202 + ModerationEvent with action=AUTO_FLAG and reason='auto_flag:<categories>'; clean -> status=VISIBLE + HTTP 201 (existing behavior); error -> status=VISIBLE + HTTP 201 + warning log (fail-open). Preserves existing validation, rate-limit, and auth logic.",
+          "acceptance_criteria": [
+            "POST comment with clean text returns 201, status VISIBLE, no ModerationEvent created",
+            "POST comment with flagged text returns 202, status FLAGGED",
+            "POST comment with flagged text creates ModerationEvent with action=AUTO_FLAG",
+            "ModerationEvent.reason contains flagged categories in format 'auto_flag:hate,harassment'",
+            "POST comment when moderateText throws returns 201, status VISIBLE, warning logged",
+            "POST comment response body includes 'under review' message when flagged",
+            "FLAGGED comments do not appear in GET /api/ideas/[id]/comments responses (excluded by existing VISIBLE filter)",
+            "Existing rate limiting still enforced on comment POST (no regression)",
+            "Existing auth/validation logic preserved (no regression)"
+          ],
+          "test_file": "src/app/api/ideas/[id]/comments/__tests__/moderation.test.ts",
+          "scenario_name": "WS-1, WS-2, scenarios 3-11",
+          "files_to_modify": [
+            "src/app/api/ideas/[id]/comments/route.ts"
+          ],
+          "dependencies": ["01-03"],
+          "estimated_hours": 2
+        },
+        {
+          "step_id": "01-05",
+          "name": "Extend admin PATCH for APPROVE action and FLAGGED status",
+          "description": "Modify src/app/api/admin/comments/[id]/route.ts. FLAGGED->VISIBLE maps to APPROVE action (creates ModerationEvent with action=APPROVE). FLAGGED->HIDDEN maps to HIDE action (existing behavior, creates ModerationEvent with action=HIDE). Reject attempts to set status=FLAGGED via PATCH (FLAGGED is system-set only, per DIST-6). Existing HIDE and RESTORE flows preserved.",
+          "acceptance_criteria": [
+            "Admin approving FLAGGED->VISIBLE creates ModerationEvent with action=APPROVE",
+            "Admin hiding FLAGGED->HIDDEN creates ModerationEvent with action=HIDE",
+            "Admin attempting to set status=FLAGGED via PATCH receives 400 error",
+            "Existing admin HIDE and RESTORE flows work unchanged (no regression)",
+            "Admin auth validation (validateAdminAuth) still required (no regression)"
+          ],
+          "test_file": "src/app/api/ideas/[id]/comments/__tests__/moderation.test.ts",
+          "scenario_name": "Scenarios 12-14 (admin approve, admin hide, admin cannot set FLAGGED)",
+          "files_to_modify": [
+            "src/app/api/admin/comments/[id]/route.ts"
+          ],
+          "dependencies": ["01-01"],
+          "estimated_hours": 1.5
+        },
+        {
+          "step_id": "01-06",
+          "name": "i18n strings for moderation feedback",
+          "description": "Add Moderation.underReview keys to ro.json, hu.json, en.json. Used in 202 response body and frontend inline notice when a comment is flagged. Follows existing i18n namespace pattern (Moderation.* namespace).",
+          "acceptance_criteria": [
+            "Moderation.underReview key exists in src/i18n/messages/ro.json",
+            "Moderation.underReview key exists in src/i18n/messages/hu.json",
+            "Moderation.underReview key exists in src/i18n/messages/en.json",
+            "All three translations are semantically accurate and culturally appropriate",
+            "Keys are referenced by the 202 response message in comment POST route"
+          ],
+          "test_file": "src/app/api/ideas/[id]/comments/__tests__/moderation.test.ts",
+          "scenario_name": "i18n check (Moderation.underReview keys present in all locales)",
+          "files_to_modify": [
+            "src/i18n/messages/ro.json",
+            "src/i18n/messages/hu.json",
+            "src/i18n/messages/en.json"
+          ],
+          "dependencies": [],
+          "estimated_hours": 0.5
+        },
+        {
+          "step_id": "01-07",
+          "name": "Admin flagged comments queue UI",
+          "description": "Add Flagged tab/filter to the admin page. Show comments with FLAGGED status including: comment text, idea title, author hash, flagged categories (parsed from ModerationEvent.reason field), and timestamp. Provide one-click Approve button (PATCH status=VISIBLE) and Hide button (PATCH status=HIDDEN). Flagged comments sorted newest-first. Count badge on Flagged tab showing number of pending flagged comments. Follows existing admin tab/filter pattern.",
+          "acceptance_criteria": [
+            "Admin page has a Flagged filter/tab showing only FLAGGED comments",
+            "Each flagged comment displays: text, idea title, author hash, flagged categories, timestamp",
+            "Approve button changes status to VISIBLE and records APPROVE ModerationEvent",
+            "Hide button changes status to HIDDEN and records HIDE ModerationEvent",
+            "Flagged count badge updates after approve or hide action",
+            "Flagged comments are sorted newest-first",
+            "All visible UI strings come from locale files (no hardcoded text)"
+          ],
+          "test_file": null,
+          "scenario_name": null,
+          "files_to_modify": [
+            "src/app/[locale]/admin/page.tsx"
+          ],
+          "dependencies": ["01-05"],
+          "estimated_hours": 3
+        }
+      ]
+    }
+  ]
+}

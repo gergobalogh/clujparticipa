@@ -50,9 +50,9 @@
     "dataDeletionText": "Személyes adatai törlését bármikor kérheti. A Facebook-felhasználók a Facebook beállításaikból indíthatnak automatikus törlést. Minden felhasználó e-mailben is kérheti a törlést. Részletekért lásd az adattörlési oldalt."
   },
   "Home": {
-    "eyebrow": "ClujParticipa",
+    "eyebrow": "Közösségi Költségvetés",
     "title": "ClujParticipa",
-    "description": "Alakítsd Kolozsvárt! Küldj be ötleteket, fedezd fel a térképet, szavazz, szólj hozzá, és kövesd nyomon az ötletek megvalósulását.",
+    "description": "Alakítsd Kolozsvárt! Küldj be ötletet, fedezd fel a térképen, és kövesd nyomon a megvalósulásukat.",
     "submitIdea": "Ötlet beküldése",
     "browseIdeas": "Ötletek böngészése",
     "statsTitle": "Jelenlegi helyzet",
@@ -66,7 +66,7 @@
     "votingPhase": "Szavazási fázis",
     "activeDistricts": "Aktív körzetek",
     "beFirst": "Legyél te az első, aki ötletet küld be ebben a városrészben!",
-    "noIdeas": "Még nincsenek ötletek.",
+    "noIdeas": "Még nincsenek ötletek. Legyél te az első, aki javaslatot tesz!",
     "noIdeasAtAll": "Még nincsenek ötletek. Legyél te az első, aki javaslatot tesz Kolozsvár számára!",
     "votingOpen": "Nyitva",
     "votingClosed": "Zárva",

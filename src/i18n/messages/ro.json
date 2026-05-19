@@ -50,9 +50,9 @@
     "dataDeletionText": "Puteți solicita ștergerea datelor personale oricând. Utilizatorii Facebook pot declanșa ștergerea automată din setările Facebook. Toți utilizatorii pot solicita ștergerea și prin email. Consultați pagina de ștergere a datelor pentru detalii."
   },
   "Home": {
-    "eyebrow": "ClujParticipa",
+    "eyebrow": "Bugetare Participativă",
     "title": "ClujParticipa",
-    "description": "Prototip de participare civică pentru Cluj-Napoca. Trimite propuneri de cartier, descoperă-le pe hartă, susține, comentează și urmărește parcursul fiecărei idei spre finalizare.",
+    "description": "Propune îmbunătățiri pentru Cluj-Napoca. Trimite o idee, descoperă-le pe hartă și urmărește parcursul lor spre finalizare.",
     "submitIdea": "Trimite o idee",
     "browseIdeas": "Caută idei",
     "statsTitle": "Situație curentă",
@@ -66,7 +66,7 @@
     "votingPhase": "Faza de votare",
     "activeDistricts": "Cartiere active",
     "beFirst": "Fii primul care trimite o idee în acest cartier!",
-    "noIdeas": "Nicio idee încă.",
+    "noIdeas": "Nicio idee încă. Fii primul care propune o îmbunătățire!",
     "noIdeasAtAll": "Nu există idei încă. Fii primul care propune o îmbunătățire pentru Cluj-Napoca!",
     "votingOpen": "Deschisă",
     "votingClosed": "Închisă",
