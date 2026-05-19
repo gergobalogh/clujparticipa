@@ -5,12 +5,37 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 
-// @ts-ignore -- RED scaffold import
-import { IdeaShareRow } from "@/components/ideas/idea-share-row";
+const { trackEventSpy } = vi.hoisted(() => ({
+  trackEventSpy: vi.fn(),
+}));
+
+vi.mock("@/lib/analytics", () => ({
+  trackEvent: (...args: unknown[]) => trackEventSpy(...args),
+}));
 
 vi.mock("next-intl", () => ({
-  useTranslations: (ns: string) => (key: string) => `${ns}.${key}`,
+  useTranslations: (ns: string) => {
+    const templates: Record<string, string> = {
+      shareText: "{title} — {category}, {district}. {ctaText} {url}",
+    };
+    return (key: string, params?: Record<string, string>) => {
+      const template = templates[key];
+      if (template && params) {
+        return template.replace(/\{(\w+)\}/g, (_, k) => params[k] ?? `${ns}.${key}`);
+      }
+      return `${ns}.${key}`;
+    };
+  },
 }));
+
+vi.mock("sonner", () => ({
+  toast: {
+    success: vi.fn(),
+  },
+}));
+
+// @ts-ignore -- RED scaffold import
+import { IdeaShareRow } from "@/components/ideas/idea-share-row";
 
 const baseProps = {
   ideaId: "idea-123",
@@ -22,6 +47,8 @@ const baseProps = {
 
 describe("IdeaShareRow", () => {
   beforeEach(() => {
+    trackEventSpy.mockClear();
+
     Object.assign(window, {
       open: vi.fn(),
     });
@@ -111,5 +138,60 @@ describe("IdeaShareRow", () => {
     expect(whatsappBtn).toHaveAttribute("aria-label");
     expect(facebookBtn).toHaveAttribute("aria-label");
     expect(copyBtn).toHaveAttribute("aria-label");
+  });
+
+  // --- D1: Missing trackEvent on WhatsApp and Facebook share buttons ---
+
+  it("D1: calls trackEvent with channel=whatsapp when WhatsApp button is clicked", () => {
+    render(<IdeaShareRow {...baseProps} />);
+    fireEvent.click(screen.getByLabelText(/whatsapp/i));
+    expect(trackEventSpy).toHaveBeenCalledWith("idea_share", {
+      channel: "whatsapp",
+      ideaId: "idea-123",
+    });
+  });
+
+  it("D1: calls trackEvent with channel=facebook when Facebook button is clicked", () => {
+    render(<IdeaShareRow {...baseProps} />);
+    fireEvent.click(screen.getByLabelText(/facebook/i));
+    expect(trackEventSpy).toHaveBeenCalledWith("idea_share", {
+      channel: "facebook",
+      ideaId: "idea-123",
+    });
+  });
+
+  // --- D3: WhatsApp share text omits category and district ---
+
+  it("D3: WhatsApp share text includes category and district from i18n template", () => {
+    render(<IdeaShareRow {...baseProps} />);
+    fireEvent.click(screen.getByLabelText(/whatsapp/i));
+    const callUrl = (window.open as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+    const decoded = decodeURIComponent(callUrl);
+    expect(decoded).toContain("TRANSPORT");
+    expect(decoded).toContain("MANASTUR");
+  });
+
+  // --- D4: Facebook has no popup-blocked fallback ---
+
+  it("D4: falls back to copy-link when Facebook popup is blocked", async () => {
+    (window.open as ReturnType<typeof vi.fn>).mockReturnValue(null);
+    render(<IdeaShareRow {...baseProps} />);
+    fireEvent.click(screen.getByLabelText(/facebook/i));
+    expect(navigator.clipboard.writeText).toHaveBeenCalled();
+    const copiedUrl = (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+    expect(copiedUrl).toContain("utm_source=facebook");
+  });
+
+  // --- D5: No toast on WhatsApp fallback copy ---
+
+  it("D5: shows toast when WhatsApp fallback copies link to clipboard", async () => {
+    (window.open as ReturnType<typeof vi.fn>).mockReturnValue(null);
+    const { toast } = await import("sonner");
+    render(<IdeaShareRow {...baseProps} />);
+    fireEvent.click(screen.getByLabelText(/whatsapp/i));
+    // Wait for async clipboard + toast
+    await vi.waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("Share.linkCopied");
+    });
   });
 });

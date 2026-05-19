@@ -10,8 +10,14 @@ const { testPrisma } = vi.hoisted(() => ({
   },
 }));
 
+const mockGetTranslations = vi.fn();
+
 vi.mock("@/lib/prisma", () => ({
   prisma: testPrisma,
+}));
+
+vi.mock("next-intl/server", () => ({
+  getTranslations: (...args: unknown[]) => mockGetTranslations(...args),
 }));
 
 import { GET } from "@/app/api/og/ideas/[id]/route";
@@ -31,6 +37,8 @@ describe("OG Image Route /api/og/ideas/[id]", () => {
       status: "SUBMITTED",
       images: [],
     });
+
+    mockGetTranslations.mockResolvedValue((key: string) => key);
 
     const req = new NextRequest("http://localhost:3000/api/og/ideas/idea-1");
     const res = await GET(req, { params: Promise.resolve({ id: "idea-1" }) });
@@ -55,5 +63,32 @@ describe("OG Image Route /api/og/ideas/[id]", () => {
     const res = await GET(req, { params: Promise.resolve({ id: "idea-1" }) });
 
     expect(res.status).toBe(500);
+  });
+
+  it("D2: translates category label when locale parameter is provided", async () => {
+    testPrisma.idea.findUnique.mockResolvedValue({
+      id: "idea-1",
+      title: "New bike lane on Dorobantilor",
+      category: "TRANSPORT",
+      description: "A dedicated bike lane",
+      district: "MANASTUR",
+      status: "SUBMITTED",
+      images: [],
+    });
+
+    const translateFn = vi.fn((key: string) => {
+      const labels: Record<string, string> = {
+        TRANSPORT: "Transport",
+      };
+      return labels[key] ?? key;
+    });
+    mockGetTranslations.mockResolvedValue(translateFn);
+
+    const req = new NextRequest("http://localhost:3000/api/og/ideas/idea-1?lang=ro");
+    const res = await GET(req, { params: Promise.resolve({ id: "idea-1" }) });
+
+    expect(res.status).toBe(200);
+    expect(mockGetTranslations).toHaveBeenCalledWith("Categories", { locale: "ro" });
+    expect(translateFn).toHaveBeenCalledWith("TRANSPORT");
   });
 });

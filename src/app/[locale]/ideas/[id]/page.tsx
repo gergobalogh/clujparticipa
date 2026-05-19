@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const ogImage = idea.images.length > 0
     ? `${appUrl}${idea.images[0].url}`
-    : `${appUrl}/api/og/ideas/${id}`;
+    : `${appUrl}/api/og/ideas/${id}?lang=${locale}`;
 
   return {
     title: idea.title,

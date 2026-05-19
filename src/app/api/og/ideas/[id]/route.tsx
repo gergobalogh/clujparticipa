@@ -1,13 +1,17 @@
 import { ImageResponse } from "next/og";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { resolveCategoryOgColor } from "@/lib/category-colors";
 import { truncateOgTitle } from "@/lib/og-image-helpers";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
   const { id } = await params;
+
+  const url = new URL(request.url);
+  const locale = url.searchParams.get("lang") ?? "ro";
 
   let idea;
   try {
@@ -32,6 +36,9 @@ export async function GET(
 
   const backgroundColor = resolveCategoryOgColor(idea.category);
   const displayTitle = truncateOgTitle(idea.title);
+
+  const t = await getTranslations("Categories", { locale });
+  const categoryLabel = t(idea.category as Parameters<typeof t>[0]);
 
   return new ImageResponse(
     (
@@ -70,7 +77,7 @@ export async function GET(
             opacity: 0.8,
           }}
         >
-          {idea.category}
+          {categoryLabel}
         </div>
       </div>
     ),

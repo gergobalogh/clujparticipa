@@ -19,9 +19,8 @@ function buildShareUrl(ideaId: string, source: string, locale: string): string {
   return `${base}/${locale}/ideas/${ideaId}?utm_source=${source}`;
 }
 
-function buildWhatsAppUrl(ideaTitle: string, shareUrl: string, ctaText: string): string {
-  const text = `${ideaTitle} — ${ctaText} ${shareUrl}`;
-  return `https://wa.me/?text=${encodeURIComponent(text)}`;
+function buildWhatsAppUrl(shareText: string): string {
+  return `https://wa.me/?text=${encodeURIComponent(shareText)}`;
 }
 
 function buildFacebookUrl(shareUrl: string): string {
@@ -38,8 +37,18 @@ export function IdeaShareRow({
   const t = useTranslations("Share");
 
   const copyUrl = buildShareUrl(ideaId, "copy", locale);
-  const whatsappUrl = buildWhatsAppUrl(title, buildShareUrl(ideaId, "whatsapp", locale), t("ctaText"));
-  const facebookUrl = buildFacebookUrl(buildShareUrl(ideaId, "facebook", locale));
+  const whatsappShareUrl = buildShareUrl(ideaId, "whatsapp", locale);
+  const facebookShareUrl = buildShareUrl(ideaId, "facebook", locale);
+
+  const whatsappShareText = t("shareText", {
+    title,
+    category,
+    district,
+    ctaText: t("ctaText"),
+    url: whatsappShareUrl,
+  });
+  const whatsappUrl = buildWhatsAppUrl(whatsappShareText);
+  const facebookUrl = buildFacebookUrl(facebookShareUrl);
 
   const handleCopy = async () => {
     await copyToClipboard(copyUrl);
@@ -47,15 +56,22 @@ export function IdeaShareRow({
     toast.success(t("linkCopied"));
   };
 
-  const handleWhatsApp = () => {
+  const handleWhatsApp = async () => {
+    trackEvent("idea_share", { channel: "whatsapp", ideaId });
     const opened = window.open(whatsappUrl, "_blank");
     if (!opened) {
-      copyToClipboard(buildShareUrl(ideaId, "whatsapp", locale));
+      await copyToClipboard(whatsappShareUrl);
+      toast.success(t("linkCopied"));
     }
   };
 
-  const handleFacebook = () => {
-    window.open(facebookUrl, "_blank");
+  const handleFacebook = async () => {
+    trackEvent("idea_share", { channel: "facebook", ideaId });
+    const opened = window.open(facebookUrl, "_blank");
+    if (!opened) {
+      await copyToClipboard(facebookShareUrl);
+      toast.success(t("linkCopied"));
+    }
   };
 
   return (
