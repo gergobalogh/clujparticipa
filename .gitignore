@@ -52,6 +52,16 @@ node_modules/@prisma/client
 # uploads
 /public/uploads/
 
+# seed images — keep folder structure, ignore content
+/public/seed/idea-*/**/*
+!/public/seed/idea-*/.gitkeep
+/public/seed/manastur-trasee-scolare-protejate/*
+!/public/seed/manastur-trasee-scolare-protejate/.gitkeep
+/public/seed/canalul-morii-master-plan/*
+!/public/seed/canalul-morii-master-plan/.gitkeep
+/public/seed/manifest.json
+/public/seed/*.png
+
 # docker
 docker-data/
 
