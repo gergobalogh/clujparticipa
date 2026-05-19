@@ -272,7 +272,17 @@
     "progressUpdateImageUrlLabel": "Image URL (optional)",
     "progressUpdateImageUrlPlaceholder": "/uploads/ideas/...",
     "progressUpdateSubmit": "Post update",
-    "progressUpdatePosted": "Progress update posted successfully."
+    "progressUpdatePosted": "Progress update posted successfully.",
+    "flaggedTab": "Flagged",
+    "flaggedCount": "{count}",
+    "flaggedCategories": "Flagged for",
+    "flaggedApprove": "Approve",
+    "flaggedHide": "Hide",
+    "flaggedIdeaTitle": "Idea",
+    "flaggedNoItems": "No flagged comments.",
+    "loadingFlagged": "Loading flagged comments...",
+    "flaggedApproveReasonPlaceholder": "Reason for approving",
+    "flaggedHideReasonPlaceholder": "Reason for hiding"
   },
   "Categories": {
     "INFRASTRUCTURE": "Infrastructure",
@@ -452,6 +462,9 @@
     "optInDismiss": "Not now",
     "statusChangedBanner": "This idea moved to {stage}"
   },
+  "Moderation": {
+    "underReview": "Your comment is under review by our moderation system"
+  },
   "HowItWorks": {
     "title": "How It Works",
     "subtitle": "Follow your idea from submission to completion",
@@ -471,5 +484,13 @@
     "mergedDesc": "This idea has been combined with another.",
     "withdrawnDesc": "The author has withdrawn this idea.",
     "nextStep": "Next: {stage}"
+  },
+  "Share": {
+    "copyLink": "Copy link",
+    "shareOnWhatsApp": "Share on WhatsApp",
+    "shareOnFacebook": "Share on Facebook",
+    "linkCopied": "Link copied!",
+    "ctaText": "Support this idea!",
+    "shareText": "{title} — {category}, {district}. {ctaText} {url}"
   }
 }

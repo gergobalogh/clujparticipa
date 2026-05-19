@@ -263,7 +263,17 @@
     "progressUpdateImageUrlLabel": "Kép URL (nem kötelező)",
     "progressUpdateImageUrlPlaceholder": "/uploads/ideas/...",
     "progressUpdateSubmit": "Jelentés beküldése",
-    "progressUpdatePosted": "Előrehaladási jelentés sikeresen beküldve."
+    "progressUpdatePosted": "Előrehaladási jelentés sikeresen beküldve.",
+    "flaggedTab": "Megjelölt",
+    "flaggedCount": "{count}",
+    "flaggedCategories": "Megjelölve",
+    "flaggedApprove": "Elfogad",
+    "flaggedHide": "Elrejtés",
+    "flaggedIdeaTitle": "Ötlet",
+    "flaggedNoItems": "Nincsenek megjelölt hozzászólások.",
+    "loadingFlagged": "Megjelölt hozzászólások betöltése...",
+    "flaggedApproveReasonPlaceholder": "Elfogadás oka",
+    "flaggedHideReasonPlaceholder": "Elrejtés oka"
   },
   "Categories": {
     "INFRASTRUCTURE": "Infrastruktúra",
@@ -443,6 +453,9 @@
     "optInDismiss": "Most nem",
     "statusChangedBanner": "Ez az ötlet a következő státuszba került: {stage}"
   },
+  "Moderation": {
+    "underReview": "Hozzászólását a moderációs rendszerünk felülvizsgálja"
+  },
   "HowItWorks": {
     "title": "Hogyan működik",
     "subtitle": "Kövesd nyomon ötletedet a beküldéstől a megvalósításig",
@@ -462,5 +475,13 @@
     "mergedDesc": "Ez az ötlet összevonásra került egy másikkal.",
     "withdrawnDesc": "A szerző visszavonta ezt az ötletet.",
     "nextStep": "Következő: {stage}"
+  },
+  "Share": {
+    "copyLink": "Link másolása",
+    "shareOnWhatsApp": "Megosztás WhatsApp-on",
+    "shareOnFacebook": "Megosztás Facebook-on",
+    "linkCopied": "Link másolva!",
+    "ctaText": "Támogasd ezt az ötletet!",
+    "shareText": "{title} — {category}, {district}. {ctaText} {url}"
   }
 }

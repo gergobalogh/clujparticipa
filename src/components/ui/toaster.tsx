@@ -1,6 +1,14 @@
-/** Sonner toaster wrapper — RED scaffold (created by DISTILL). */
-export const __SCAFFOLD__ = true;
+"use client";
 
-export function Toaster(): JSX.Element {
-  throw new Error("Not yet implemented -- RED scaffold");
+import { Toaster as SonnerToaster } from "sonner";
+
+export function Toaster() {
+  return (
+    <SonnerToaster
+      position="bottom-right"
+      toastOptions={{
+        duration: 4000,
+      }}
+    />
+  );
 }

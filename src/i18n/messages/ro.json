@@ -263,7 +263,17 @@
     "progressUpdateImageUrlLabel": "URL imagine (opțional)",
     "progressUpdateImageUrlPlaceholder": "/uploads/ideas/...",
     "progressUpdateSubmit": "Postează actualizarea",
-    "progressUpdatePosted": "Actualizarea a fost postată cu succes."
+    "progressUpdatePosted": "Actualizarea a fost postată cu succes.",
+    "flaggedTab": "Semnalate",
+    "flaggedCount": "{count}",
+    "flaggedCategories": "Semnalate pentru",
+    "flaggedApprove": "Aprobă",
+    "flaggedHide": "Ascunde",
+    "flaggedIdeaTitle": "Ideea",
+    "flaggedNoItems": "Nu există comentarii semnalate.",
+    "loadingFlagged": "Se încarcă comentariile semnalate...",
+    "flaggedApproveReasonPlaceholder": "Motivul aprobării",
+    "flaggedHideReasonPlaceholder": "Motivul ascunderii"
   },
   "Categories": {
     "INFRASTRUCTURE": "Infrastructură",
@@ -443,6 +453,9 @@
     "optInDismiss": "Nu acum",
     "statusChangedBanner": "Această idee a trecut la {stage}"
   },
+  "Moderation": {
+    "underReview": "Comentariul dvs. este în revizuire de către sistemul nostru de moderare"
+  },
   "HowItWorks": {
     "title": "Cum funcționează",
     "subtitle": "Urmărește ideea ta de la trimitere până la finalizare",
@@ -462,5 +475,13 @@
     "mergedDesc": "Această idee a fost contopită cu altă idee.",
     "withdrawnDesc": "Autorul a retras această idee.",
     "nextStep": "Următorul: {stage}"
+  },
+  "Share": {
+    "copyLink": "Copiază linkul",
+    "shareOnWhatsApp": "Distribuie pe WhatsApp",
+    "shareOnFacebook": "Distribuie pe Facebook",
+    "linkCopied": "Link copiat!",
+    "ctaText": "Susține această idee!",
+    "shareText": "{title} — {category}, {district}. {ctaText} {url}"
   }
 }
