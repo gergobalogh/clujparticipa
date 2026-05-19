@@ -39,8 +39,21 @@ describe("OG Image Route /api/og/ideas/[id]", () => {
     expect(res.headers.get("content-type")).toContain("image/png");
   });
 
-  // Deferred to step 01-05: category color background
-  // Deferred to step 01-05: 404 for non-existent idea
-  // Deferred to step 01-05: long title truncation
-  // Deferred to step 01-05: 500 on Prisma error
+  it("S12: returns 404 for non-existent idea ID", async () => {
+    testPrisma.idea.findUnique.mockResolvedValue(null);
+
+    const req = new NextRequest("http://localhost:3000/api/og/ideas/nonexistent");
+    const res = await GET(req, { params: Promise.resolve({ id: "nonexistent" }) });
+
+    expect(res.status).toBe(404);
+  });
+
+  it("S24: returns 500 on Prisma error", async () => {
+    testPrisma.idea.findUnique.mockRejectedValue(new Error("Prisma connection failed"));
+
+    const req = new NextRequest("http://localhost:3000/api/og/ideas/idea-1");
+    const res = await GET(req, { params: Promise.resolve({ id: "idea-1" }) });
+
+    expect(res.status).toBe(500);
+  });
 });

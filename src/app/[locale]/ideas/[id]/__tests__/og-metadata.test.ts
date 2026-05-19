@@ -271,7 +271,7 @@ describe("Idea Detail Page -- generateMetadata (OG tags)", () => {
     delete process.env.NEXT_PUBLIC_APP_URL;
   });
 
-  it("S16: omits og:image when idea has no images", async () => {
+  it("S17: sets og:image to placeholder URL when idea has no uploaded images", async () => {
     process.env.NEXT_PUBLIC_APP_URL = "https://test.clujparticipa.ro";
     mockFindUnique.mockResolvedValue({
       id: "idea-noimg",
@@ -287,8 +287,15 @@ describe("Idea Detail Page -- generateMetadata (OG tags)", () => {
       params: Promise.resolve({ id: "idea-noimg", locale: "ro" }),
     });
 
-    // og:image should be omitted -- not present, not undefined with a broken URL
-    expect(metadata.openGraph?.images).toBeUndefined();
+    // og:image should point to the OG image generation route for dynamic placeholder
+    expect(metadata.openGraph?.images).toBeDefined();
+    const ogImages = metadata.openGraph?.images;
+    const placeholderUrl = Array.isArray(ogImages)
+      ? (ogImages[0] as { url: string }).url ?? ogImages[0]
+      : ogImages;
+    expect(placeholderUrl).toBe(
+      "https://test.clujparticipa.ro/api/og/ideas/idea-noimg"
+    );
 
     delete process.env.NEXT_PUBLIC_APP_URL;
   });

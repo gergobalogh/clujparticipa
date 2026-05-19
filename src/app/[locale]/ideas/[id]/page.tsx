@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const ogImage = idea.images.length > 0
     ? `${appUrl}${idea.images[0].url}`
-    : undefined;
+    : `${appUrl}/api/og/ideas/${id}`;
 
   return {
     title: idea.title,
@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: `${appUrl}/${locale}/ideas/${id}`,
       type: "website",
       siteName: "ClujParticipa",
-      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
+      images: [{ url: ogImage }],
     },
   };
 }
